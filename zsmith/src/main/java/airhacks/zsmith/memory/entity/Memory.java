@@ -1,4 +1,4 @@
-package airhacks.zsmith.agent.entity;
+package airhacks.zsmith.memory.entity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,6 @@ public record Memory(List<Message> messages) {
     public int size() {
         return this.messages.size();
     }
-
 
     public JSONArray toJSON() {
         var array = new JSONArray();

@@ -1,4 +1,4 @@
-package airhacks.zsmith.agent.entity;
+package airhacks.zsmith.memory.entity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
