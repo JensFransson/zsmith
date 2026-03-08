@@ -26,6 +26,7 @@ import java.util.stream.Stream;
 public class ZCfg {
 
     static final String PROPERTIES_FILE = "app.properties";
+    static final String SYSTEM_PROMPT_FILE = "system.prompt";
     static Properties CACHE;
     static String APP_NAME;
 
@@ -81,6 +82,36 @@ public class ZCfg {
         var localAgentConfig = Path.of(agentName, PROPERTIES_FILE);
         if (Files.exists(localAgentConfig)) {
             loadFromFile(localAgentConfig, CACHE);
+        }
+    }
+
+    /**
+     * Loads a system prompt for a named agent from system.prompt files.
+     * Checks ~/.{appName}/{agentName}/system.prompt first, then ./{agentName}/system.prompt.
+     * Local file takes precedence over global.
+     *
+     * @param agentName the agent instance name
+     * @return the system prompt content, or null if no file exists
+     */
+    public static String loadSystemPrompt(String agentName) {
+        var userHome = System.getProperty("user.home");
+        String prompt = null;
+        var globalPrompt = Path.of(userHome, "." + APP_NAME, agentName, SYSTEM_PROMPT_FILE);
+        if (Files.exists(globalPrompt)) {
+            prompt = readTextFile(globalPrompt);
+        }
+        var localPrompt = Path.of(agentName, SYSTEM_PROMPT_FILE);
+        if (Files.exists(localPrompt)) {
+            prompt = readTextFile(localPrompt);
+        }
+        return prompt;
+    }
+
+    static String readTextFile(Path file) {
+        try {
+            return Files.readString(file);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot read file: " + file, e);
         }
     }
 
