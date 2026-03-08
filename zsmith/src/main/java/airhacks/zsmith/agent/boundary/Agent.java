@@ -16,6 +16,7 @@ import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
+import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
@@ -45,7 +46,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     static String resolveSystemPrompt(String agentName, String fallback) {
-        var prompt = ZCfg.loadSystemPrompt(agentName);
+        var prompt = SystemPromptLoader.load(ZCfg.APP_NAME, agentName);
         if (prompt != null) return prompt;
         return fallback != null ? fallback : DEFAULT_SYSTEM_PROMPT;
     }

@@ -26,9 +26,9 @@ import java.util.stream.Stream;
 public class ZCfg {
 
     static final String PROPERTIES_FILE = "app.properties";
-    static final String SYSTEM_PROMPT_FILE = "system.prompt";
+
     static Properties CACHE;
-    static String APP_NAME;
+    public static String APP_NAME;
 
     public static void loadBaseConfig(String appName) {
         APP_NAME = appName;
@@ -85,44 +85,7 @@ public class ZCfg {
         }
     }
 
-    /**
-     * Loads a system prompt from system.prompt files in order:
-     * 1. ~/.{appName}/{agentName}/system.prompt (global agent-specific)
-     * 2. ./{agentName}/system.prompt (local agent-specific)
-     * 3. ./system.prompt (highest priority)
-     *
-     * Each layer overwrites the previous.
-     *
-     * @param agentName the agent instance name
-     * @return the system prompt content, or null if no file exists
-     */
-    public static String loadSystemPrompt(String agentName) {
-        var userHome = System.getProperty("user.home");
-        String prompt = null;
-        var globalPrompt = Path.of(userHome, "." + APP_NAME, agentName, SYSTEM_PROMPT_FILE);
-        if (Files.exists(globalPrompt)) {
-            prompt = readTextFile(globalPrompt);
-        }
-        var localPrompt = Path.of(agentName, SYSTEM_PROMPT_FILE);
-        if (Files.exists(localPrompt)) {
-            prompt = readTextFile(localPrompt);
-        }
-        var basePrompt = Path.of(SYSTEM_PROMPT_FILE);
-        if (Files.exists(basePrompt)) {
-            prompt = readTextFile(basePrompt);
-        }
-        return prompt;
-    }
-
-    static String readTextFile(Path file) {
-        try {
-            return Files.readString(file);
-        } catch (IOException e) {
-            throw new IllegalStateException("Cannot read file: " + file, e);
-        }
-    }
-
-    static void loadFromFile(Path file, Properties properties) {
+static void loadFromFile(Path file, Properties properties) {
         try (var is = Files.newBufferedReader(file)) {
             properties.load(is);
         } catch (IOException e) {
