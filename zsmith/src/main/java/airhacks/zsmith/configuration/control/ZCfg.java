@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * 
  * <pre>
  * // Initialize once at application startup
- * ZCfg.load("myapp");
+ * ZCfg.loadBaseConfig("myapp");
  * 
  * // Access configuration values
  * var port = ZCfg.integer("server.port", 8080);
@@ -29,7 +29,7 @@ public class ZCfg {
     static Properties CACHE;
     static String APP_NAME;
 
-    public static void load(String appName) {
+    public static void loadBaseConfig(String appName) {
         APP_NAME = appName;
         CACHE = loadProperties(appName);
     }
@@ -63,15 +63,22 @@ public class ZCfg {
         return properties;
     }
 
-    public static void override(String subfolder) {
+    /**
+     * Loads configuration for a named agent, overriding base properties with values
+     * from ~/.{appName}/{agentName}/app.properties and ./{agentName}/app.properties.
+     *
+     * @param agentName the agent instance name used to locate its configuration
+     * @throws IllegalStateException if {@link #loadBaseConfig(String)} has not been called first
+     */
+    public static void loadNamedAgentConfig(String agentName) {
         if (CACHE == null)
-            throw new IllegalStateException("Call ZCfg.load(appName) first");
+            throw new IllegalStateException("Call ZCfg.loadBaseConfig(appName) first");
         var userHome = System.getProperty("user.home");
-        var globalAgentConfig = Path.of(userHome, "." + APP_NAME, subfolder, PROPERTIES_FILE);
+        var globalAgentConfig = Path.of(userHome, "." + APP_NAME, agentName, PROPERTIES_FILE);
         if (Files.exists(globalAgentConfig)) {
             loadFromFile(globalAgentConfig, CACHE);
         }
-        var localAgentConfig = Path.of(subfolder, PROPERTIES_FILE);
+        var localAgentConfig = Path.of(agentName, PROPERTIES_FILE);
         if (Files.exists(localAgentConfig)) {
             loadFromFile(localAgentConfig, CACHE);
         }
@@ -87,13 +94,13 @@ public class ZCfg {
 
     public static String string(String key) {
         if (CACHE == null)
-            throw new IllegalStateException("Call ZCfg.load(appName) first");
+            throw new IllegalStateException("Call ZCfg.loadBaseConfig(appName) first");
         return CACHE.getProperty(key);
     }
 
     public static String string(String key, String defaultValue) {
         if (CACHE == null)
-            throw new IllegalStateException("Call ZCfg.load(appName) first");
+            throw new IllegalStateException("Call ZCfg.loadBaseConfig(appName) first");
         return CACHE.getProperty(key, defaultValue);
     }
 
@@ -107,14 +114,14 @@ public class ZCfg {
 
     public static int integer(String key, int defaultValue) {
         if (CACHE == null)
-            throw new IllegalStateException("Call ZCfg.load(appName) first");
+            throw new IllegalStateException("Call ZCfg.loadBaseConfig(appName) first");
         var value = CACHE.getProperty(key);
         return value != null ? Integer.parseInt(value) : defaultValue;
     }
 
     public static boolean bool(String key, boolean defaultValue) {
         if (CACHE == null)
-            throw new IllegalStateException("Call ZCfg.load(appName) first");
+            throw new IllegalStateException("Call ZCfg.loadBaseConfig(appName) first");
         var value = CACHE.getProperty(key);
         return value != null ? Boolean.parseBoolean(value) : defaultValue;
     }
@@ -127,7 +134,7 @@ public class ZCfg {
      */
     public static List<String> strings(String key) {
         if (CACHE == null)
-            throw new IllegalStateException("Call ZCfg.load(appName) first");
+            throw new IllegalStateException("Call ZCfg.loadBaseConfig(appName) first");
         var value = CACHE.getProperty(key);
         if (value == null)
             return List.of();

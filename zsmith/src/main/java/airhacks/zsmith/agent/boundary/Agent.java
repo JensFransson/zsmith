@@ -19,7 +19,7 @@ import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
-    static final String version ="2026.02.22.01";
+    static final String version ="2026.03.08.01";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -28,7 +28,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
 
     static {
         Log.user("zsmith v" + version);
-        ZCfg.load("zsmith");
+        ZCfg.loadBaseConfig("zsmith");
     }
 
     public Agent(String name, String systemPrompt) {
@@ -41,7 +41,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             DEFAULT_TEMPERATURE,
             null
         );
-        ZCfg.override(this.name);
+        ZCfg.loadNamedAgentConfig(this.name);
     }
 
     public Agent(String systemPrompt) {
