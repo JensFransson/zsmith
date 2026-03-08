@@ -1,4 +1,4 @@
-package airhacks.zcfg;
+package airhacks.zsmith.configuration.control;
 
 import java.io.IOException;
 import java.nio.file.Files;
