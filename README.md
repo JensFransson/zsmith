@@ -37,6 +37,13 @@ Loaded from `system.prompt` files in order (each layer overrides the previous):
 3. `./system.prompt` — highest priority
 4. Constructor parameter — fallback if no file exists
 
+## Running the Example
+
+```bash
+zb.sh
+java -cp zbo/app.jar src/test/java/airhacks/zsmith/MeetingPlannerExample.java
+```
+
 ## Custom Tools
 
 Implement the `Tool` interface:
