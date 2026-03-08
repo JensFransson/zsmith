@@ -34,6 +34,13 @@ public class ZCfg {
         CACHE = loadProperties(appName);
     }
 
+    /**
+     * Loads properties from global (~/.{appName}/app.properties), local (./app.properties),
+     * and system properties, with each layer overwriting the previous.
+     *
+     * @param appName used to locate the global config directory
+     * @return merged properties with system properties taking highest priority
+     */
     static Properties loadProperties(String appName) {
         var properties = new Properties();
 
