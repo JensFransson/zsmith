@@ -16,7 +16,9 @@ var response = agent.chat("What is 42 * 17?");
 
 ## Configuration
 
-Properties are loaded in order (each layer overrides the previous):
+### Properties
+
+Loaded in order (each layer overrides the previous):
 
 1. `~/.zsmith/app.properties` — global defaults
 2. `./app.properties` — local project defaults
@@ -25,6 +27,15 @@ Properties are loaded in order (each layer overrides the previous):
 5. System properties — highest priority
 
 Only keys present in later files override earlier values; other keys are preserved.
+
+### System Prompt
+
+Loaded from `system.prompt` files in order (each layer overrides the previous):
+
+1. `~/.zsmith/[agentName]/system.prompt` — global agent-specific
+2. `./[agentName]/system.prompt` — local agent-specific
+3. `./system.prompt` — highest priority
+4. Constructor parameter — fallback if no file exists
 
 ## Custom Tools
 
