@@ -43,10 +43,7 @@ public class CalculatorTool implements Tool {
             case "add" -> a + b;
             case "subtract" -> a - b;
             case "multiply" -> a * b;
-            case "divide" -> {
-                if (b == 0) throw new ArithmeticException("Division by zero");
-                yield a / b;
-            }
+            case "divide" -> a / b;
             default -> throw new IllegalArgumentException("Unknown operation: " + operation);
         };
 
