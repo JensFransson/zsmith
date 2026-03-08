@@ -5,7 +5,7 @@ import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.tools.control.CalculatorTool;
 import airhacks.zsmith.tools.control.CurrentTimeTool;
 
-public interface ZSmith {
+public interface MeetingPlannerExample {
     static void main(String...args) {
         var systemPrompt = """
                 You are a helpful assistant with access to tools.
@@ -20,7 +20,7 @@ public interface ZSmith {
 
         Log.INFO.out("Agent initialized with calculator and current_time tools");
 
-        var question = "What is 42 multiplied by 17? Also, what time is it now?";
+        var question = "I have a meeting in 90 minutes. What time does it start? If the meeting lasts 45 minutes, what time does it end?";
         Log.PROMPT.out("User: " + question);
 
         var response = agent.chat(question);
