@@ -86,9 +86,12 @@ public class ZCfg {
     }
 
     /**
-     * Loads a system prompt for a named agent from system.prompt files.
-     * Checks ~/.{appName}/{agentName}/system.prompt first, then ./{agentName}/system.prompt.
-     * Local file takes precedence over global.
+     * Loads a system prompt from system.prompt files in order:
+     * 1. ~/.{appName}/{agentName}/system.prompt (global agent-specific)
+     * 2. ./{agentName}/system.prompt (local agent-specific)
+     * 3. ./system.prompt (highest priority)
+     *
+     * Each layer overwrites the previous.
      *
      * @param agentName the agent instance name
      * @return the system prompt content, or null if no file exists
@@ -103,6 +106,10 @@ public class ZCfg {
         var localPrompt = Path.of(agentName, SYSTEM_PROMPT_FILE);
         if (Files.exists(localPrompt)) {
             prompt = readTextFile(localPrompt);
+        }
+        var basePrompt = Path.of(SYSTEM_PROMPT_FILE);
+        if (Files.exists(basePrompt)) {
+            prompt = readTextFile(basePrompt);
         }
         return prompt;
     }
