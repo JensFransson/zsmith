@@ -15,9 +15,10 @@ import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
+import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 
 
-public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature) {
+public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
     static final String version ="2026.02.22.01";
 
     static final String DEFAULT_NAME = "zsmith";
@@ -37,7 +38,8 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             new Memory(),
             new HashMap<>(),
             DEFAULT_MAX_ITERATIONS,
-            DEFAULT_TEMPERATURE
+            DEFAULT_TEMPERATURE,
+            null
         );
         ZCfg.override(this.name);
     }
@@ -56,11 +58,15 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public Agent withMaxIterations(int maxIterations) {
-        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, maxIterations, this.temperature);
+        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, maxIterations, this.temperature, this.episodicMemory);
     }
 
     public Agent withTemperature(float temperature) {
-        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations, temperature);
+        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations, temperature, this.episodicMemory);
+    }
+
+    public Agent withEpisodicMemory(EpisodicMemoryStore store) {
+        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations, this.temperature, store);
     }
 
 
