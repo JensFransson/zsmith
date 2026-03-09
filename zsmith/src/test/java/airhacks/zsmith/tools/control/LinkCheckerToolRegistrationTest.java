@@ -16,7 +16,7 @@ public interface LinkCheckerToolRegistrationTest {
 
     /** Req 5.1, 5.2: LinkCheckerTool can be registered via withTool() */
     static void testToolRegistrationWithAgent() {
-        var agent = new Agent("You are a helpful assistant.")
+        var agent = new Agent().withSystemPrompt("You are a helpful assistant.")
                 .withTool(new LinkCheckerTool());
 
         assert agent != null : "Agent with LinkCheckerTool should be created";
@@ -25,7 +25,7 @@ public interface LinkCheckerToolRegistrationTest {
 
     /** Req 5.1: LinkCheckerTool can be registered alongside other tools */
     static void testToolRegistrationAlongsideOtherTools() {
-        var agent = new Agent("You are a helpful assistant.")
+        var agent = new Agent().withSystemPrompt("You are a helpful assistant.")
                 .withTool(new CalculatorTool())
                 .withTool(new LinkCheckerTool());
 

@@ -41,7 +41,7 @@ Loaded from `system.prompt` files in order (each layer overrides the previous):
 
 ```bash
 zb.sh
-java -cp zbo/app.jar src/test/java/airhacks/zsmith/MeetingPlannerExample.java
+java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/MeetingPlannerExample.java
 ```
 
 ## Custom Tools

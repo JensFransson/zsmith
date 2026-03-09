@@ -20,7 +20,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
-    static final String version ="2026.03.09.01";
+    static final String version ="2026.03.09.03";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -51,8 +51,8 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         return fallback != null ? fallback : DEFAULT_SYSTEM_PROMPT;
     }
 
-    public Agent(String systemPrompt) {
-        this(DEFAULT_NAME, systemPrompt);
+    public Agent(String name) {
+        this(name, DEFAULT_SYSTEM_PROMPT);
     }
 
     public Agent() {
@@ -62,6 +62,10 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     public Agent withTool(Tool tool) {
         this.tools.put(tool.name(), tool);
         return this;
+    }
+
+    public Agent withSystemPrompt(String systemPrompt) {
+        return new Agent(this.name, systemPrompt, this.memory, this.tools, this.maxIterations, this.temperature, this.episodicMemory);
     }
 
     public Agent withMaxIterations(int maxIterations) {

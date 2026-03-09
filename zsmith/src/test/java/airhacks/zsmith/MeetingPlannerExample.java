@@ -7,14 +7,13 @@ import airhacks.zsmith.tools.control.CurrentTimeTool;
 
 public interface MeetingPlannerExample {
     static void main(String...args) {
-        var systemPrompt = """
-                You are a helpful assistant with access to tools.
-                Use the calculator tool for math operations.
-                Use the current_time tool to get the current date and time.
-                Be concise in your responses.
-                """;
-
-        var agent = new Agent(systemPrompt)
+        var agent = new Agent()
+                .withSystemPrompt("""
+                        You are a helpful assistant with access to tools.
+                        Use the calculator tool for math operations.
+                        Use the current_time tool to get the current date and time.
+                        Be concise in your responses.
+                        """)
                 .withTool(new CalculatorTool())
                 .withTool(new CurrentTimeTool());
 
