@@ -37,11 +37,17 @@ Loaded from `system.prompt` files in order (each layer overrides the previous):
 3. `./system.prompt` — highest priority
 4. Constructor parameter — fallback if no file exists
 
-## Running the Example
+## Running the Examples
 
 ```bash
 zb.sh
 java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/MeetingPlannerExample.java
+```
+
+The `UserConfirmationExample` demonstrates interactive yes/no confirmation prompts before the agent proceeds with actions:
+
+```bash
+java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/UserConfirmationExample.java
 ```
 
 ## Custom Tools

@@ -16,7 +16,7 @@ public interface UserConfirmationExample {
 
         Log.INFO.out("Agent initialized with user_confirmation tool");
 
-        var question = "I want to delete all temporary files from my project. Can you help?";
+        var question = "I want to create a HelloWorld.java example. Can you help?";
         Log.PROMPT.out("User: " + question);
 
         var response = agent.chat(question);
