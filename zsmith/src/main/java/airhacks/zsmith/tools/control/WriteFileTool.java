@@ -20,6 +20,14 @@ public class WriteFileTool implements Tool {
         this.fs = fs;
     }
 
+    public static WriteFileTool fromConfig() {
+        return new WriteFileTool();
+    }
+
+    public static WriteFileTool of(String sandboxPath) {
+        return new WriteFileTool(new SandboxedFileSystem(Path.of(sandboxPath)));
+    }
+
     @Override
     public String toolName() {
         return "write_file";

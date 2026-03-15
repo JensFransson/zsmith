@@ -20,6 +20,14 @@ public class ReadFileTool implements Tool {
         this.fs = fs;
     }
 
+    public static ReadFileTool fromConfig() {
+        return new ReadFileTool();
+    }
+
+    public static ReadFileTool of(String sandboxPath) {
+        return new ReadFileTool(new SandboxedFileSystem(Path.of(sandboxPath)));
+    }
+
     @Override
     public String toolName() {
         return "read_file";
