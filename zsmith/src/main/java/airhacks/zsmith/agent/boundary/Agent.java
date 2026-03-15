@@ -77,6 +77,10 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public Agent withEpisodicMemory() {
+        return withEpisodicMemory(new EpisodicMemoryStore(EpisodicMemoryStore.agentPath(this.name)));
+    }
+
+    public Agent withSharedEpisodicMemory() {
         return withEpisodicMemory(new EpisodicMemoryStore());
     }
 

@@ -32,8 +32,16 @@ public class EpisodicMemoryStore {
     }
 
     static Path defaultPath() {
+        return resolvePath("memory");
+    }
+
+    public static Path agentPath(String agentName) {
+        return resolvePath(agentName + "/memory");
+    }
+
+    private static Path resolvePath(String subdir) {
         var userHome = System.getProperty("user.home");
-        var memoryDir = Path.of(userHome, "." + ZCfg.APP_NAME, "memory");
+        var memoryDir = Path.of(userHome, "." + ZCfg.APP_NAME, subdir);
         try {
             Files.createDirectories(memoryDir);
         } catch (IOException e) {
