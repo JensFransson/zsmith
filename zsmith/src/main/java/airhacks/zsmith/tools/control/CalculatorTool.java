@@ -5,7 +5,7 @@ import org.json.JSONObject;
 public class CalculatorTool implements Tool {
 
     @Override
-    public String name() {
+    public String toolName() {
         return "calculator";
     }
 

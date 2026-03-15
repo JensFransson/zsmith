@@ -27,7 +27,7 @@ public interface LinkCheckerToolTest {
     /** Req 5.2: Tool name is "check_link" */
     static void testNameReturnsCheckLink() {
         var tool = new LinkCheckerTool();
-        assert "check_link".equals(tool.name()) : "name() should return 'check_link', got: " + tool.name();
+        assert "check_link".equals(tool.toolName()) : "name() should return 'check_link', got: " + tool.toolName();
     }
 
     /** Req 5.3: Description is non-empty */

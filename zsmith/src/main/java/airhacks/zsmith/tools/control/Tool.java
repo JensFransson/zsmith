@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 public interface Tool {
 
-    String name();
+    String toolName();
 
     String description();
 
@@ -14,7 +14,7 @@ public interface Tool {
 
     default JSONObject toToolDefinition() {
         return new JSONObject()
-                .put("name", name())
+                .put("name", toolName())
                 .put("description", description())
                 .put("input_schema", new JSONObject(inputSchema()));
     }

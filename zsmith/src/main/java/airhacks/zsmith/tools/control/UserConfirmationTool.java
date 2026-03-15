@@ -17,7 +17,7 @@ public class UserConfirmationTool implements Tool {
     }
 
     @Override
-    public String name() {
+    public String toolName() {
         return "user_confirmation";
     }
 

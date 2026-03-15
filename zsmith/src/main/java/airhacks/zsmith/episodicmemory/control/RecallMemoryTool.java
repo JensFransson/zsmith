@@ -18,7 +18,7 @@ public class RecallMemoryTool implements Tool {
     }
 
     @Override
-    public String name() {
+    public String toolName() {
         return "recall_memory";
     }
 

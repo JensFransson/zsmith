@@ -1,6 +1,7 @@
 package airhacks.zsmith.tools.control;
 
 import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.tools.boundary.Tools;
 
 /**
  * Integration test verifying LinkCheckerTool can be registered with an Agent.
@@ -11,6 +12,7 @@ public interface LinkCheckerToolRegistrationTest {
     static void main(String... args) {
         testToolRegistrationWithAgent();
         testToolRegistrationAlongsideOtherTools();
+        testToolRegistrationViaToolsEnum();
         System.out.println("All LinkCheckerTool registration tests passed.");
     }
 
@@ -31,6 +33,16 @@ public interface LinkCheckerToolRegistrationTest {
 
         assert agent.tools().containsKey("check_link") : "Agent should contain 'check_link' tool";
         assert agent.tools().containsKey("calculator") : "Agent should still contain 'calculator' tool";
+        assert agent.tools().size() >= 2 : "Agent should have at least 2 tools";
+    }
+
+    /** Tools enum constant can be used instead of constructor */
+    static void testToolRegistrationViaToolsEnum() {
+        var agent = new Agent().withSystemPrompt("You are a helpful assistant.")
+                .withTools(Tools.CALCULATOR, Tools.LINK_CHECKER);
+
+        assert agent.tools().containsKey("check_link") : "Agent should contain 'check_link' tool via enum";
+        assert agent.tools().containsKey("calculator") : "Agent should contain 'calculator' tool via enum";
         assert agent.tools().size() >= 2 : "Agent should have at least 2 tools";
     }
 }

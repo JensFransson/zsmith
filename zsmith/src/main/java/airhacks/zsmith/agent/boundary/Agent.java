@@ -60,7 +60,14 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public Agent withTool(Tool tool) {
-        this.tools.put(tool.name(), tool);
+        this.tools.put(tool.toolName(), tool);
+        return this;
+    }
+
+    public Agent withTools(Tool... tools) {
+        for (var tool : tools) {
+            this.tools.put(tool.toolName(), tool);
+        }
         return this;
     }
 

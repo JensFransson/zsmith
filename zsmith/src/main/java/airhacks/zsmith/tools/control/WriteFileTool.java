@@ -21,7 +21,7 @@ public class WriteFileTool implements Tool {
     }
 
     @Override
-    public String name() {
+    public String toolName() {
         return "write_file";
     }
 

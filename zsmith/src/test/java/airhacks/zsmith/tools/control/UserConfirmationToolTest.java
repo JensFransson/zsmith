@@ -24,7 +24,7 @@ public interface UserConfirmationToolTest {
     /** Req 4.2: Tool name is "user_confirmation" */
     static void testNameReturnsUserConfirmation() {
         var tool = new UserConfirmationTool(prompt -> "yes");
-        assert "user_confirmation".equals(tool.name()) : "name() should return 'user_confirmation', got: " + tool.name();
+        assert "user_confirmation".equals(tool.toolName()) : "name() should return 'user_confirmation', got: " + tool.toolName();
     }
 
     /** Req 4.3: Description is non-empty */

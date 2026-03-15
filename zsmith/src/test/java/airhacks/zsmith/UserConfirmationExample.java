@@ -2,7 +2,7 @@ package airhacks.zsmith;
 
 import airhacks.zsmith.agent.boundary.Agent;
 import airhacks.zsmith.logging.control.Log;
-import airhacks.zsmith.tools.control.UserConfirmationTool;
+import airhacks.zsmith.tools.boundary.Tools;
 
 public interface UserConfirmationExample {
     static void main(String...args) {
@@ -12,7 +12,7 @@ public interface UserConfirmationExample {
                         Use the user_confirmation tool to ask the user yes/no questions before proceeding with actions.
                         Be concise in your responses.
                         """)
-                .withTool(new UserConfirmationTool());
+                .withTool(Tools.USER_CONFIRMATION);
 
         Log.INFO.out("Agent initialized with user_confirmation tool");
 

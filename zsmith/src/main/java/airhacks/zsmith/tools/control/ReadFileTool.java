@@ -21,7 +21,7 @@ public class ReadFileTool implements Tool {
     }
 
     @Override
-    public String name() {
+    public String toolName() {
         return "read_file";
     }
 

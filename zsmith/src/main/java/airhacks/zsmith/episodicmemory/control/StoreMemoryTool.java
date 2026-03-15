@@ -16,7 +16,7 @@ public class StoreMemoryTool implements Tool {
     }
 
     @Override
-    public String name() {
+    public String toolName() {
         return "store_memory";
     }
 

@@ -2,8 +2,7 @@ package airhacks.zsmith;
 
 import airhacks.zsmith.agent.boundary.Agent;
 import airhacks.zsmith.logging.control.Log;
-import airhacks.zsmith.tools.control.CalculatorTool;
-import airhacks.zsmith.tools.control.CurrentTimeTool;
+import airhacks.zsmith.tools.boundary.Tools;
 
 public interface MeetingPlannerExample {
     static void main(String...args) {
@@ -14,8 +13,7 @@ public interface MeetingPlannerExample {
                         Use the current_time tool to get the current date and time.
                         Be concise in your responses.
                         """)
-                .withTool(new CalculatorTool())
-                .withTool(new CurrentTimeTool());
+                .withTools(Tools.CALCULATOR, Tools.CURRENT_TIME);
 
         Log.INFO.out("Agent initialized with calculator and current_time tools");
 

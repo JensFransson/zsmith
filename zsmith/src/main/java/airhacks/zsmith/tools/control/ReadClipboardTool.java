@@ -8,7 +8,7 @@ import org.json.JSONObject;
 public class ReadClipboardTool implements Tool {
 
     @Override
-    public String name() {
+    public String toolName() {
         return "read_clipboard";
     }
 

@@ -8,7 +8,7 @@ import org.json.JSONObject;
 public class CurrentTimeTool implements Tool {
 
     @Override
-    public String name() {
+    public String toolName() {
         return "current_time";
     }
 

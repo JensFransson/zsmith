@@ -27,7 +27,7 @@ public class LinkCheckerTool implements Tool {
     }
 
     @Override
-    public String name() {
+    public String toolName() {
         return "check_link";
     }
 
