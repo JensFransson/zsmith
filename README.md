@@ -58,14 +58,23 @@ java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/EpisodicMemoryExample.java
 
 ## Episodic Memory
 
-Agents can store and recall information across conversations using `EpisodicMemoryStore`:
+Agents can store and recall information across conversations using `EpisodicMemoryStore`.
+
+Agent-specific memory (stored at `~/.zsmith/[agentName]/memory/episodic-memory.json`):
 
 ```java
-var agent = new Agent()
+var agent = new Agent("planner")
         .withEpisodicMemory();
 ```
 
-For a custom storage location, pass a `Path` to the `EpisodicMemoryStore` constructor:
+Shared memory across all agents (stored at `~/.zsmith/memory/episodic-memory.json`):
+
+```java
+var agent = new Agent("planner")
+        .withSharedEpisodicMemory();
+```
+
+Custom storage location:
 
 ```java
 var agent = new Agent()
@@ -79,7 +88,19 @@ Memories are persisted to a JSON file and classified by type:
 - `project` — ongoing work, goals, decisions, or incidents
 - `reference` — pointers to external resources and systems
 
-The default file path is `~/.zsmith/memory/episodic-memory.json`.
+## Built-in Tools
+
+| Tool | Name | Description |
+|------|------|-------------|
+| `CalculatorTool` | `calculator` | Performs basic arithmetic operations: add, subtract, multiply, divide |
+| `CurrentTimeTool` | `current_time` | Returns the current date and time |
+| `ReadClipboardTool` | `read_clipboard` | Reads the current text content from the system clipboard |
+| `ReadFileTool` | `read_file` | Reads the contents of a file within the sandbox directory |
+| `WriteFileTool` | `write_file` | Writes content to a file within the sandbox directory |
+| `LinkCheckerTool` | `check_link` | Checks a URL and returns response information including status code, content type, and body preview |
+| `UserConfirmationTool` | `user_confirmation` | Asks the user a yes/no question and returns the answer |
+| `StoreMemoryTool` | `store_memory` | Stores an episode in long-term memory for future recall |
+| `RecallMemoryTool` | `recall_memory` | Recalls past memories, optionally filtered by type or limited to recent entries |
 
 ## Custom Tools
 
