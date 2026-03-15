@@ -6,7 +6,7 @@ import java.nio.file.Path;
 
 public class SandboxedFileSystem {
 
-    private final Path rootDirectory;
+    Path rootDirectory;
 
     public SandboxedFileSystem(Path rootDirectory) {
         this.rootDirectory = rootDirectory.toAbsolutePath().normalize();

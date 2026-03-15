@@ -13,6 +13,7 @@ import org.json.JSONArray;
 
 import airhacks.zsmith.episodicmemory.entity.Episode;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
+import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
 
 public class EpisodicMemoryStore {
@@ -27,7 +28,18 @@ public class EpisodicMemoryStore {
     }
 
     public EpisodicMemoryStore() {
-        this(Path.of("episodic-memory.json"));
+        this(defaultPath());
+    }
+
+    static Path defaultPath() {
+        var userHome = System.getProperty("user.home");
+        var memoryDir = Path.of(userHome, "." + ZCfg.APP_NAME, "memory");
+        try {
+            Files.createDirectories(memoryDir);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return memoryDir.resolve("episodic-memory.json");
     }
 
     public void store(Episode episode) {
