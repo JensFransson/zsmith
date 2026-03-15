@@ -4,6 +4,7 @@ import org.json.JSONObject;
 
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.entity.Episode;
+import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.tools.control.Tool;
 
 public class StoreMemoryTool implements Tool {
@@ -21,7 +22,13 @@ public class StoreMemoryTool implements Tool {
 
     @Override
     public String description() {
-        return "Stores an episode in long-term memory for future recall. Use this to remember important facts, decisions, or outcomes.";
+        return """
+                Stores an episode in long-term memory for future recall. \
+                Each memory must be classified with a type: \
+                'user' for information about the user's role, preferences, and knowledge; \
+                'feedback' for guidance or corrections the user has given; \
+                'project' for ongoing work, goals, decisions, or incidents; \
+                'reference' for pointers to external resources and systems.""";
     }
 
     @Override
@@ -34,12 +41,13 @@ public class StoreMemoryTool implements Tool {
                             "type": "string",
                             "description": "The information to remember"
                         },
-                        "category": {
+                        "type": {
                             "type": "string",
-                            "description": "Optional category for organizing memories"
+                            "enum": ["user", "feedback", "project", "reference"],
+                            "description": "The memory type: user, feedback, project, or reference"
                         }
                     },
-                    "required": ["content"]
+                    "required": ["content", "type"]
                 }
                 """;
     }
@@ -47,8 +55,8 @@ public class StoreMemoryTool implements Tool {
     @Override
     public String execute(JSONObject input) {
         var content = input.getString("content");
-        var category = input.optString("category", null);
-        var episode = new Episode(content, null, category);
+        var type = MemoryType.fromString(input.getString("type"));
+        var episode = new Episode(content, null, type);
         store.store(episode);
         return "Memory stored.";
     }

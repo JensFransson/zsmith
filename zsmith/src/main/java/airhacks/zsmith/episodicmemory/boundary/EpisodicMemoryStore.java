@@ -12,6 +12,7 @@ import java.util.Objects;
 import org.json.JSONArray;
 
 import airhacks.zsmith.episodicmemory.entity.Episode;
+import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.logging.control.Log;
 
 public class EpisodicMemoryStore {
@@ -40,9 +41,9 @@ public class EpisodicMemoryStore {
                 .toList();
     }
 
-    public List<Episode> byCategory(String category) {
+    public List<Episode> byType(MemoryType type) {
         return this.episodes.stream()
-                .filter(e -> Objects.equals(e.category(), category))
+                .filter(e -> Objects.equals(e.type(), type))
                 .sorted(Comparator.comparing(Episode::timestamp))
                 .toList();
     }

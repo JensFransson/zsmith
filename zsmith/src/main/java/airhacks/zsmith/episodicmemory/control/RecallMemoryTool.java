@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.entity.Episode;
+import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.tools.control.Tool;
 
 public class RecallMemoryTool implements Tool {
@@ -23,7 +24,7 @@ public class RecallMemoryTool implements Tool {
 
     @Override
     public String description() {
-        return "Recalls past memories. Optionally filter by category or limit to the most recent entries.";
+        return "Recalls past memories. Optionally filter by type (user, feedback, project, reference) or limit to the most recent entries.";
     }
 
     @Override
@@ -32,9 +33,10 @@ public class RecallMemoryTool implements Tool {
                 {
                     "type": "object",
                     "properties": {
-                        "category": {
+                        "type": {
                             "type": "string",
-                            "description": "Optional category to filter memories"
+                            "enum": ["user", "feedback", "project", "reference"],
+                            "description": "Optional type to filter memories"
                         },
                         "limit": {
                             "type": "integer",
@@ -47,12 +49,13 @@ public class RecallMemoryTool implements Tool {
 
     @Override
     public String execute(JSONObject input) {
-        var category = input.optString("category", null);
+        var typeString = input.optString("type", null);
         var limit = input.optInt("limit", 10);
 
         List<Episode> episodes;
-        if (category != null) {
-            episodes = store.byCategory(category);
+        if (typeString != null) {
+            var type = MemoryType.fromString(typeString);
+            episodes = store.byType(type);
         } else {
             episodes = store.recent(limit);
         }
@@ -64,8 +67,8 @@ public class RecallMemoryTool implements Tool {
         var result = new StringBuilder();
         for (var episode : episodes) {
             result.append("[%s] %s".formatted(episode.timestamp(), episode.content()));
-            if (episode.category() != null) {
-                result.append(" (category: %s)".formatted(episode.category()));
+            if (episode.type() != null) {
+                result.append(" (type: %s)".formatted(episode.type().name()));
             }
             result.append("\n");
         }
