@@ -11,6 +11,7 @@ public enum Log {
     INFO(Color.INFO, System.out),
     SYSTEM(Color.DARKBLUE, System.out),
     ANSWER(Color.ANSWER, System.out),
+    TOOL(Color.CYAN, System.out),
     DEBUG(Color.BLACK_ON_WHITE, System.out);
 
     PrintStream out;

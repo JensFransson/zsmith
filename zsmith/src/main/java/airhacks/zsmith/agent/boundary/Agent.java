@@ -107,12 +107,16 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     ToolResult executeTool(ToolUse toolUse) {
         var tool = this.tools.get(toolUse.name());
         if (tool == null) {
+            Log.TOOL.out("tool not available: " + toolUse.name());
             return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
         }
         try {
+            Log.TOOL.out("calling tool: " + toolUse.name());
             var result = tool.execute(toolUse.input());
+            Log.TOOL.out("tool result: " + toolUse.name());
             return ToolResult.success(toolUse.id(), result);
         } catch (Exception e) {
+            Log.TOOL.out("tool error: " + toolUse.name() + " — " + e.getMessage());
             return ToolResult.error(toolUse.id(), e.getMessage());
         }
     }
