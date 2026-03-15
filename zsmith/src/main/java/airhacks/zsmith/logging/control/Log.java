@@ -2,7 +2,7 @@ package airhacks.zsmith.logging.control;
 
 import java.io.PrintStream;
 
-
+import airhacks.zsmith.configuration.control.ZCfg;
 
 public enum Log {
 
@@ -12,7 +12,9 @@ public enum Log {
     SYSTEM(Color.DARKBLUE, System.out),
     ANSWER(Color.ANSWER, System.out),
     TOOL(Color.CYAN, System.out),
-    DEBUG(Color.BLACK_ON_WHITE, System.out);
+    DEBUG(Color.BLACK_ON_WHITE, System.out),
+    REQUEST(Color.GREEN, System.out, "log.request"),
+    RESPONSE(Color.BLUE, System.out, "log.response");
 
     PrintStream out;
 
@@ -38,11 +40,17 @@ public enum Log {
     }
 
     private final String value;
+    private final String configKey;
     private final static String RESET = "\u001B[0m";
 
     private Log(Color color, PrintStream out) {
+        this(color, out, null);
+    }
+
+    private Log(Color color, PrintStream out, String configKey) {
         this.value = (color.code + "%s" + RESET);
         this.out = out;
+        this.configKey = configKey;
     }
 
     public String formatted(String raw) {
@@ -50,6 +58,7 @@ public enum Log {
     }
 
     public void out(String message) {
+        if (configKey != null && !ZCfg.bool(configKey, false)) return;
         var colored = formatted(message);
         this.out.println(colored);
     }

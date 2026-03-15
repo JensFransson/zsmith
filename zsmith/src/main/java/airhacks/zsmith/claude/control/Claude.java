@@ -74,19 +74,21 @@ public interface Claude {
             payloadJSON.put("tools", tools);
         }
         var payload = payloadJSON.toString();
-        Log.debug(payload);
+        Log.REQUEST.out(payload);
         var answer = invoke(payload);
+        Log.RESPONSE.out(answer);
         return new JSONObject(answer);
     }
 
     public static JSONObject invoke(String system, String user, float temperature) {
         var enclosedPrompt = messagePrompt(user);
-        Log.debug(enclosedPrompt.toString());
+        Log.REQUEST.out(enclosedPrompt.toString());
         var payloadJSON = Claude.claudeMessage(enclosedPrompt, temperature, system);
         payloadJSON.put("model", currentModel.modelName());
         var payload = payloadJSON.toString();
-        Log.debug(payload);
+        Log.REQUEST.out(payload);
         var answer = invoke(payload);
+        Log.RESPONSE.out(answer);
         return new JSONObject(answer);
     }
 
