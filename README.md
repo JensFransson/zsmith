@@ -50,6 +50,37 @@ The `UserConfirmationExample` demonstrates interactive yes/no confirmation promp
 java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/UserConfirmationExample.java
 ```
 
+The `EpisodicMemoryExample` demonstrates persistent long-term memory across conversations:
+
+```bash
+java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/EpisodicMemoryExample.java
+```
+
+## Episodic Memory
+
+Agents can store and recall information across conversations using `EpisodicMemoryStore`:
+
+```java
+var agent = new Agent()
+        .withEpisodicMemory();
+```
+
+For a custom storage location, pass a `Path` to the `EpisodicMemoryStore` constructor:
+
+```java
+var agent = new Agent()
+        .withEpisodicMemory(new EpisodicMemoryStore(Path.of("custom-memory.json")));
+```
+
+Memories are persisted to a JSON file and classified by type:
+
+- `user` — role, preferences, and knowledge about the user
+- `feedback` — guidance or corrections from the user
+- `project` — ongoing work, goals, decisions, or incidents
+- `reference` — pointers to external resources and systems
+
+The default file path is `~/.zsmith/memory/episodic-memory.json`.
+
 ## Custom Tools
 
 Implement the `Tool` interface:
