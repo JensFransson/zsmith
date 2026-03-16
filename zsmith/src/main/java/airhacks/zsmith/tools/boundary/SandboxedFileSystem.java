@@ -76,6 +76,23 @@ public class SandboxedFileSystem {
         }
     }
 
+    public String listFiles() {
+        try (var stream = Files.walk(this.rootDirectory)) {
+            var files = stream
+                    .filter(Files::isRegularFile)
+                    .map(this.rootDirectory::relativize)
+                    .map(Path::toString)
+                    .sorted()
+                    .toList();
+            if (files.isEmpty()) {
+                return "No files found in sandbox";
+            }
+            return String.join("\n", files);
+        } catch (IOException e) {
+            return "Error: Could not list files";
+        }
+    }
+
     private boolean containsDotDot(String path) {
         for (var segment : path.replace('\\', '/').split("/")) {
             if ("..".equals(segment)) {
