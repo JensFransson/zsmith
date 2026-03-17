@@ -111,9 +111,9 @@ public class EpisodicMemoryStore {
                 this.episodes.add(Episode.fromJSON(array.getJSONObject(i)));
             }
         } catch (IOException e) {
-            Log.error("Warning: could not load episodic memory from " + this.filePath + ": " + e.getMessage());
+            Log.warning("could not load episodic memory from " + this.filePath + ": " + e.getMessage());
         } catch (IllegalArgumentException | IllegalStateException e) {
-            Log.error("Warning: malformed JSON in " + this.filePath + ": " + e.getMessage());
+            Log.warning("malformed JSON in " + this.filePath + ": " + e.getMessage());
         }
     }
 }

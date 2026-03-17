@@ -118,7 +118,7 @@ public interface Claude {
      * ...
      */
     static String invoke(String message) {
-        Log.user("using claude model: %s".formatted(currentModel.modelName()));
+        Log.agent("using claude model: %s".formatted(currentModel.modelName()));
         var request = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))
                 .header("x-api-key", ANTHROPIC_API_KEY)

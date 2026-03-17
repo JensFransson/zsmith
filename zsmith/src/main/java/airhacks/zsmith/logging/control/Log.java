@@ -7,30 +7,28 @@ import airhacks.zsmith.configuration.control.ZCfg;
 public enum Log {
 
     ERROR(Color.RED, System.err),
-    PROMPT(Color.PROMPT, System.out),
-    INFO(Color.INFO, System.out),
-    SYSTEM(Color.DARKBLUE, System.out),
-    ANSWER(Color.ANSWER, System.out),
-    TOOL(Color.CYAN, System.out),
-    DEBUG(Color.BLACK_ON_WHITE, System.out),
+    WARNING(Color.YELLOW, System.out),
+    INFO(Color.GREEN, System.out),
+    DEBUG(Color.VIOLET, System.out),
+    AGENT(Color.BLUE, System.out),
+    PROMPT(Color.CYAN, System.out),
+    ANSWER(Color.ORANGE, System.out),
+    TOOL(Color.MAGENTA, System.out),
+    MEMORY(Color.YELLOW, System.out),
     REQUEST(Color.GREEN, System.out, "log.request"),
-    RESPONSE(Color.BLUE, System.out, "log.response");
+    RESPONSE(Color.VIOLET, System.out, "log.response");
 
-    PrintStream out;
+    private PrintStream out;
 
     enum Color {
-        PROMPT("\033[0;90m"),
-        INFO("\033[0;33m"),
-        DARKBLUE("\033[2;34m"),
-        ANSWER("\033[0;97m"),
-        RED("\033[0;41m"),
-        GREEN("\033[0;42m"),
-        YELLOW("\033[0;43m"),
-        BLUE("\033[0;44m"),
-        PURPLE("\033[0;45m"),
-        CYAN("\033[0;46m"),
-        WHITE("\033[0;47m"),
-        BLACK_ON_WHITE("\u001B[30;107m");
+        YELLOW("\033[38;2;181;137;0m"),       // Solarized Yellow #b58900
+        ORANGE("\033[38;2;203;75;22m"),       // Solarized Orange #cb4b16
+        RED("\033[38;2;220;50;47m"),          // Solarized Red #dc322f
+        MAGENTA("\033[38;2;211;54;130m"),     // Solarized Magenta #d33682
+        VIOLET("\033[38;2;108;113;196m"),     // Solarized Violet #6c71c4
+        BLUE("\033[38;2;38;139;210m"),        // Solarized Blue #268bd2
+        CYAN("\033[38;2;42;161;152m"),        // Solarized Cyan #2aa198
+        GREEN("\033[38;2;133;153;0m");        // Solarized Green #859900
 
         String code;
 
@@ -53,7 +51,7 @@ public enum Log {
         this.configKey = configKey;
     }
 
-    public String formatted(String raw) {
+    String formatted(String raw) {
         return this.value.formatted(raw);
     }
 
@@ -63,29 +61,33 @@ public enum Log {
         this.out.println(colored);
     }
 
-
-    public static void debug(String message) {
-        Log.DEBUG.out(message);
-    }
-
     public static void error(String message) {
         Log.ERROR.out(message);
     }
 
-    public static void user(String message) {
-        Log.INFO.out(message);
+    public static void error(String message, Exception e) {
+        Log.ERROR.out(message + ": " + e.getMessage());
+        e.printStackTrace(System.err);
+    }
+
+    public static void warning(String message) {
+        Log.WARNING.out(message);
     }
 
     public static void info(String message) {
         Log.INFO.out(message);
     }
 
-    public static void prompt(String message) {
-        Log.PROMPT.out(message);
+    public static void debug(String message) {
+        Log.DEBUG.out(message);
     }
 
-    public static void system(String message) {
-        Log.SYSTEM.out(message);
+    public static void agent(String message) {
+        Log.AGENT.out(message);
+    }
+
+    public static void prompt(String message) {
+        Log.PROMPT.out(message);
     }
 
     public static void answer(String message) {
@@ -96,6 +98,10 @@ public enum Log {
         Log.TOOL.out(message);
     }
 
+    public static void memory(String message) {
+        Log.MEMORY.out(message);
+    }
+
     public static void request(String message) {
         Log.REQUEST.out(message);
     }
@@ -104,4 +110,12 @@ public enum Log {
         Log.RESPONSE.out(message);
     }
 
+    public static void clearScreen() {
+        System.out.println("\033c");
+    }
+
+    public static void stop(String message) {
+        error(message);
+        System.exit(0);
+    }
 }

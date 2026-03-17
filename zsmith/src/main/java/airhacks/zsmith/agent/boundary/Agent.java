@@ -30,7 +30,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     static final float DEFAULT_TEMPERATURE = 0.7f;
 
     static {
-        Log.user("zsmith v" + version);
+        Log.agent("zsmith v" + version);
         ZCfg.loadBaseConfig("zsmith");
     }
 

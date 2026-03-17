@@ -15,7 +15,7 @@ public interface EpisodicMemoryExample {
                         """)
                 .withEpisodicMemory();
 
-        Log.info("Agent initialized with episodic memory tools");
+        Log.agent("Agent initialized with episodic memory tools");
 
         var question = "Remember that I prefer Java 25 and work on microservices. My name is Duke.";
         Log.prompt("User: " + question);

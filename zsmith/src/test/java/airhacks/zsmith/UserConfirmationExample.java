@@ -14,7 +14,7 @@ public interface UserConfirmationExample {
                         """)
                 .withTool(Tools.USER_CONFIRMATION);
 
-        Log.info("Agent initialized with user_confirmation tool");
+        Log.agent("Agent initialized with user_confirmation tool");
 
         var question = "I want to create a HelloWorld.java example. Can you help?";
         Log.prompt("User: " + question);
