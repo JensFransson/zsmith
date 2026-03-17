@@ -22,11 +22,11 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version ="2026.03.15.06";
+    public static final String version ="2026.03.17.02";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
-    static final int DEFAULT_MAX_ITERATIONS = 10;
+    static final int DEFAULT_MAX_ITERATIONS = 20;
     static final float DEFAULT_TEMPERATURE = 0.7f;
 
     static {
@@ -112,16 +112,16 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     ToolResult executeTool(ToolUse toolUse) {
         var tool = this.tools.get(toolUse.name());
         if (tool == null) {
-            Log.TOOL.out("tool not available: " + toolUse.name());
+            Log.tool("tool not available: " + toolUse.name());
             return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
         }
         try {
-            Log.TOOL.out("calling tool: " + toolUse.name());
+            Log.tool("calling tool: " + toolUse.name());
             var result = tool.execute(toolUse.input());
-            Log.TOOL.out("tool result: " + toolUse.name());
+            Log.tool("tool result: " + toolUse.name());
             return ToolResult.success(toolUse.id(), result);
         } catch (Exception e) {
-            Log.TOOL.out("tool error: " + toolUse.name() + " — " + e.getMessage());
+            Log.tool("tool error: " + toolUse.name() + " — " + e.getMessage());
             return ToolResult.error(toolUse.id(), e.getMessage());
         }
     }

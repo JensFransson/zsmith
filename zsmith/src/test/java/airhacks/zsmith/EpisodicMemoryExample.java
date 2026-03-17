@@ -15,18 +15,18 @@ public interface EpisodicMemoryExample {
                         """)
                 .withEpisodicMemory();
 
-        Log.INFO.out("Agent initialized with episodic memory tools");
+        Log.info("Agent initialized with episodic memory tools");
 
         var question = "Remember that I prefer Java 25 and work on microservices. My name is Duke.";
-        Log.PROMPT.out("User: " + question);
+        Log.prompt("User: " + question);
 
         var response = agent.chat(question);
-        Log.ANSWER.out("Agent: " + response);
+        Log.answer("Agent: " + response);
 
         var followUp = "What do you know about me?";
-        Log.PROMPT.out("User: " + followUp);
+        Log.prompt("User: " + followUp);
 
         var recallResponse = agent.chat(followUp);
-        Log.ANSWER.out("Agent: " + recallResponse);
+        Log.answer("Agent: " + recallResponse);
     }
 }

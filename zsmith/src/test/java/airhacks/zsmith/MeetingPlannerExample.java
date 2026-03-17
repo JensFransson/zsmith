@@ -15,12 +15,12 @@ public interface MeetingPlannerExample {
                         """)
                 .withTools(Tools.CALCULATOR, Tools.CURRENT_TIME);
 
-        Log.INFO.out("Agent initialized with calculator and current_time tools");
+        Log.info("Agent initialized with calculator and current_time tools");
 
         var question = "I have a meeting in 90 minutes. What time does it start? If the meeting lasts 45 minutes, what time does it end?";
-        Log.PROMPT.out("User: " + question);
+        Log.prompt("User: " + question);
 
         var response = agent.chat(question);
-        Log.ANSWER.out("Agent: " + response);
+        Log.answer("Agent: " + response);
     }
 }

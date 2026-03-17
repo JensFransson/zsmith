@@ -57,7 +57,7 @@ public enum Log {
         return this.value.formatted(raw);
     }
 
-    public void out(String message) {
+    void out(String message) {
         if (configKey != null && !ZCfg.bool(configKey, false)) return;
         var colored = formatted(message);
         this.out.println(colored);
@@ -65,15 +65,43 @@ public enum Log {
 
 
     public static void debug(String message) {
-            Log.DEBUG.out(message);
+        Log.DEBUG.out(message);
     }
 
     public static void error(String message) {
         Log.ERROR.out(message);
     }
 
-    public static void user(String message){
+    public static void user(String message) {
         Log.INFO.out(message);
+    }
+
+    public static void info(String message) {
+        Log.INFO.out(message);
+    }
+
+    public static void prompt(String message) {
+        Log.PROMPT.out(message);
+    }
+
+    public static void system(String message) {
+        Log.SYSTEM.out(message);
+    }
+
+    public static void answer(String message) {
+        Log.ANSWER.out(message);
+    }
+
+    public static void tool(String message) {
+        Log.TOOL.out(message);
+    }
+
+    public static void request(String message) {
+        Log.REQUEST.out(message);
+    }
+
+    public static void response(String message) {
+        Log.RESPONSE.out(message);
     }
 
 }

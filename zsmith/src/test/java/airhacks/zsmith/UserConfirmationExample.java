@@ -14,12 +14,12 @@ public interface UserConfirmationExample {
                         """)
                 .withTool(Tools.USER_CONFIRMATION);
 
-        Log.INFO.out("Agent initialized with user_confirmation tool");
+        Log.info("Agent initialized with user_confirmation tool");
 
         var question = "I want to create a HelloWorld.java example. Can you help?";
-        Log.PROMPT.out("User: " + question);
+        Log.prompt("User: " + question);
 
         var response = agent.chat(question);
-        Log.ANSWER.out("Agent: " + response);
+        Log.answer("Agent: " + response);
     }
 }
