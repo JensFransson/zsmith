@@ -127,9 +127,11 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public String chat(String userMessage) {
+        Log.prompt(userMessage);
         this.memory.addUserMessage(userMessage);
 
         for (int iteration = 0; iteration < this.maxIterations; iteration++) {
+            Log.agent("iteration " + (iteration + 1) + "/" + this.maxIterations);
             var response = Claude.invoke(
                     this.systemPrompt,
                     this.memory.toJSON(),
@@ -147,6 +149,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
                 if (!textParts.isEmpty()) {
                     var assistantResponse = String.join("\n", textParts);
                     this.memory.addAssistantMessage(assistantResponse);
+                    Log.answer(assistantResponse);
                     return assistantResponse;
                 }
                 return "";
@@ -163,6 +166,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             this.memory.addMessage(Message.withContentBlocks("user", toolResults));
         }
 
+        Log.warning("max iterations reached (" + this.maxIterations + ")");
         return "Max iterations reached";
     }
 
