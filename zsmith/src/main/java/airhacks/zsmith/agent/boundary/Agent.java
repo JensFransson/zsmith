@@ -18,6 +18,8 @@ import airhacks.zsmith.tools.entity.ToolUse;
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.control.RecallMemoryTool;
 import airhacks.zsmith.episodicmemory.control.StoreMemoryTool;
+import airhacks.zsmith.skills.boundary.SkillStore;
+import airhacks.zsmith.skills.control.LoadSkillTool;
 import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 
@@ -100,6 +102,19 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         return agent;
     }
 
+    public Agent withSkills() {
+        return withSkills(SkillStore.forAgent(this.name));
+    }
+
+    public Agent withSkills(SkillStore store) {
+        var catalog = store.catalog();
+        var enrichedPrompt = catalog.isEmpty()
+                ? this.systemPrompt
+                : this.systemPrompt + "\n\n" + catalog;
+        var agent = new Agent(this.name, enrichedPrompt, this.memory, this.tools, this.maxIterations, this.temperature, this.episodicMemory);
+        agent.tools.put("load_skill", new LoadSkillTool(store));
+        return agent;
+    }
 
     JSONArray toolDefinitions() {
         var array = new JSONArray();
