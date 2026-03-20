@@ -26,7 +26,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version ="2026.03.20.02";
+    public static final String version ="2026.03.20.03";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -160,6 +160,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
                     toolDefinitions(),
                     this.temperature
             );
+            progress.addClaudeInvocation();
 
             var content = response.getJSONArray("content");
             var stopReason = response.optString("stop_reason", "end_turn");
@@ -184,6 +185,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
                 var result = executeTool(toolUse);
                 toolResults.put(result.toContentBlock());
             }
+            progress.addToolInvocations(toolUses.size());
 
             this.memory.addMessage(Message.withContentBlocks("user", toolResults));
         }

@@ -8,9 +8,19 @@ public class ProgressBar {
     static final String RESET = "\u001B[0m";
 
     private final int maxIterations;
+    private int claudeInvocations;
+    private int toolInvocations;
 
     public ProgressBar(int maxIterations) {
         this.maxIterations = maxIterations;
+    }
+
+    public void addClaudeInvocation() {
+        this.claudeInvocations++;
+    }
+
+    public void addToolInvocations(int count) {
+        this.toolInvocations += count;
     }
 
     public void update(int iteration) {
@@ -23,10 +33,14 @@ public class ProgressBar {
 
         var blue = Log.Color.BLUE.code;
         var violet = Log.Color.VIOLET.code;
+        var cyan = Log.Color.CYAN.code;
+        var magenta = Log.Color.MAGENTA.code;
 
         return blue + "[" + FILLED.repeat(filled) + RESET
                 + violet + EMPTY.repeat(empty) + RESET
                 + blue + "]" + RESET
-                + "  " + iteration + "/" + maxIterations;
+                + "  " + iteration + "/" + maxIterations
+                + "  " + cyan + "claude: " + claudeInvocations + RESET
+                + "  " + magenta + "tools: " + toolInvocations + RESET;
     }
 }
