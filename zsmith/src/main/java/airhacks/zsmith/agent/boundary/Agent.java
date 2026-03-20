@@ -13,6 +13,7 @@ import airhacks.zsmith.memory.entity.Message;
 import airhacks.zsmith.claude.control.Claude;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.logging.control.ProgressBar;
 import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
@@ -25,7 +26,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version ="2026.03.17.03";
+    public static final String version ="2026.03.20.02";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -150,8 +151,9 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         Log.prompt(userMessage);
         this.memory.addUserMessage(userMessage);
 
+        var progress = new ProgressBar(this.maxIterations);
         for (int iteration = 0; iteration < this.maxIterations; iteration++) {
-            Log.agent("iteration " + (iteration + 1) + "/" + this.maxIterations);
+            progress.update(iteration + 1);
             var response = Claude.invoke(
                     this.systemPrompt,
                     this.memory.toJSON(),
