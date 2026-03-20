@@ -56,6 +56,62 @@ The `EpisodicMemoryExample` demonstrates persistent long-term memory across conv
 java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/EpisodicMemoryExample.java
 ```
 
+The `SkillsExample` demonstrates loading and using skills — reusable prompt instructions the agent can activate on demand:
+
+```bash
+java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/SkillsExample.java
+```
+
+## Skills
+
+Agents can load skills — reusable prompt snippets stored as `SKILL.md` files in a directory structure:
+
+```
+skills/
+  explain/
+    SKILL.md
+  code-reviewer/
+    SKILL.md
+  java-modernizer/
+    SKILL.md
+```
+
+Default skill resolution (each layer overrides the previous):
+
+1. `~/.zsmith/skills/` — global skills
+2. `~/.zsmith/[agentName]/skills/` — global agent-specific
+3. `./skills/` — local project skills
+4. `./[agentName]/skills/` — local agent-specific
+
+```java
+var agent = new Agent()
+        .withSkills();
+```
+
+Custom skill directory:
+
+```java
+var agent = new Agent()
+        .withSkills("path/to/skills");
+```
+
+Each `SKILL.md` uses frontmatter for metadata:
+
+```markdown
+---
+name: explain
+description: Explains a concept using an analogy and a short example
+---
+When explaining a concept:
+
+1. Start with a one-sentence definition
+2. Give an everyday analogy
+3. Show a minimal code example (if applicable)
+4. End with one common misconception
+
+Keep it under 10 sentences total.
+```
+
 ## Episodic Memory
 
 Agents can store and recall information across conversations using `EpisodicMemoryStore`.
