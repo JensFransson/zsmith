@@ -43,4 +43,13 @@ public class ProgressBar {
                 + "  " + cyan + "claude: " + claudeInvocations + RESET
                 + "  " + magenta + "tools: " + toolInvocations + RESET;
     }
+
+    public void summary() {
+        var cyan = Log.Color.CYAN.code;
+        var magenta = Log.Color.MAGENTA.code;
+        var green = Log.Color.GREEN.code;
+        System.out.println(green + "--- summary ---" + RESET
+                + "  " + cyan + "claude: " + claudeInvocations + RESET
+                + "  " + magenta + "tools: " + toolInvocations + RESET);
+    }
 }
