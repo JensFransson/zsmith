@@ -16,7 +16,8 @@ public enum Log {
     TOOL(Color.MAGENTA, System.out),
     MEMORY(Color.YELLOW, System.out),
     REQUEST(Color.GREEN, System.out, "log.request"),
-    RESPONSE(Color.VIOLET, System.out, "log.response");
+    RESPONSE(Color.VIOLET, System.out, "log.response"),
+    LLM(Color.CYAN, System.out, "log.llm");
 
     private PrintStream out;
 
@@ -108,6 +109,10 @@ public enum Log {
 
     public static void response(String message) {
         Log.RESPONSE.out(message);
+    }
+
+    public static void llm(String message) {
+        Log.LLM.out(message);
     }
 
     public static void clearScreen() {

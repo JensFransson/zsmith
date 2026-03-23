@@ -75,8 +75,10 @@ public interface Claude {
         }
         var payload = payloadJSON.toString();
         Log.request(payload);
+        Log.llm(">> " + payload);
         var answer = invoke(payload);
         Log.response(answer);
+        Log.llm("<< " + answer);
         return new JSONObject(answer);
     }
 
@@ -87,8 +89,10 @@ public interface Claude {
         payloadJSON.put("model", currentModel.modelName());
         var payload = payloadJSON.toString();
         Log.request(payload);
+        Log.llm(">> " + payload);
         var answer = invoke(payload);
         Log.response(answer);
+        Log.llm("<< " + answer);
         return new JSONObject(answer);
     }
 
