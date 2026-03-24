@@ -137,9 +137,11 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
         }
         try {
-            Log.tool("calling tool: " + toolUse.name());
+            Log.toolStart(toolUse.name());
+            var start = System.currentTimeMillis();
             var result = tool.execute(toolUse.input());
-            Log.tool("tool result: " + toolUse.name());
+            var duration = System.currentTimeMillis() - start;
+            Log.toolEnd(duration + " ms");
             return ToolResult.success(toolUse.id(), result);
         } catch (Exception e) {
             Log.tool("tool error: " + toolUse.name() + " — " + e.getMessage());

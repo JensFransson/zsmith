@@ -62,6 +62,18 @@ public enum Log {
         this.out.println(colored);
     }
 
+    void outInline(String message) {
+        if (configKey != null && !ZCfg.bool(configKey, false)) return;
+        var colored = formatted(message);
+        this.out.print(colored);
+    }
+
+    void outEndline(String message) {
+        if (configKey != null && !ZCfg.bool(configKey, false)) return;
+        var colored = formatted(message);
+        this.out.println(" " + colored);
+    }
+
     public static void error(String message) {
         Log.ERROR.out(message);
     }
@@ -97,6 +109,14 @@ public enum Log {
 
     public static void tool(String message) {
         Log.TOOL.out(message);
+    }
+
+    public static void toolStart(String message) {
+        Log.TOOL.outInline(message);
+    }
+
+    public static void toolEnd(String message) {
+        Log.TOOL.outEndline(message);
     }
 
     public static void memory(String message) {
