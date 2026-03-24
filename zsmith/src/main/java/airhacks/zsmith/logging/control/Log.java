@@ -112,7 +112,7 @@ public enum Log {
     }
 
     public static void toolStart(String message) {
-        Log.TOOL.outInline(message);
+        Log.TOOL.outEndline(message);
     }
 
     public static void toolEnd(String message) {
