@@ -63,7 +63,7 @@ public class EpisodicMemoryStore {
 
     public List<Episode> byType(MemoryType type) {
         return this.episodes.stream()
-                .filter(e -> Objects.equals(e.type(), type))
+                .filter(e -> e.hasType(type))
                 .sorted(Comparator.comparing(Episode::timestamp))
                 .toList();
     }
@@ -108,7 +108,8 @@ public class EpisodicMemoryStore {
             var json = Files.readString(this.filePath);
             var array = new JSONArray(json);
             for (int i = 0; i < array.length(); i++) {
-                this.episodes.add(Episode.fromJSON(array.getJSONObject(i)));
+                var episode = Episode.fromJSON(array.getJSONObject(i));
+                this.episodes.add(episode);
             }
         } catch (IOException e) {
             Log.warning("could not load episodic memory from " + this.filePath + ": " + e.getMessage());

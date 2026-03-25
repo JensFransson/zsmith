@@ -26,7 +26,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version ="2026.03.24.01";
+    public static final String version ="2026.03.25.01";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -137,7 +137,6 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
         }
         try {
-            Log.toolStart(toolUse.name());
             var start = System.currentTimeMillis();
             var result = tool.execute(toolUse.input());
             var duration = System.currentTimeMillis() - start;
@@ -190,8 +189,8 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
                 toolResults.put(result.toContentBlock());
             }
             progress.addToolInvocations(toolUses.size());
-
-            this.memory.addMessage(Message.withContentBlocks("user", toolResults));
+            var message = Message.withContentBlocks("user", toolResults);
+            this.memory.addMessage(message);
         }
 
         Log.warning("max iterations reached (" + this.maxIterations + ")");
