@@ -27,7 +27,7 @@ public interface Claude {
 
     enum Models {
         CLAUDE_46_OPUS("claude-opus-4-6"),
-        CLAUDE_46_SONNET(fallbackModelName),
+        CLAUDE_46_SONNET(Claude.fallbackModelName),
         CLAUDE_45_OPUS("claude-opus-4-5-20251101"),
         CLAUDE_45_SONNET("claude-sonnet-4-5-20250929"),
         CLAUDE_41_OPUS("claude-opus-4-1-20250805"),
@@ -41,7 +41,7 @@ public interface Claude {
             this.modelName = modelName;
         }
         Models(String modelName) {
-            this(modelName,fallbackModelName);
+            this(modelName,Claude.fallbackModelName);
         }
 
         public String modelName() {

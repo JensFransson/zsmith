@@ -8,14 +8,18 @@ import airhacks.zsmith.tools.control.LinkCheckerTool;
 import airhacks.zsmith.tools.control.ReadClipboardTool;
 import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.control.UserConfirmationTool;
+import airhacks.zsmith.tools.control.UserMessageTool;
+import airhacks.zsmith.tools.control.WriteClipboardTool;
 
 public enum Tools implements Tool {
 
     CALCULATOR(new CalculatorTool()),
     CURRENT_TIME(new CurrentTimeTool()),
     READ_CLIPBOARD(new ReadClipboardTool()),
+    WRITE_CLIPBOARD(new WriteClipboardTool()),
     LINK_CHECKER(new LinkCheckerTool()),
-    USER_CONFIRMATION(new UserConfirmationTool());
+    USER_CONFIRMATION(new UserConfirmationTool()),
+    USER_MESSAGE(new UserMessageTool());
 
     private final Tool delegate;
 
