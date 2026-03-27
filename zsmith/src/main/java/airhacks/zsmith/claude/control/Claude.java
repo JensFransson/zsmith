@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -22,22 +23,33 @@ public interface Claude {
     int MAX_TOKENS = 4000;
     String ANTHROPIC_VERSION = ZCfg.requiredString("anthropic.version");
     String ANTHROPIC_API_KEY = ZCfg.requiredString("anthropic.api.key");
+    String fallbackModelName = "claude-sonnet-4-6";
 
     enum Models {
         CLAUDE_46_OPUS("claude-opus-4-6"),
+        CLAUDE_46_SONNET(fallbackModelName),
         CLAUDE_45_OPUS("claude-opus-4-5-20251101"),
         CLAUDE_45_SONNET("claude-sonnet-4-5-20250929"),
         CLAUDE_41_OPUS("claude-opus-4-1-20250805"),
         CLAUDE_40_OPUS("claude-opus-4-20250514");
 
         private String modelName;
+        private String fallbackModelName;
 
-        Models(String modelName) {
+        Models(String modelName,String fallbackModelName) {
+            this.fallbackModelName = fallbackModelName;
             this.modelName = modelName;
+        }
+        Models(String modelName) {
+            this(modelName,fallbackModelName);
         }
 
         public String modelName() {
             return this.modelName;
+        }
+
+        public String fallbackModelName(){
+            return this.fallbackModelName;
         }
 
         boolean matches(String partialName) {
@@ -123,6 +135,20 @@ public interface Claude {
      */
     static String invoke(String message) {
         Log.agent("using claude model: %s".formatted(currentModel.modelName()));
+        var body = send(message);
+        if (body.statusCode() == 529) {
+            Log.error("claude is overloaded, retrying with fallback model: %s".formatted(currentModel.fallbackModelName()));
+            var fallbackMessage = replaceModel(message, currentModel.modelName(), currentModel.fallbackModelName());
+            body = send(fallbackMessage);
+        }
+        return body.body();
+    }
+
+    static String replaceModel(String message, String originalModel, String fallbackModel) {
+        return message.replace(originalModel, fallbackModel);
+    }
+
+    static HttpResponse<String> send(String message) {
         var request = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))
                 .header("x-api-key", ANTHROPIC_API_KEY)
@@ -130,12 +156,7 @@ public interface Claude {
                 .header("anthropic-version", ANTHROPIC_VERSION)
                 .build();
         try {
-            var response = client.send(request, BodyHandlers.ofString());
-            var body = response.body();
-            if (response.statusCode() == 529) {
-                Log.error("claude is overloaded, please try again later " + body);
-            }
-            return body;
+            return client.send(request, BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
             Log.error(e.getMessage());
             throw new IllegalStateException("cannot communicate with claude", e);
