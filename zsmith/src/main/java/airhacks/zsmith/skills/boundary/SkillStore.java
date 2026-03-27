@@ -14,7 +14,7 @@ import airhacks.zsmith.skills.entity.Skill;
 
 public class SkillStore {
 
-    static final String SKILL_FILE = "skill.prompt";
+    static final String SKILL_FILE = "SKILL.md";
     static final String SKILLS_DIR = "skills";
 
     private final Map<String, Skill> skills;

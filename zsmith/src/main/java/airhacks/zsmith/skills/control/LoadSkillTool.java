@@ -2,6 +2,7 @@ package airhacks.zsmith.skills.control;
 
 import org.json.JSONObject;
 
+import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.skills.boundary.SkillStore;
 import airhacks.zsmith.tools.control.Tool;
 
@@ -46,6 +47,7 @@ public class LoadSkillTool implements Tool {
         if (skill == null) {
             return "Skill not found: " + name;
         }
+        Log.skill(skill.name() + " loaded");
         return skill.content();
     }
 }

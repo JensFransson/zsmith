@@ -14,6 +14,7 @@ public enum Log {
     PROMPT(Color.CYAN, System.out),
     ANSWER(Color.ORANGE, System.out),
     TOOL(Color.MAGENTA, System.out),
+    SKILL(Color.CYAN, System.out),
     MEMORY(Color.YELLOW, System.out),
     REQUEST(Color.GREEN, System.out, "log.request"),
     RESPONSE(Color.VIOLET, System.out, "log.response"),
@@ -117,6 +118,10 @@ public enum Log {
 
     public static void toolEnd(String message) {
         Log.TOOL.outEndline(message);
+    }
+
+    public static void skill(String message) {
+        Log.SKILL.out(message);
     }
 
     public static void memory(String message) {
