@@ -37,7 +37,7 @@ public class LoadSkillTool implements Tool {
         if (skill == null) {
             return "Skill not found: " + name;
         }
-        Log.skill(skill.name() + " loaded");
+        Log.skill(skill.name() + " skill loaded");
         return skill.content();
     }
 }
