@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.json.JSONArray;
 
@@ -24,9 +25,9 @@ import airhacks.zsmith.skills.boundary.SkillStore;
 import airhacks.zsmith.skills.control.LoadSkillTool;
 import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
-
-public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations, float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version ="2026.03.28.03";
+public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
+        float temperature, EpisodicMemoryStore episodicMemory) {
+    public static final String version = "2026.03.28.04";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -40,20 +41,20 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
 
     public Agent(String name, String systemPrompt) {
         this(
-            name != null ? name : DEFAULT_NAME,
-            resolveSystemPrompt(name != null ? name : DEFAULT_NAME, systemPrompt),
-            new Memory(),
-            new HashMap<>(),
-            DEFAULT_MAX_ITERATIONS,
-            DEFAULT_TEMPERATURE,
-            null
-        );
+                name != null ? name : DEFAULT_NAME,
+                resolveSystemPrompt(name != null ? name : DEFAULT_NAME, systemPrompt),
+                new Memory(),
+                new HashMap<>(),
+                DEFAULT_MAX_ITERATIONS,
+                DEFAULT_TEMPERATURE,
+                null);
         ZCfg.loadNamedAgentConfig(this.name);
     }
 
     static String resolveSystemPrompt(String agentName, String fallback) {
         var prompt = SystemPromptLoader.load(ZCfg.APP_NAME, agentName);
-        if (prompt != null) return prompt;
+        if (prompt != null)
+            return prompt;
         return fallback != null ? fallback : DEFAULT_SYSTEM_PROMPT;
     }
 
@@ -78,15 +79,18 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public Agent withSystemPrompt(String systemPrompt) {
-        return new Agent(this.name, systemPrompt, this.memory, this.tools, this.maxIterations, this.temperature, this.episodicMemory);
+        return new Agent(this.name, systemPrompt, this.memory, this.tools, this.maxIterations, this.temperature,
+                this.episodicMemory);
     }
 
     public Agent withMaxIterations(int maxIterations) {
-        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, maxIterations, this.temperature, this.episodicMemory);
+        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, maxIterations, this.temperature,
+                this.episodicMemory);
     }
 
     public Agent withTemperature(float temperature) {
-        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations, temperature, this.episodicMemory);
+        return new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations, temperature,
+                this.episodicMemory);
     }
 
     public Agent withEpisodicMemory() {
@@ -98,7 +102,8 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public Agent withEpisodicMemory(EpisodicMemoryStore store) {
-        var agent = new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations, this.temperature, store);
+        var agent = new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations,
+                this.temperature, store);
         agent.tools.put("store_memory", new StoreMemoryTool(store));
         agent.tools.put("recall_memory", new RecallMemoryTool(store));
         return agent;
@@ -117,7 +122,8 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         var enrichedPrompt = catalog.isEmpty()
                 ? this.systemPrompt
                 : this.systemPrompt + "\n\n" + catalog;
-        var agent = new Agent(this.name, enrichedPrompt, this.memory, this.tools, this.maxIterations, this.temperature, this.episodicMemory);
+        var agent = new Agent(this.name, enrichedPrompt, this.memory, this.tools, this.maxIterations, this.temperature,
+                this.episodicMemory);
         agent.tools.put("load_skill", new LoadSkillTool(store));
         return agent;
     }
@@ -140,7 +146,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             var start = System.currentTimeMillis();
             var result = tool.execute(toolUse.input());
             var duration = System.currentTimeMillis() - start;
-            Log.toolEnd("%s %dms".formatted(toolUse.name(),duration));
+            Log.toolEnd("%s %dms".formatted(toolUse.name(), duration));
             return ToolResult.success(toolUse.id(), result);
         } catch (Exception e) {
             Log.tool("tool error: " + toolUse.name() + " — " + e.getMessage());
@@ -149,14 +155,13 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public String act() {
-        return chat(null);
+        return chat("go");
     }
 
     public String chat(String userMessage) {
-        if (userMessage != null) {
-            Log.prompt(userMessage);
-            this.memory.addUserMessage(userMessage);
-        }
+        Objects.requireNonNull(userMessage, "Chat requires a message, use act() for agentic workflows");
+        Log.prompt(userMessage);
+        this.memory.addUserMessage(userMessage);
 
         var progress = new ProgressBar(this.maxIterations);
         for (int iteration = 0; iteration < this.maxIterations; iteration++) {
@@ -165,8 +170,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
                     this.systemPrompt,
                     this.memory.toJSON(),
                     toolDefinitions(),
-                    this.temperature
-            );
+                    this.temperature);
             progress.addClaudeInvocation();
 
             var content = response.getJSONArray("content");
