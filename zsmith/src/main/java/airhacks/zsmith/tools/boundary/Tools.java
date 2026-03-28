@@ -9,6 +9,7 @@ import airhacks.zsmith.tools.control.ReadClipboardTool;
 import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.control.UserConfirmationTool;
 import airhacks.zsmith.tools.control.UserMessageTool;
+import airhacks.zsmith.tools.control.UserQuestionTool;
 import airhacks.zsmith.tools.control.WriteClipboardTool;
 
 public enum Tools implements Tool {
@@ -19,7 +20,8 @@ public enum Tools implements Tool {
     WRITE_CLIPBOARD(new WriteClipboardTool()),
     LINK_CHECKER(new LinkCheckerTool()),
     USER_CONFIRMATION(new UserConfirmationTool()),
-    USER_MESSAGE(new UserMessageTool());
+    USER_MESSAGE(new UserMessageTool()),
+    USER_QUESTION(new UserQuestionTool());
 
     private final Tool delegate;
 
