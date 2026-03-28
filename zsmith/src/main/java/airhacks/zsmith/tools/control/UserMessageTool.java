@@ -4,12 +4,14 @@ import java.util.function.Consumer;
 
 import org.json.JSONObject;
 
+import airhacks.zsmith.logging.control.Log;
+
 public class UserMessageTool implements Tool {
 
     private final Consumer<String> messageConsumer;
 
     public UserMessageTool() {
-        this(System.out::println);
+        this(Log::user);
     }
 
     public UserMessageTool(Consumer<String> messageConsumer) {
