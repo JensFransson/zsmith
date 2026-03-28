@@ -15,6 +15,7 @@ import airhacks.zsmith.claude.control.Claude;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.logging.control.ProgressBar;
+import airhacks.zsmith.tools.boundary.Tools;
 import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
@@ -27,7 +28,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
         float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version = "2026.03.28.04";
+    public static final String version = "2026.03.28.05";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -76,6 +77,10 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             this.tools.put(tool.toolName(), tool);
         }
         return this;
+    }
+
+    public Agent withUserIOTools() {
+        return withTools(Tools.USER_MESSAGE, Tools.USER_QUESTION, Tools.USER_CONFIRMATION);
     }
 
     public Agent withSystemPrompt(String systemPrompt) {
