@@ -30,18 +30,7 @@ public class UserMessageTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "message": {
-                            "type": "string",
-                            "description": "The message to present to the user"
-                        }
-                    },
-                    "required": ["message"]
-                }
-                """;
+        return Tool.schema(Prop.string("message", "The message to present to the user"));
     }
 
     @Override

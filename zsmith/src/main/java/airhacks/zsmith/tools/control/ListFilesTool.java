@@ -42,12 +42,7 @@ public class ListFilesTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {}
-                }
-                """;
+        return Tool.emptySchema();
     }
 
     @Override

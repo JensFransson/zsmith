@@ -38,18 +38,7 @@ public class LinkCheckerTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "url": {
-                            "type": "string",
-                            "description": "The URL to check"
-                        }
-                    },
-                    "required": ["url"]
-                }
-                """;
+        return Tool.schema(Prop.string("url", "The URL to check"));
     }
 
     @Override

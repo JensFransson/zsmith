@@ -19,18 +19,7 @@ public class WriteClipboardTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "text": {
-                            "type": "string",
-                            "description": "The text to write to the clipboard"
-                        }
-                    },
-                    "required": ["text"]
-                }
-                """;
+        return Tool.schema(Prop.string("text", "The text to write to the clipboard"));
     }
 
     @Override

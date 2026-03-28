@@ -28,18 +28,7 @@ public class UserQuestionTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "question": {
-                            "type": "string",
-                            "description": "The question to ask the user"
-                        }
-                    },
-                    "required": ["question"]
-                }
-                """;
+        return Tool.schema(Prop.string("question", "The question to ask the user"));
     }
 
     @Override

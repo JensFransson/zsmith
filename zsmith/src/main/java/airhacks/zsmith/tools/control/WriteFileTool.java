@@ -40,22 +40,10 @@ public class WriteFileTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string",
-                            "description": "Relative path to the file to write"
-                        },
-                        "content": {
-                            "type": "string",
-                            "description": "Content to write to the file"
-                        }
-                    },
-                    "required": ["path", "content"]
-                }
-                """;
+        return Tool.schema(
+                Prop.string("path", "Relative path to the file to write"),
+                Prop.string("content", "Content to write to the file")
+        );
     }
 
     @Override

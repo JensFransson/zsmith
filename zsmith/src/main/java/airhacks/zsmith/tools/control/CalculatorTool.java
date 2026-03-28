@@ -16,21 +16,12 @@ public class CalculatorTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "operation": {
-                            "type": "string",
-                            "enum": ["add", "subtract", "multiply", "divide"],
-                            "description": "The arithmetic operation to perform"
-                        },
-                        "a": { "type": "number", "description": "First operand" },
-                        "b": { "type": "number", "description": "Second operand" }
-                    },
-                    "required": ["operation", "a", "b"]
-                }
-                """;
+        return Tool.schema(
+                Prop.stringEnum("operation", "The arithmetic operation to perform",
+                        "add", "subtract", "multiply", "divide"),
+                Prop.number("a", "First operand"),
+                Prop.number("b", "Second operand")
+        );
     }
 
     @Override

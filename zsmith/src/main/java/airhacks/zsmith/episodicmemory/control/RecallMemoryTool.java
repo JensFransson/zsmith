@@ -8,6 +8,7 @@ import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.entity.Episode;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.Tool.Prop;
 
 public class RecallMemoryTool implements Tool {
 
@@ -29,22 +30,11 @@ public class RecallMemoryTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "enum": ["user", "feedback", "project", "reference"],
-                            "description": "Optional type to filter memories"
-                        },
-                        "limit": {
-                            "type": "integer",
-                            "description": "Maximum number of recent memories to return. Defaults to 10."
-                        }
-                    }
-                }
-                """;
+        return Tool.schema(
+                Prop.stringEnum("type", "Optional type to filter memories",
+                        "user", "feedback", "project", "reference").optional(),
+                Prop.integer("limit", "Maximum number of recent memories to return. Defaults to 10.").optional()
+        );
     }
 
     @Override

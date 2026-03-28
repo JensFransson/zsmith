@@ -6,6 +6,7 @@ import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.entity.Episode;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.Tool.Prop;
 
 public class StoreMemoryTool implements Tool {
 
@@ -33,23 +34,11 @@ public class StoreMemoryTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "content": {
-                            "type": "string",
-                            "description": "The information to remember"
-                        },
-                        "type": {
-                            "type": "string",
-                            "enum": ["user", "feedback", "project", "reference"],
-                            "description": "The memory type: user, feedback, project, or reference"
-                        }
-                    },
-                    "required": ["content", "type"]
-                }
-                """;
+        return Tool.schema(
+                Prop.string("content", "The information to remember"),
+                Prop.stringEnum("type", "The memory type: user, feedback, project, or reference",
+                        "user", "feedback", "project", "reference")
+        );
     }
 
     @Override

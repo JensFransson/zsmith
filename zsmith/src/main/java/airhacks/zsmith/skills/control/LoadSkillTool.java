@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.skills.boundary.SkillStore;
 import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.Tool.Prop;
 
 public class LoadSkillTool implements Tool {
 
@@ -26,18 +27,7 @@ public class LoadSkillTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "The name of the skill to load"
-                        }
-                    },
-                    "required": ["name"]
-                }
-                """;
+        return Tool.schema(Prop.string("name", "The name of the skill to load"));
     }
 
     @Override

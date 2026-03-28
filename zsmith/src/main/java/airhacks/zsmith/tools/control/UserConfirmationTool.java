@@ -28,18 +28,7 @@ public class UserConfirmationTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "question": {
-                            "type": "string",
-                            "description": "The yes/no question to ask the user"
-                        }
-                    },
-                    "required": ["question"]
-                }
-                """;
+        return Tool.schema(Prop.string("question", "The yes/no question to ask the user"));
     }
 
     @Override

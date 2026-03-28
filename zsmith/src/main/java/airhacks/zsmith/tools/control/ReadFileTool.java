@@ -40,18 +40,7 @@ public class ReadFileTool implements Tool {
 
     @Override
     public String inputSchema() {
-        return """
-                {
-                    "type": "object",
-                    "properties": {
-                        "path": {
-                            "type": "string",
-                            "description": "Relative path to the file to read"
-                        }
-                    },
-                    "required": ["path"]
-                }
-                """;
+        return Tool.schema(Prop.string("path", "Relative path to the file to read"));
     }
 
     @Override
