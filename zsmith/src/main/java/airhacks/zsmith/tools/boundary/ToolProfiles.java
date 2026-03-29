@@ -14,14 +14,26 @@ import airhacks.zsmith.tools.control.WriteFileTool;
  * <em>which tools belong together for a given use case</em>. Agents compose
  * capabilities by selecting a profile rather than cherry-picking individual
  * tools, keeping the wiring in {@link airhacks.zsmith.agent.boundary.Agent}
- * intention-revealing (e.g. {@code agent.withTools(ToolProfiles.USER_IO)}).
+ * intention-revealing (e.g. {@code agent.withTools(ToolProfiles.userIO())}).
  *
  * <p>Implemented as an interface with constant fields so it acts as a
  * pure namespace — no instantiation, no state, just curated lists.
  */
 public interface ToolProfiles {
-    List<Tool> USER_IO = List.of(Tools.USER_MESSAGE, Tools.USER_QUESTION, Tools.USER_CONFIRMATION);
-    List<Tool> CLIPBOARD = List.of(Tools.READ_CLIPBOARD, Tools.WRITE_CLIPBOARD);
-    List<Tool> FILE_IO = List.of(new ReadFileTool(), new WriteFileTool(), new ListFilesTool());
-    List<Tool> ALL = List.of(Tools.values());
+
+    static List<Tool> userIO() {
+        return List.of(Tools.USER_MESSAGE, Tools.USER_QUESTION, Tools.USER_CONFIRMATION);
+    }
+
+    static List<Tool> clipboard() {
+        return List.of(Tools.READ_CLIPBOARD, Tools.WRITE_CLIPBOARD);
+    }
+
+    static List<Tool> fileIO() {
+        return List.of(new ReadFileTool(), new WriteFileTool(), new ListFilesTool());
+    }
+
+    static List<Tool> all() {
+        return List.of(Tools.values());
+    }
 }
