@@ -1,5 +1,7 @@
 package airhacks.zsmith.tools.boundary;
 
+import java.util.List;
+
 import org.json.JSONObject;
 
 import airhacks.zsmith.tools.control.CalculatorTool;
@@ -22,6 +24,10 @@ public enum Tools implements Tool {
     USER_CONFIRMATION(new UserConfirmationTool()),
     USER_MESSAGE(new UserMessageTool()),
     USER_QUESTION(new UserQuestionTool());
+
+    public static List<Tool> userIOTools(){
+        return List.of(Tools.USER_MESSAGE, Tools.USER_QUESTION, Tools.USER_CONFIRMATION);
+    }
 
     private final Tool delegate;
 
