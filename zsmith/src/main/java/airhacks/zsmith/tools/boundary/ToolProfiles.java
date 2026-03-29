@@ -3,6 +3,7 @@ package airhacks.zsmith.tools.boundary;
 import java.util.List;
 
 import airhacks.zsmith.tools.control.ListFilesTool;
+import airhacks.zsmith.tools.control.ReadAnyFileTool;
 import airhacks.zsmith.tools.control.ReadFileTool;
 import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.control.WriteFileTool;
@@ -30,7 +31,7 @@ public interface ToolProfiles {
     }
 
     static List<Tool> fileIO() {
-        return List.of(new ReadFileTool(), new WriteFileTool(), new ListFilesTool());
+        return List.of(new ReadFileTool(), new WriteFileTool(), new ListFilesTool(), new ReadAnyFileTool());
     }
 
     static List<Tool> all() {
