@@ -25,7 +25,8 @@ public class ReadFileTool implements Tool {
     }
 
     public static ReadFileTool of(String sandboxPath) {
-        return new ReadFileTool(new SandboxedFileSystem(Path.of(sandboxPath)));
+        var path = Path.of(sandboxPath);
+        return new ReadFileTool(new SandboxedFileSystem(path));
     }
 
     @Override
