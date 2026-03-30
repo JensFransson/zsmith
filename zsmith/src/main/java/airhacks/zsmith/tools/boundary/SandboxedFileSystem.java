@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import airhacks.zsmith.logging.control.Log;
+
 public class SandboxedFileSystem {
 
     Path rootDirectory;
 
     public SandboxedFileSystem(Path rootDirectory) {
         this.rootDirectory = rootDirectory.toAbsolutePath().normalize();
+        Log.info("Sandbox root: " + this.rootDirectory);
     }
 
     Path resolve(String relativePath) {
@@ -43,40 +46,52 @@ public class SandboxedFileSystem {
     }
 
     public String readFile(String relativePath) {
+        Log.debug("Reading file: " + relativePath);
         Path resolved;
         try {
             resolved = resolve(relativePath);
         } catch (IllegalArgumentException e) {
+            Log.error("Invalid path: " + relativePath);
             throw e;
         }
         try {
-            return Files.readString(resolved);
+            var content = Files.readString(resolved);
+            Log.debug("Read " + content.length() + " chars from " + relativePath);
+            return content;
         } catch (java.nio.file.NoSuchFileException e) {
+            Log.warning("File not found: " + relativePath);
             return "Error: File not found";
         } catch (IOException e) {
+            Log.error("Could not read file: " + relativePath, e);
             return "Error: Could not read file";
         }
     }
 
     public void writeFile(String relativePath, String content) {
+        Log.debug("Writing file: " + relativePath);
         Path resolved;
         try {
             resolved = resolve(relativePath);
         } catch (IllegalArgumentException e) {
+            Log.error("Invalid path: " + relativePath);
             throw e;
         }
         try {
             var parent = resolved.getParent();
             if (parent != null && !Files.exists(parent)) {
+                Log.debug("Creating directories: " + parent);
                 Files.createDirectories(parent);
             }
             Files.writeString(resolved, content);
+            Log.debug("Wrote " + content.length() + " chars to " + relativePath);
         } catch (IOException e) {
+            Log.error("Could not write file: " + relativePath, e);
             throw new RuntimeException("Error: Could not write file");
         }
     }
 
     public String listFiles() {
+        Log.debug("Listing files in sandbox");
         try (var stream = Files.walk(this.rootDirectory)) {
             var files = stream
                     .filter(Files::isRegularFile)
@@ -85,10 +100,13 @@ public class SandboxedFileSystem {
                     .sorted()
                     .toList();
             if (files.isEmpty()) {
+                Log.debug("No files found in sandbox");
                 return "No files found in sandbox";
             }
+            Log.debug("Found " + files.size() + " files");
             return String.join("\n", files);
         } catch (IOException e) {
+            Log.error("Could not list files", e);
             return "Error: Could not list files";
         }
     }
