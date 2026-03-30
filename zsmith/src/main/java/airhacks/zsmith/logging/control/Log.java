@@ -6,20 +6,20 @@ import airhacks.zsmith.configuration.control.ZCfg;
 
 public enum Log {
 
-    ERROR(Color.RED, System.err),
-    WARNING(Color.YELLOW, System.out),
-    INFO(Color.GREEN, System.out),
-    DEBUG(Color.VIOLET, System.out),
-    AGENT(Color.BLUE, System.out),
-    PROMPT(Color.CYAN, System.out),
-    ANSWER(Color.ORANGE, System.out),
-    TOOL(Color.MAGENTA, System.out),
-    SKILL(Color.CYAN, System.out),
-    USER(Color.GREEN, System.out),
-    MEMORY(Color.YELLOW, System.out),
-    REQUEST(Color.GREEN, System.out, "log.request"),
-    RESPONSE(Color.VIOLET, System.out, "log.response"),
-    LLM(Color.CYAN, System.out, "log.llm");
+    ERROR("❌", Color.RED, System.err),
+    WARNING("⚠️", Color.YELLOW, System.out),
+    INFO("ℹ️", Color.GREEN, System.out),
+    DEBUG("🔍", Color.VIOLET, System.out),
+    AGENT("🤖", Color.BLUE, System.out),
+    PROMPT("💬", Color.CYAN, System.out),
+    ANSWER("💡", Color.ORANGE, System.out),
+    TOOL("🔧", Color.MAGENTA, System.out),
+    SKILL("⚡", Color.CYAN, System.out),
+    USER("👤", Color.GREEN, System.out),
+    MEMORY("🧠", Color.YELLOW, System.out),
+    REQUEST("📤", Color.GREEN, System.out, "log.request"),
+    RESPONSE("📥", Color.VIOLET, System.out, "log.response"),
+    LLM("🧩", Color.CYAN, System.out, "log.llm");
 
     private PrintStream out;
 
@@ -40,22 +40,24 @@ public enum Log {
         }
     }
 
+    private final String emoji;
     private final String value;
     private final String configKey;
     private final static String RESET = "\u001B[0m";
 
-    private Log(Color color, PrintStream out) {
-        this(color, out, null);
+    private Log(String emoji, Color color, PrintStream out) {
+        this(emoji, color, out, null);
     }
 
-    private Log(Color color, PrintStream out, String configKey) {
+    private Log(String emoji, Color color, PrintStream out, String configKey) {
+        this.emoji = emoji;
         this.value = (color.code + "%s" + RESET);
         this.out = out;
         this.configKey = configKey;
     }
 
     String formatted(String raw) {
-        return this.value.formatted(raw);
+        return this.emoji + " " + this.value.formatted(raw);
     }
 
     void out(String message) {
