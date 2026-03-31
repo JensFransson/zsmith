@@ -22,6 +22,17 @@ var agent = new Agent("reporter", "Summarize today's tasks.")
 var response = agent.act();
 ```
 
+## Tool Profiles
+
+Predefined tool groupings for common use cases:
+
+```java
+var agent = new Agent("assistant")
+        .withUserIOTools()   // user_message, user_question, user_confirmation
+        .withFileIOTools()   // read_file, write_file, list_files, read_any_file
+        .withAllTools();     // all available tools
+```
+
 ## Configuration
 
 ### Properties
@@ -138,6 +149,7 @@ var agent = new Agent()
 | `ReadFileTool` | `read_file` | Reads the contents of a file within the sandbox directory |
 | `WriteFileTool` | `write_file` | Writes content to a file within the sandbox directory |
 | `ListFilesTool` | `list_files` | Lists all files within the sandbox directory |
+| `ReadAnyFileTool` | `read_any_file` | Reads a file from any location on the filesystem after user confirmation |
 | `LinkCheckerTool` | `check_link` | Checks a URL and returns response information including status code, content type, and body preview |
 | `UserConfirmationTool` | `user_confirmation` | Asks the user a yes/no question and returns the answer |
 | `UserQuestionTool` | `user_question` | Asks the user a question and returns the typed answer |
@@ -148,10 +160,12 @@ var agent = new Agent()
 
 ## Custom Tools
 
-Implement the `Tool` interface. Use `Tool.Prop` and `Tool.schema()` to define the input schema:
+Implement the `Tool` interface. Use `Tool.Prop` with an enum for type-safe field names and `Tool.schema()` to define the input schema:
 
 ```java
 public class MyTool implements Tool {
+
+    enum Field { param, count }
 
     public String toolName() {
         return "my_tool";
@@ -163,13 +177,19 @@ public class MyTool implements Tool {
 
     public String inputSchema() {
         return Tool.schema(
-            Prop.string("param", "Parameter description"),
-            Prop.integer("count", "How many times").optional()
+            Prop.string(Field.param, "Parameter description"),
+            Prop.integer(Field.count, "How many times").optional()
         );
     }
 
     public String execute(JSONObject input) {
-        return "Result: " + input.getString("param");
+        return "Result: " + input.getString(Field.param.name());
     }
 }
 ```
+
+Available `Prop` types: `string`, `stringEnum` (with allowed values), `number`, `integer`. Any prop can be marked `.optional()`.
+
+---
+
+Powered by [airhacks.live](https://airhacks.live)
