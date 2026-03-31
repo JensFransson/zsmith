@@ -75,6 +75,48 @@ java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/EpisodicMemoryExample.java
 java -cp zbo/zsmith.jar src/test/java/airhacks/zsmith/SkillsExample.java
 ```
 
+## Java Script Usage
+
+zsmith agents can run as standalone Java scripts using source-file mode — no build tool, no compilation step:
+
+```bash
+./src/test/java/airhacks/zsmith/userConfirmationExample
+```
+
+The script uses a shebang to reference `zbo/zsmith.jar` directly, so build first with `./zb.sh`. Example script:
+
+```java
+#!/usr/bin/java --class-path=../../../../../zbo/zsmith.jar --source 25
+
+// Requires zbo/zsmith.jar — build first with: ./zb.sh
+
+import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.tools.boundary.Tools;
+
+void main() {
+
+        var agent = new Agent()
+                .withSystemPrompt("""
+                        You are a helpful assistant with access to tools.
+                        Use the user_confirmation tool to ask the user yes/no questions before proceeding with actions.
+                        Be concise in your responses.
+                        """)
+                .withTool(Tools.USER_CONFIRMATION);
+
+        Log.agent("Agent initialized with user_confirmation tool");
+
+        var question = "I want to create a HelloWorld.java example. Can you help?";
+        Log.prompt("User: " + question);
+
+        var response = agent.chat(question);
+        Log.answer("Agent: " + response);
+
+}
+```
+
+No package declaration, no class wrapper — Java 25 implicit classes keep the script minimal. Install system-wide by copying the jar and script to a PATH directory, adjusting the `--class-path` accordingly.
+
 ## Skills
 
 Skills are reusable prompt snippets stored as `SKILL.md` files. Each skill uses frontmatter for metadata:
