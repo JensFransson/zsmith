@@ -1,8 +1,10 @@
 # zsmith
 
+Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and agentic loop support.
+
 ![zsmith](zsmith.png)
 
-Zero-dependency AI agent framework for Claude with tool execution and agentic loop support.
+
 
 ## Usage
 
