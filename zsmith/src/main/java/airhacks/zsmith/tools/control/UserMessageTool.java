@@ -28,17 +28,19 @@ public class UserMessageTool implements Tool {
         return "Presents a message to the user. Use this to display important information, status updates, or notifications.";
     }
 
+    enum Field { message }
+
     @Override
     public String inputSchema() {
-        return Tool.schema(Prop.string("message", "The message to present to the user"));
+        return Tool.schema(Prop.string(Field.message, "The message to present to the user"));
     }
 
     @Override
     public String execute(JSONObject input) {
-        if (!input.has("message") || input.getString("message").isEmpty()) {
+        if (!input.has(Field.message.name()) || input.getString(Field.message.name()).isEmpty()) {
             return "Error: Missing or empty required parameter: message";
         }
-        var message = input.getString("message");
+        var message = input.getString(Field.message.name());
         messageConsumer.accept(message);
         return "Message presented to user";
     }

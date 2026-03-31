@@ -39,18 +39,20 @@ public class ReadFileTool implements Tool {
         return "Reads the contents of a file within the sandbox directory";
     }
 
+    enum Field { path }
+
     @Override
     public String inputSchema() {
-        return Tool.schema(Prop.string("path", "Relative path to the file to read"));
+        return Tool.schema(Prop.string(Field.path, "Relative path to the file to read"));
     }
 
     @Override
     public String execute(JSONObject input) {
-        if (!input.has("path")) {
+        if (!input.has(Field.path.name())) {
             return "Error: Missing required parameter: path";
         }
         try {
-            return this.fs.readFile(input.getString("path"));
+            return this.fs.readFile(input.getString(Field.path.name()));
         } catch (IllegalArgumentException e) {
             return "Error: Invalid path";
         }

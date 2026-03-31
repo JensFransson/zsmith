@@ -8,7 +8,6 @@ import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.entity.Episode;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.tools.control.Tool;
-import airhacks.zsmith.tools.control.Tool.Prop;
 
 public class RecallMemoryTool implements Tool {
 
@@ -28,19 +27,21 @@ public class RecallMemoryTool implements Tool {
         return "Recalls past memories. Optionally filter by type (user, feedback, project, reference) or limit to the most recent entries.";
     }
 
+    enum Field { type, limit }
+
     @Override
     public String inputSchema() {
         return Tool.schema(
-                Prop.stringEnum("type", "Optional type to filter memories",
+                Prop.stringEnum(Field.type, "Optional type to filter memories",
                         "user", "feedback", "project", "reference").optional(),
-                Prop.integer("limit", "Maximum number of recent memories to return. Defaults to 10.").optional()
+                Prop.integer(Field.limit, "Maximum number of recent memories to return. Defaults to 10.").optional()
         );
     }
 
     @Override
     public String execute(JSONObject input) {
-        var typeString = input.optString("type", null);
-        var limit = input.optInt("limit", 10);
+        var typeString = input.optString(Field.type.name(), null);
+        var limit = input.optInt(Field.limit.name(), 10);
 
         List<Episode> episodes;
         if (typeString != null) {

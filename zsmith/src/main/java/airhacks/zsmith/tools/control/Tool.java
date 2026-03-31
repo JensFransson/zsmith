@@ -22,26 +22,26 @@ public interface Tool {
                 .put("input_schema", new JSONObject(inputSchema()));
     }
 
-    record Prop(String name, String type, String description, List<String> enumValues, boolean required) {
+    record Prop<E extends Enum<E>>(E name, String type, String description, List<String> enumValues, boolean required) {
 
-        public static Prop string(String name, String description) {
-            return new Prop(name, "string", description, List.of(), true);
+        public static <E extends Enum<E>> Prop<E> string(E name, String description) {
+            return new Prop<>(name, "string", description, List.of(), true);
         }
 
-        public static Prop stringEnum(String name, String description, String... values) {
-            return new Prop(name, "string", description, List.of(values), true);
+        public static <E extends Enum<E>> Prop<E> stringEnum(E name, String description, String... values) {
+            return new Prop<>(name, "string", description, List.of(values), true);
         }
 
-        public static Prop number(String name, String description) {
-            return new Prop(name, "number", description, List.of(), true);
+        public static <E extends Enum<E>> Prop<E> number(E name, String description) {
+            return new Prop<>(name, "number", description, List.of(), true);
         }
 
-        public static Prop integer(String name, String description) {
-            return new Prop(name, "integer", description, List.of(), true);
+        public static <E extends Enum<E>> Prop<E> integer(E name, String description) {
+            return new Prop<>(name, "integer", description, List.of(), true);
         }
 
-        public Prop optional() {
-            return new Prop(name, type, description, enumValues, false);
+        public Prop<E> optional() {
+            return new Prop<>(name, type, description, enumValues, false);
         }
     }
 
@@ -50,7 +50,7 @@ public interface Tool {
                 {"type":"object","properties":{}}""";
     }
 
-    static String schema(Prop... props) {
+    static String schema(Prop<?>... props) {
         var properties = new JSONObject();
         var required = new JSONArray();
         for (var prop : props) {
@@ -60,9 +60,9 @@ public interface Tool {
             if (!prop.enumValues().isEmpty()) {
                 p.put("enum", new JSONArray(prop.enumValues()));
             }
-            properties.put(prop.name(), p);
+            properties.put(prop.name().name(), p);
             if (prop.required()) {
-                required.put(prop.name());
+                required.put(prop.name().name());
             }
         }
         var schema = new JSONObject()

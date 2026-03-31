@@ -14,21 +14,23 @@ public class CalculatorTool implements Tool {
         return "Performs basic arithmetic operations: add, subtract, multiply, divide";
     }
 
+    enum Field { operation, a, b }
+
     @Override
     public String inputSchema() {
         return Tool.schema(
-                Prop.stringEnum("operation", "The arithmetic operation to perform",
+                Prop.stringEnum(Field.operation, "The arithmetic operation to perform",
                         "add", "subtract", "multiply", "divide"),
-                Prop.number("a", "First operand"),
-                Prop.number("b", "Second operand")
+                Prop.number(Field.a, "First operand"),
+                Prop.number(Field.b, "Second operand")
         );
     }
 
     @Override
     public String execute(JSONObject input) {
-        var operation = input.getString("operation");
-        var a = input.getDouble("a");
-        var b = input.getDouble("b");
+        var operation = input.getString(Field.operation.name());
+        var a = input.getDouble(Field.a.name());
+        var b = input.getDouble(Field.b.name());
 
         var result = switch (operation) {
             case "add" -> a + b;

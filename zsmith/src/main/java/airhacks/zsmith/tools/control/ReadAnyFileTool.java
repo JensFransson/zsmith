@@ -29,17 +29,19 @@ public class ReadAnyFileTool implements Tool {
         return "Reads a file from any location on the filesystem after user confirmation";
     }
 
+    enum Field { path }
+
     @Override
     public String inputSchema() {
-        return Tool.schema(Prop.string("path", "Absolute path to the file to read"));
+        return Tool.schema(Prop.string(Field.path, "Absolute path to the file to read"));
     }
 
     @Override
     public String execute(JSONObject input) {
-        if (!input.has("path")) {
+        if (!input.has(Field.path.name())) {
             return "Error: Missing required parameter: path";
         }
-        var path = Path.of(input.getString("path"));
+        var path = Path.of(input.getString(Field.path.name()));
         if (!Files.exists(path)) {
             return "Error: File not found: " + path;
         }

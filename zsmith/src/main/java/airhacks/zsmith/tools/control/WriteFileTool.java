@@ -38,25 +38,27 @@ public class WriteFileTool implements Tool {
         return "Writes content to a file within the sandbox directory";
     }
 
+    enum Field { path, content }
+
     @Override
     public String inputSchema() {
         return Tool.schema(
-                Prop.string("path", "Relative path to the file to write"),
-                Prop.string("content", "Content to write to the file")
+                Prop.string(Field.path, "Relative path to the file to write"),
+                Prop.string(Field.content, "Content to write to the file")
         );
     }
 
     @Override
     public String execute(JSONObject input) {
-        if (!input.has("path")) {
+        if (!input.has(Field.path.name())) {
             return "Error: Missing required parameter: path";
         }
-        if (!input.has("content")) {
+        if (!input.has(Field.content.name())) {
             return "Error: Missing required parameter: content";
         }
-        var path = input.getString("path");
+        var path = input.getString(Field.path.name());
         try {
-            this.fs.writeFile(path, input.getString("content"));
+            this.fs.writeFile(path, input.getString(Field.content.name()));
             return "File written successfully: " + path;
         } catch (IllegalArgumentException e) {
             return "Error: Invalid path";

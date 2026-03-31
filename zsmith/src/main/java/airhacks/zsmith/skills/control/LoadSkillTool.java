@@ -5,7 +5,6 @@ import org.json.JSONObject;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.skills.boundary.SkillStore;
 import airhacks.zsmith.tools.control.Tool;
-import airhacks.zsmith.tools.control.Tool.Prop;
 
 public class LoadSkillTool implements Tool {
 
@@ -25,14 +24,16 @@ public class LoadSkillTool implements Tool {
         return "Loads a skill by name. Returns the full skill content with instructions the assistant should follow to complete the user's request.";
     }
 
+    enum Field { name }
+
     @Override
     public String inputSchema() {
-        return Tool.schema(Prop.string("name", "The name of the skill to load"));
+        return Tool.schema(Prop.string(Field.name, "The name of the skill to load"));
     }
 
     @Override
     public String execute(JSONObject input) {
-        var name = input.getString("name");
+        var name = input.getString(Field.name.name());
         var skill = store.load(name);
         if (skill == null) {
             return "Skill not found: " + name;

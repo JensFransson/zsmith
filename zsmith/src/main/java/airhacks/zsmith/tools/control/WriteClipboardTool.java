@@ -17,15 +17,17 @@ public class WriteClipboardTool implements Tool {
         return "Writes text content to the system clipboard";
     }
 
+    enum Field { text }
+
     @Override
     public String inputSchema() {
-        return Tool.schema(Prop.string("text", "The text to write to the clipboard"));
+        return Tool.schema(Prop.string(Field.text, "The text to write to the clipboard"));
     }
 
     @Override
     public String execute(JSONObject input) {
         try {
-            var text = input.getString("text");
+            var text = input.getString(Field.text.name());
             var selection = new StringSelection(text);
             var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             clipboard.setContents(selection, selection);

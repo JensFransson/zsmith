@@ -6,7 +6,6 @@ import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.entity.Episode;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.tools.control.Tool;
-import airhacks.zsmith.tools.control.Tool.Prop;
 
 public class StoreMemoryTool implements Tool {
 
@@ -32,19 +31,21 @@ public class StoreMemoryTool implements Tool {
                 'reference' for pointers to external resources and systems.""";
     }
 
+    enum Field { content, type }
+
     @Override
     public String inputSchema() {
         return Tool.schema(
-                Prop.string("content", "The information to remember"),
-                Prop.stringEnum("type", "The memory type: user, feedback, project, or reference",
+                Prop.string(Field.content, "The information to remember"),
+                Prop.stringEnum(Field.type, "The memory type: user, feedback, project, or reference",
                         "user", "feedback", "project", "reference")
         );
     }
 
     @Override
     public String execute(JSONObject input) {
-        var content = input.getString("content");
-        var type = MemoryType.fromString(input.getString("type"));
+        var content = input.getString(Field.content.name());
+        var type = MemoryType.fromString(input.getString(Field.type.name()));
         var episode = new Episode(content, null, type);
         store.store(episode);
         return "Memory stored.";

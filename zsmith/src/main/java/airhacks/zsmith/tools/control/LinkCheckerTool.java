@@ -36,18 +36,20 @@ public class LinkCheckerTool implements Tool {
         return "Checks a URL and returns response information including status code, content type, and body preview";
     }
 
+    enum Field { url }
+
     @Override
     public String inputSchema() {
-        return Tool.schema(Prop.string("url", "The URL to check"));
+        return Tool.schema(Prop.string(Field.url, "The URL to check"));
     }
 
     @Override
     public String execute(JSONObject input) {
-        if (!input.has("url") || input.getString("url").isBlank()) {
+        if (!input.has(Field.url.name()) || input.getString(Field.url.name()).isBlank()) {
             return "Error: Missing required parameter: url";
         }
 
-        var urlString = input.getString("url");
+        var urlString = input.getString(Field.url.name());
 
         URI uri;
         try {
