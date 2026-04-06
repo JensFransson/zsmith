@@ -4,7 +4,11 @@ Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and 
 
 ![zsmith](zsmith.png)
 
+## Requirements
 
+- **Java 25+** — uses implicit classes, text blocks, records, and source-file mode
+- **Anthropic API key** — set `anthropic.api.key` in `~/.zsmith/app.properties` or as a system property
+- **Build with zb** — run `./zb.sh` to produce `zbo/zsmith.jar` (no Maven/Gradle needed)
 
 ## Usage
 
