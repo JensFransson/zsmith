@@ -1,6 +1,6 @@
 # zsmith
 
-Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and agentic loop support.
+Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and agentic loop support. No external libraries — only the Java standard library and a bundled JSON parser (`org.json`).
 
 ![zsmith](zsmith.png)
 
