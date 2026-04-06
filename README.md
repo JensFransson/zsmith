@@ -41,7 +41,24 @@ var agent = new Agent("assistant")
 
 ## Configuration
 
-### Properties
+### Required Properties
+
+Add to `~/.zsmith/app.properties` or any properties file in the loading chain:
+
+```properties
+anthropic.api.key=sk-ant-...
+anthropic.version=2023-06-01
+```
+
+The default model is `claude-opus-4-6`. Override via system property:
+
+```bash
+java -Dmodel=sonnet -cp zbo/zsmith.jar MyAgent.java
+```
+
+Partial matching works — `sonnet` resolves to `claude-sonnet-4-6`, `4-5` to `claude-opus-4-5-20251101`, etc.
+
+### Properties Loading Order
 
 Loaded in order (each layer overrides the previous):
 
