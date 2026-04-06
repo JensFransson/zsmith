@@ -19,7 +19,7 @@ var agent = new Agent("calculator", "You are a helpful assistant.")
 var response = agent.chat("What is 42 * 17?");
 ```
 
-Autonomous execution without user input:
+Agentic execution — `act()` sends `"go"` as the user message, letting the system prompt drive the task:
 
 ```java
 var agent = new Agent("reporter", "Summarize today's tasks.")
