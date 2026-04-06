@@ -77,7 +77,8 @@ Loaded from `system.prompt` files in order (each layer overrides the previous):
 1. `~/.zsmith/[agentName]/system.prompt` — global agent-specific
 2. `./[agentName]/system.prompt` — local agent-specific
 3. `./system.prompt` — highest priority
-4. Constructor parameter — fallback if no file exists
+
+If no file is found, the constructor parameter is used as fallback.
 
 ## Running the Examples
 
