@@ -35,9 +35,12 @@ Predefined tool groupings for common use cases:
 ```java
 var agent = new Agent("assistant")
         .withUserIOTools()   // user_message, user_question, user_confirmation
-        .withFileIOTools()   // read_file, write_file, list_files, read_any_file
-        .withAllTools();     // all available tools
+        .withFileIOTools()   // read_file, write_file, list_files, read_any_file (sandboxed)
+        .withAllTools();     // calculator, current_time, clipboard, read_any_file,
+                             // check_link, user_confirmation, user_message, user_question
 ```
+
+`withAllTools()` includes all tools from the `Tools` enum. Sandboxed file tools (`read_file`, `write_file`, `list_files`) require `withFileIOTools()` because they need a configured `sandbox.path`.
 
 ## Configuration
 
@@ -223,6 +226,7 @@ var agent = new Agent()
 | `StoreMemoryTool` | `store_memory` | Stores an episode in long-term memory for future recall |
 | `RecallMemoryTool` | `recall_memory` | Recalls past memories, optionally filtered by type or limited to recent entries |
 | `LoadSkillTool` | `load_skill` | Loads a skill by name (added automatically with `withSkills()`) |
+| `ExecuteScriptTool` | `execute_script` | Executes a script and returns its output |
 
 ## Custom Tools
 
