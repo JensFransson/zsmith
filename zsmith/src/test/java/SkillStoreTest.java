@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.List;
 
+import java.util.Objects;
+
 import airhacks.zsmith.skills.boundary.SkillStore;
 
 void main() throws IOException {
@@ -31,15 +33,10 @@ void loadSkillWithFrontmatter() throws IOException {
                 """);
 
         var store = new SkillStore(List.of(tempDir));
-        var skill = store.load("rest-resource");
-        if (skill == null)
-            throw new AssertionError("skill should not be null");
-        if (!"rest-resource".equals(skill.name()))
-            throw new AssertionError("expected 'rest-resource' but got " + skill.name());
-        if (!"Creates a JAX-RS resource".equals(skill.description()))
-            throw new AssertionError("expected 'Creates a JAX-RS resource' but got " + skill.description());
-        if (!"Generate a REST resource with proper BCE structure.".equals(skill.content()))
-            throw new AssertionError("expected content mismatch, got: " + skill.content());
+        var skill = Objects.requireNonNull(store.load("rest-resource"), "skill should not be null");
+        assert "rest-resource".equals(skill.name()) : "expected 'rest-resource' but got " + skill.name();
+        assert "Creates a JAX-RS resource".equals(skill.description()) : "expected 'Creates a JAX-RS resource' but got " + skill.description();
+        assert "Generate a REST resource with proper BCE structure.".equals(skill.content()) : "expected content mismatch, got: " + skill.content();
     } finally {
         deleteRecursively(tempDir);
     }
@@ -53,13 +50,9 @@ void loadSkillWithoutFrontmatter() throws IOException {
         Files.writeString(skillDir.resolve("SKILL.md"), "Just plain content here.");
 
         var store = new SkillStore(List.of(tempDir));
-        var skill = store.load("my-skill");
-        if (skill == null)
-            throw new AssertionError("skill should not be null");
-        if (!"my-skill".equals(skill.name()))
-            throw new AssertionError("expected 'my-skill' but got " + skill.name());
-        if (!"Just plain content here.".equals(skill.content()))
-            throw new AssertionError("expected 'Just plain content here.' but got " + skill.content());
+        var skill = Objects.requireNonNull(store.load("my-skill"), "skill should not be null");
+        assert "my-skill".equals(skill.name()) : "expected 'my-skill' but got " + skill.name();
+        assert "Just plain content here.".equals(skill.content()) : "expected 'Just plain content here.' but got " + skill.content();
     } finally {
         deleteRecursively(tempDir);
     }
@@ -78,13 +71,9 @@ void loadSkillNameFallsBackToDirectoryName() throws IOException {
                 """);
 
         var store = new SkillStore(List.of(tempDir));
-        var skill = store.load("dir-name");
-        if (skill == null)
-            throw new AssertionError("skill should not be null");
-        if (!"dir-name".equals(skill.name()))
-            throw new AssertionError("expected 'dir-name' but got " + skill.name());
-        if (!"A skill without a name field".equals(skill.description()))
-            throw new AssertionError("expected 'A skill without a name field' but got " + skill.description());
+        var skill = Objects.requireNonNull(store.load("dir-name"), "skill should not be null");
+        assert "dir-name".equals(skill.name()) : "expected 'dir-name' but got " + skill.name();
+        assert "A skill without a name field".equals(skill.description()) : "expected 'A skill without a name field' but got " + skill.description();
     } finally {
         deleteRecursively(tempDir);
     }
@@ -116,10 +105,8 @@ void laterDirectoryOverridesEarlier() throws IOException {
 
         var store = new SkillStore(List.of(dir1, dir2));
         var skill = store.load("overlap");
-        if (!"Second version".equals(skill.description()))
-            throw new AssertionError("expected 'Second version' but got " + skill.description());
-        if (!"Content from dir2.".equals(skill.content()))
-            throw new AssertionError("expected 'Content from dir2.' but got " + skill.content());
+        assert "Second version".equals(skill.description()) : "expected 'Second version' but got " + skill.description();
+        assert "Content from dir2.".equals(skill.content()) : "expected 'Content from dir2.' but got " + skill.content();
     } finally {
         deleteRecursively(tempDir);
     }
@@ -140,12 +127,9 @@ void catalogFormatsCorrectly() throws IOException {
 
         var store = new SkillStore(List.of(tempDir));
         var catalog = store.catalog();
-        if (!catalog.contains("## Available Skills"))
-            throw new AssertionError("catalog should contain '## Available Skills'");
-        if (!catalog.contains("- test-skill: A test skill"))
-            throw new AssertionError("catalog should contain '- test-skill: A test skill'");
-        if (!catalog.contains("load_skill"))
-            throw new AssertionError("catalog should contain 'load_skill'");
+        assert catalog.contains("## Available Skills") : "catalog should contain '## Available Skills'";
+        assert catalog.contains("- test-skill: A test skill") : "catalog should contain '- test-skill: A test skill'";
+        assert catalog.contains("load_skill") : "catalog should contain 'load_skill'";
     } finally {
         deleteRecursively(tempDir);
     }
@@ -155,8 +139,7 @@ void emptyDirectoryProducesEmptyCatalog() throws IOException {
     var tempDir = Files.createTempDirectory("zunit-skillstore");
     try {
         var store = new SkillStore(List.of(tempDir));
-        if (!"".equals(store.catalog()))
-            throw new AssertionError("expected empty catalog but got: " + store.catalog());
+        assert "".equals(store.catalog()) : "expected empty catalog but got: " + store.catalog();
     } finally {
         deleteRecursively(tempDir);
     }
@@ -164,16 +147,14 @@ void emptyDirectoryProducesEmptyCatalog() throws IOException {
 
 void nonExistentDirectoryIsIgnored() {
     var store = new SkillStore(List.of(Path.of("/nonexistent/path")));
-    if (!store.allSkills().isEmpty())
-        throw new AssertionError("expected empty skills for non-existent directory");
+    assert store.allSkills().isEmpty() : "expected empty skills for non-existent directory";
 }
 
 void loadReturnsNullForUnknownSkill() throws IOException {
     var tempDir = Files.createTempDirectory("zunit-skillstore");
     try {
         var store = new SkillStore(List.of(tempDir));
-        if (store.load("nonexistent") != null)
-            throw new AssertionError("expected null for unknown skill");
+        assert store.load("nonexistent") == null : "expected null for unknown skill";
     } finally {
         deleteRecursively(tempDir);
     }
