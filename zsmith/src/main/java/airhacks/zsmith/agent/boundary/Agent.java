@@ -16,7 +16,9 @@ import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.logging.control.ProgressBar;
 import airhacks.zsmith.tools.boundary.ToolProfiles;
+import airhacks.zsmith.tools.control.Console;
 import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.ToolPermission;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
@@ -28,7 +30,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
         float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version = "2026.04.07.02";
+    public static final String version = "2026.04.08.02";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -159,6 +161,18 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         if (tool == null) {
             Log.tool("tool not available: " + toolUse.name());
             return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
+        }
+        var permission = ToolPermission.resolve(toolUse.name());
+        if (permission == ToolPermission.DENY) {
+            Log.tool("tool denied: " + toolUse.name());
+            return ToolResult.error(toolUse.id(), "Denied: tool not permitted by agent configuration");
+        }
+        if (permission == ToolPermission.CONFIRM) {
+            var answer = Console.prompt("Allow " + toolUse.name() + " with " + toolUse.input() + "? (yes/no): ");
+            if (!"yes".equalsIgnoreCase(answer) && !"y".equalsIgnoreCase(answer)) {
+                Log.tool("tool rejected by user: " + toolUse.name());
+                return ToolResult.error(toolUse.id(), "Denied: user rejected tool execution");
+            }
         }
         try {
             var start = System.currentTimeMillis();

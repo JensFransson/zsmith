@@ -9,7 +9,7 @@ public class UserConfirmationTool implements Tool {
     private final Function<String, String> promptFunction;
 
     public UserConfirmationTool() {
-        this(IO::readln);
+        this(Console::prompt);
     }
 
     public UserConfirmationTool(Function<String, String> promptFunction) {

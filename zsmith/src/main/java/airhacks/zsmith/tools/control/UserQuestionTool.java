@@ -9,7 +9,7 @@ public class UserQuestionTool implements Tool {
     private final Function<String, String> promptFunction;
 
     public UserQuestionTool() {
-        this(IO::readln);
+        this(Console::prompt);
     }
 
     public UserQuestionTool(Function<String, String> promptFunction) {
