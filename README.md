@@ -73,6 +73,26 @@ Loaded in order (each layer overrides the previous):
 
 Only keys present in later files override earlier values; other keys are preserved.
 
+### Tool Permissions
+
+Control which tools require user confirmation before execution. Three permission levels: `allow` (execute silently), `deny` (reject), `confirm` (ask user first). Default is `confirm`.
+
+```properties
+tools.permissions.default=confirm
+tools.permissions.calculator=allow
+tools.permissions.current_time=allow
+tools.permissions.execute_script=confirm
+tools.permissions.read_any_file=confirm
+```
+
+Agent-specific permissions in `~/.zsmith/[agentName]/app.properties` override global defaults:
+
+```properties
+# A trusted automation agent
+tools.permissions.default=allow
+tools.permissions.execute_script=confirm
+```
+
 ### System Prompt
 
 Loaded from `system.prompt` files in order (each layer overrides the previous):
@@ -218,7 +238,7 @@ var agent = new Agent()
 | `ReadFileTool` | `read_file` | Reads the contents of a file within the sandbox directory |
 | `WriteFileTool` | `write_file` | Writes content to a file within the sandbox directory |
 | `ListFilesTool` | `list_files` | Lists all files within the sandbox directory |
-| `ReadAnyFileTool` | `read_any_file` | Reads a file from any location on the filesystem after user confirmation |
+| `ReadAnyFileTool` | `read_any_file` | Reads a file from any location on the filesystem |
 | `LinkCheckerTool` | `check_link` | Checks a URL and returns response information including status code, content type, and body preview |
 | `UserConfirmationTool` | `user_confirmation` | Asks the user a yes/no question and returns the answer |
 | `UserQuestionTool` | `user_question` | Asks the user a question and returns the typed answer |
