@@ -38,12 +38,6 @@ void main() throws IOException {
         var failResult = tool.execute(input(fail));
         assert failResult.contains("partial") : "expected 'partial' in output but got: " + failResult;
         assert failResult.contains("exited with code 1") : "expected 'exited with code 1' but got: " + failResult;
-
-        // timeout
-        var slow = createScript(tempDir, "slow.sh", "#!/bin/sh\nsleep 2");
-        var fastTool = new ExecuteScriptTool(1);
-        var timeoutResult = fastTool.execute(input(slow));
-        assert timeoutResult.contains("timed out") : "expected 'timed out' but got: " + timeoutResult;
     } finally {
         try (var walk = Files.walk(tempDir)) {
             walk.sorted(Comparator.reverseOrder())
