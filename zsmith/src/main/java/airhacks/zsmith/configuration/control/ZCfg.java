@@ -27,6 +27,8 @@ public class ZCfg {
 
     static final String PROPERTIES_FILE = "app.properties";
 
+    static final String SANDBOX_DIR = "agent-io";
+
     static Properties CACHE;
     public static String APP_NAME;
 
@@ -111,6 +113,25 @@ static void loadFromFile(Path file, Properties properties) {
             throw new IllegalStateException("Missing required configuration: '" + key + "'");
         }
         return value;
+    }
+
+    public static Path defaultSandboxPath(String agentName) {
+        var userHome = System.getProperty("user.home");
+        var sandboxDir = Path.of(userHome, "." + APP_NAME, agentName, SANDBOX_DIR);
+        try {
+            Files.createDirectories(sandboxDir);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot create sandbox directory: " + sandboxDir, e);
+        }
+        return sandboxDir;
+    }
+
+    public static Path sandboxPath(String agentName) {
+        var configured = string("sandbox.path");
+        if (configured != null && !configured.isBlank()) {
+            return Path.of(configured);
+        }
+        return defaultSandboxPath(agentName);
     }
 
     public static int integer(String key, int defaultValue) {

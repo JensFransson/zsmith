@@ -2,26 +2,15 @@ package airhacks.zsmith.tools.control;
 
 import java.nio.file.Path;
 
-import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.tools.boundary.SandboxedFileSystem;
 import org.json.JSONObject;
 
 public class ReadFileTool implements Tool {
 
-    static final String SANDBOX_PATH_KEY = "sandbox.path";
-
     private final SandboxedFileSystem fs;
-
-    public ReadFileTool() {
-        this(new SandboxedFileSystem(Path.of(ZCfg.requiredString(SANDBOX_PATH_KEY))));
-    }
 
     public ReadFileTool(SandboxedFileSystem fs) {
         this.fs = fs;
-    }
-
-    public static ReadFileTool fromConfig() {
-        return new ReadFileTool();
     }
 
     public static ReadFileTool of(String sandboxPath) {

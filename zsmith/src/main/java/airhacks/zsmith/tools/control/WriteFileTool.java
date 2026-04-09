@@ -2,26 +2,15 @@ package airhacks.zsmith.tools.control;
 
 import java.nio.file.Path;
 
-import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.tools.boundary.SandboxedFileSystem;
 import org.json.JSONObject;
 
 public class WriteFileTool implements Tool {
 
-    static final String SANDBOX_PATH_KEY = "sandbox.path";
-
     private final SandboxedFileSystem fs;
-
-    public WriteFileTool() {
-        this(new SandboxedFileSystem(Path.of(ZCfg.requiredString(SANDBOX_PATH_KEY))));
-    }
 
     public WriteFileTool(SandboxedFileSystem fs) {
         this.fs = fs;
-    }
-
-    public static WriteFileTool fromConfig() {
-        return new WriteFileTool();
     }
 
     public static WriteFileTool of(String sandboxPath) {

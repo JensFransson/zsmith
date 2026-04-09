@@ -2,6 +2,7 @@ package airhacks.zsmith.tools.boundary;
 
 import java.util.List;
 
+import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.tools.control.ListFilesTool;
 import airhacks.zsmith.tools.control.ReadAnyFileTool;
 import airhacks.zsmith.tools.control.ReadFileTool;
@@ -30,8 +31,9 @@ public interface ToolProfiles {
         return List.of(Tools.READ_CLIPBOARD, Tools.WRITE_CLIPBOARD);
     }
 
-    static List<Tool> fileIO() {
-        return List.of(new ReadFileTool(), new WriteFileTool(), new ListFilesTool(), new ReadAnyFileTool());
+    static List<Tool> fileIO(String agentName) {
+        var sandbox = new SandboxedFileSystem(ZCfg.sandboxPath(agentName));
+        return List.of(new ReadFileTool(sandbox), new WriteFileTool(sandbox), new ListFilesTool(sandbox), new ReadAnyFileTool());
     }
 
     static List<Tool> all() {
