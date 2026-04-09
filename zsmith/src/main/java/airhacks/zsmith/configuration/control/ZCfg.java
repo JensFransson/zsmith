@@ -142,6 +142,28 @@ static void loadFromFile(Path file, Properties properties) {
         return split(value);
     }
 
+    public static void storeAgentProperty(String agentName, String key, String value) {
+        var userHome = System.getProperty("user.home");
+        var agentConfigDir = Path.of(userHome, "." + APP_NAME, agentName);
+        try {
+            Files.createDirectories(agentConfigDir);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot create config directory: " + agentConfigDir, e);
+        }
+        var configFile = agentConfigDir.resolve(PROPERTIES_FILE);
+        var props = new Properties();
+        if (Files.exists(configFile)) {
+            loadFromFile(configFile, props);
+        }
+        props.setProperty(key, value);
+        try (var writer = Files.newBufferedWriter(configFile)) {
+            props.store(writer, null);
+        } catch (IOException e) {
+            throw new IllegalStateException("Cannot write properties to: " + configFile, e);
+        }
+        CACHE.setProperty(key, value);
+    }
+
     static List<String> split(String value) {
         var values = value.split(",");
         return Stream.of(values)

@@ -31,7 +31,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
         float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version = "2026.04.09.01";
+    public static final String version = "2026.04.09.02";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -177,8 +177,15 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             return ToolResult.error(toolUse.id(), "Denied: tool not permitted by agent configuration");
         }
         if (permission == ToolPermission.CONFIRM) {
-            var answer = Console.prompt("Allow " + toolUse.name() + " with " + toolUse.input() + "? (yes/no): ");
-            if (!"yes".equalsIgnoreCase(answer) && !"y".equalsIgnoreCase(answer)) {
+            var answer = Console.prompt("Allow " + toolUse.name() + " with " + toolUse.input() + "? (yes/always/no/never): ");
+            if ("always".equalsIgnoreCase(answer) || "a".equalsIgnoreCase(answer)) {
+                ZCfg.storeAgentProperty(this.name, ToolPermission.PREFIX + toolUse.name(), "allow");
+                Log.tool("tool permission persisted: " + toolUse.name() + " = allow");
+            } else if ("never".equalsIgnoreCase(answer)) {
+                ZCfg.storeAgentProperty(this.name, ToolPermission.PREFIX + toolUse.name(), "deny");
+                Log.tool("tool permission persisted: " + toolUse.name() + " = deny");
+                return ToolResult.error(toolUse.id(), "Denied: user rejected tool execution (persisted)");
+            } else if (!"yes".equalsIgnoreCase(answer) && !"y".equalsIgnoreCase(answer)) {
                 Log.tool("tool rejected by user: " + toolUse.name());
                 return ToolResult.error(toolUse.id(), "Denied: user rejected tool execution");
             }

@@ -8,7 +8,7 @@ public enum ToolPermission {
     DENY,
     CONFIRM;
 
-    static final String PREFIX = "tools.permissions.";
+    public static final String PREFIX = "tools.permissions.";
     static final String DEFAULT_KEY = PREFIX + "default";
 
     public static ToolPermission resolve(String toolName) {
