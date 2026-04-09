@@ -42,6 +42,28 @@ var agent = new Agent("assistant")
 
 `withAllTools()` includes all tools from the `Tools` enum. Sandboxed file tools (`read_file`, `write_file`, `list_files`) require `withFileIOTools()` because they need a configured `sandbox.path`.
 
+### Launch App Tool
+
+`withLaunchAppTool()` adds a config-driven tool that launches an external application and passes arguments to it:
+
+```java
+// Explicit configuration
+var agent = new Agent("assistant")
+        .withLaunchAppTool("run_tests", "Runs the test suite", "./run-tests.sh");
+
+// From app.properties (launch.tool.name, launch.tool.description, launch.command)
+var agent = new Agent("assistant")
+        .withLaunchAppTool();
+```
+
+Configure in `app.properties`:
+
+```properties
+launch.tool.name=run_tests
+launch.tool.description=Runs the test suite
+launch.command=./run-tests.sh
+```
+
 ## Configuration
 
 ### Required Properties
@@ -247,6 +269,7 @@ var agent = new Agent()
 | `RecallMemoryTool` | `recall_memory` | Recalls past memories, optionally filtered by type or limited to recent entries |
 | `LoadSkillTool` | `load_skill` | Loads a skill by name (added automatically with `withSkills()`) |
 | `ExecuteScriptTool` | `execute_script` | Executes a script and returns its output |
+| `LaunchAppTool` | *(config-driven)* | Launches an external application with arguments (name, description, command from config or constructor) |
 
 ## Custom Tools
 

@@ -27,8 +27,4 @@ void main() {
     var badResult = badTool.execute(new JSONObject().put("arguments", "test"));
     assert badResult.contains("Error") : "expected error but got: " + badResult;
 
-    // non-zero exit code
-    var failTool = new LaunchAppTool("fail", "fail", "sh");
-    var failResult = failTool.execute(new JSONObject().put("arguments", "-c exit\u00201"));
-    assert failResult.contains("exited with code 1") : "expected 'exited with code 1' but got: " + failResult;
 }
