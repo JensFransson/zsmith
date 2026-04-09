@@ -23,8 +23,8 @@ public record Episode(String content, String timestamp, MemoryType type) {
         return new Episode(content, null, type);
     }
 
-    public boolean hasType(MemoryType type){
-        return type.equals(type);
+    public boolean hasType(MemoryType type) {
+        return this.type != null && this.type.equals(type);
     }
 
     public JSONObject toJSON() {
