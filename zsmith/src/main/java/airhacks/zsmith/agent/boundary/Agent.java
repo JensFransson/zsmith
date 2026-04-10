@@ -27,6 +27,7 @@ import airhacks.zsmith.episodicmemory.control.RecallMemoryTool;
 import airhacks.zsmith.episodicmemory.control.StoreMemoryTool;
 import airhacks.zsmith.skills.boundary.SkillStore;
 import airhacks.zsmith.skills.control.LoadSkillTool;
+import airhacks.zsmith.subagent.control.SubAgentTool;
 import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
@@ -136,6 +137,10 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         agent.tools.put("store_memory", new StoreMemoryTool(store));
         agent.tools.put("recall_memory", new RecallMemoryTool(store));
         return agent;
+    }
+
+    public Agent withSubAgent(Agent childAgent) {
+        return withTool(new SubAgentTool(childAgent));
     }
 
     public Agent withSkills() {
