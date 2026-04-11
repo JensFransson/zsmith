@@ -61,11 +61,11 @@ public class SubAgentTool implements Tool {
             return "Error: Maximum sub-agent depth (%d) exceeded".formatted(this.maxDepth);
         }
         var task = input.getString(Field.task.name());
-        Log.agent("delegating to sub-agent '%s': %s".formatted(this.subAgent.name(), task));
+        Log.subagent("delegating to sub-agent '%s': %s".formatted(this.subAgent.name(), task));
         try {
             var result = ScopedValue.where(DEPTH, currentDepth + 1)
                     .call(() -> this.subAgent.chat(task));
-            Log.agent("sub-agent '%s' completed".formatted(this.subAgent.name()));
+            Log.subagent("sub-agent '%s' completed".formatted(this.subAgent.name()));
             return result;
         } catch (Exception e) {
             return "Error: Sub-agent '%s' failed: %s".formatted(this.subAgent.name(), e.getMessage());
