@@ -305,4 +305,4 @@ Available `Prop` types: `string`, `stringEnum` (with allowed values), `number`, 
 
 ---
 
-Built by [zb](https://github.com/AdamBien/zb) | Tested by [zunit](https://github.com/AdamBien/zunit) | Powered by [airhacks.live](https://airhacks.live)
+architecture by [bce.design] (https://bce.design) | built by [zb](https://github.com/AdamBien/zb) | tested by [zunit](https://github.com/AdamBien/zunit) | powered by [airhacks.live](https://airhacks.live)
