@@ -305,4 +305,4 @@ Available `Prop` types: `string`, `stringEnum` (with allowed values), `number`, 
 
 ---
 
-architecture by [bce.design](https://bce.design) | built by [zb](https://github.com/AdamBien/zb) | tested by [zunit](https://github.com/AdamBien/zunit) | powered by [airhacks.live](https://airhacks.live) | skill provided by: [airails](https://airails.dev)
+architecture by [bce.design](https://bce.design) | built by [zb](https://github.com/AdamBien/zb) | tested by [zunit](https://github.com/AdamBien/zunit) | skill provided by: [airails](https://airails.dev) | powered by [airhacks.live](https://airhacks.live)
