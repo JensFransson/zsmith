@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.sun.net.httpserver.HttpExchange;
 
-class Exchanges {
+interface Exchanges {
 
     static void sendPlain(HttpExchange exchange, int status, String body) throws IOException {
         var bytes = body.getBytes(StandardCharsets.UTF_8);
