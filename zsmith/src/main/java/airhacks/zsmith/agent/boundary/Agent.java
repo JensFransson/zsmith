@@ -6,9 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.json.JSONArray;
 
+import airhacks.zsmith.http.boundary.AgentHttpServer;
+import airhacks.zsmith.http.boundary.ChatEngine;
 import airhacks.zsmith.memory.entity.Memory;
 import airhacks.zsmith.memory.entity.Message;
 import airhacks.zsmith.claude.control.Claude;
@@ -32,7 +35,7 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
         float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version = "2026.04.11.01";
+    public static final String version = "2026.04.16.01";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -141,6 +144,20 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
 
     public Agent withSubAgent(Agent childAgent) {
         return withTool(new SubAgentTool(childAgent));
+    }
+
+    public Agent withHttpServer(int port) {
+        var perSession = new ConcurrentHashMap<String, Agent>();
+        ChatEngine engine = (sessionId, message) -> perSession
+                .computeIfAbsent(sessionId, id -> cloneForSession())
+                .chat(message);
+        AgentHttpServer.start(engine, port);
+        return this;
+    }
+
+    Agent cloneForSession() {
+        return new Agent(this.name, this.systemPrompt, new Memory(), new HashMap<>(this.tools),
+                this.maxIterations, this.temperature, this.episodicMemory);
     }
 
     public Agent withSkills() {
