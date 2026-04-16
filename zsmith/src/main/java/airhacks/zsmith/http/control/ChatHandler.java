@@ -9,15 +9,7 @@ import com.sun.net.httpserver.HttpHandler;
 import airhacks.zsmith.http.boundary.ChatEngine;
 import airhacks.zsmith.logging.control.Log;
 
-public class ChatHandler implements HttpHandler {
-
-    final ChatEngine engine;
-    final Sessions sessions;
-
-    public ChatHandler(ChatEngine engine, Sessions sessions) {
-        this.engine = engine;
-        this.sessions = sessions;
-    }
+public record ChatHandler(ChatEngine engine, Sessions sessions) implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -27,8 +19,7 @@ public class ChatHandler implements HttpHandler {
                 return;
             }
             var body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            var message = messageFor(body);
-            if (message == null) {
+            if (body.isEmpty()) {
                 Exchanges.sendPlain(exchange, 400, "Request body must not be empty");
                 return;
             }
@@ -37,7 +28,7 @@ public class ChatHandler implements HttpHandler {
             var lock = this.sessions.lockFor(sessionId);
             lock.lock();
             try {
-                var response = this.engine.chat(sessionId, message);
+                var response = this.engine.chat(sessionId, body);
                 Exchanges.sendPlain(exchange, 200, response == null ? "" : response);
             } finally {
                 lock.unlock();
@@ -46,9 +37,5 @@ public class ChatHandler implements HttpHandler {
             Log.error("chat handler error: " + e.getMessage(), e);
             Exchanges.sendPlain(exchange, 500, e.getMessage() == null ? "Internal error" : e.getMessage());
         }
-    }
-
-    String messageFor(String body) {
-        return body == null || body.isEmpty() ? null : body;
     }
 }

@@ -9,17 +9,9 @@ import com.sun.net.httpserver.HttpHandler;
 import airhacks.zsmith.http.boundary.ChatEngine;
 import airhacks.zsmith.logging.control.Log;
 
-public class ActHandler implements HttpHandler {
+public record ActHandler(ChatEngine engine, Sessions sessions) implements HttpHandler {
 
     static final String DEFAULT_SEED = "go";
-
-    final ChatEngine engine;
-    final Sessions sessions;
-
-    public ActHandler(ChatEngine engine, Sessions sessions) {
-        this.engine = engine;
-        this.sessions = sessions;
-    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -29,7 +21,7 @@ public class ActHandler implements HttpHandler {
                 return;
             }
             var body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
-            var seed = body == null || body.isEmpty() ? DEFAULT_SEED : body;
+            var seed = body.isEmpty() ? DEFAULT_SEED : body;
             var sessionId = this.sessions.resolveOrCreate(exchange.getRequestHeaders().getFirst(Sessions.HEADER));
             exchange.getResponseHeaders().add(Sessions.HEADER, sessionId);
             var lock = this.sessions.lockFor(sessionId);
