@@ -278,6 +278,39 @@ var transcriber = new Agent("transcriber", """
 var response = transcriber.act();
 ```
 
+As a standalone Java script with shebang:
+
+```java
+#!/usr/bin/java --class-path=zbo/zsmith.jar --source 25
+
+import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.tools.boundary.Tools;
+
+void main() {
+
+        var linkChecker = new Agent("link_checker", """
+                You verify URLs. For each URL given, use the check_link tool
+                to confirm it is reachable. Return a markdown status list.
+                """)
+                .withTool(Tools.LINK_CHECKER);
+
+        var transcriber = new Agent("transcriber", """
+                You process podcast transcriptions.
+                1. Ask the user for the transcript file path.
+                2. Read the transcript.
+                3. Extract all guest names and URLs mentioned.
+                4. Delegate link verification to the link_checker agent.
+                5. Store guests and verified links in memory.
+                6. Write a summary with link status annotations to the clipboard.
+                """)
+                .withTools(Tools.USER_QUESTION, Tools.READ_ANY_FILE, Tools.WRITE_CLIPBOARD)
+                .withSubAgent(linkChecker)
+                .withEpisodicMemory();
+
+        transcriber.act();
+}
+```
+
 Custom tool name, description, and max delegation depth:
 
 ```java
