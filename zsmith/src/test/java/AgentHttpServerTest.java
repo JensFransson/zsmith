@@ -12,6 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import airhacks.zsmith.http.boundary.AgentHttpServer;
 import airhacks.zsmith.http.boundary.ChatEngine;
 
+Duration timeout = Duration.ofMillis(500);
+
 void main() throws Exception {
     chatEchoesBodyAndGeneratesSessionId();
     chatReusesClientProvidedSessionId();
@@ -102,7 +104,7 @@ void getOnChatReturns405() throws Exception {
     var server = AgentHttpServer.start(engine, 0);
     try {
         var request = HttpRequest.newBuilder(uri(server, "/chat"))
-                .timeout(Duration.ofSeconds(5))
+                .timeout(timeout)
                 .GET()
                 .build();
         var response = HttpClient.newHttpClient().send(request, BodyHandlers.ofString());
@@ -147,9 +149,9 @@ void differentSessionsAreIndependent() throws Exception {
     }
 }
 
-static HttpResponse<String> post(AgentHttpServer server, String path, String sessionId, String body) throws Exception {
+HttpResponse<String> post(AgentHttpServer server, String path, String sessionId, String body) throws Exception {
     var builder = HttpRequest.newBuilder(uri(server, path))
-            .timeout(Duration.ofSeconds(5))
+            .timeout(timeout)
             .header("Content-Type", "text/plain; charset=utf-8")
             .POST(BodyPublishers.ofString(body));
     if (sessionId != null) {
@@ -158,6 +160,6 @@ static HttpResponse<String> post(AgentHttpServer server, String path, String ses
     return HttpClient.newHttpClient().send(builder.build(), BodyHandlers.ofString());
 }
 
-static URI uri(AgentHttpServer server, String path) {
+URI uri(AgentHttpServer server, String path) {
     return URI.create("http://localhost:" + server.port() + path);
 }
