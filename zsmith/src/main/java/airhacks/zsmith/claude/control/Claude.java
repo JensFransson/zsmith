@@ -23,6 +23,7 @@ public interface Claude {
     int MAX_TOKENS = 4000;
     String ANTHROPIC_VERSION = ZCfg.requiredString("anthropic.version");
     String ANTHROPIC_API_KEY = ZCfg.requiredString("anthropic.api.key");
+    Models defaultModel = Models.CLAUDE_46_OPUS;
     String fallbackModelName = "claude-sonnet-4-6";
 
     enum Models {
@@ -59,7 +60,7 @@ public interface Claude {
         public static Models fromSystemProperty() {
             var modelInput = System.getProperty("model");
             return fromPartialMatch(modelInput)
-            .orElse(Models.CLAUDE_46_OPUS);
+            .orElse(defaultModel);
         }
 
         public static Optional<Models> fromPartialMatch(String partialName) {
