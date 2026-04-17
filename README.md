@@ -249,6 +249,43 @@ var agent = new Agent()
         .withEpisodicMemory(new EpisodicMemoryStore(Path.of("custom-memory.json")));
 ```
 
+## Subagents
+
+Agents can delegate tasks to other agents via `withSubAgent()`. The child agent becomes a callable tool (`delegate_to_<name>`).
+
+Podcast transcription example — the coordinator asks for the transcript path, reads the file, delegates link verification, stores guests and links in memory, and copies the result to the clipboard:
+
+```java
+var linkChecker = new Agent("link_checker", """
+        You verify URLs. For each URL given, use the check_link tool
+        to confirm it is reachable. Return a markdown status list.
+        """)
+        .withTool(Tools.LINK_CHECKER);
+
+var transcriber = new Agent("transcriber", """
+        You process podcast transcriptions.
+        1. Ask the user for the transcript file path.
+        2. Read the transcript.
+        3. Extract all guest names and URLs mentioned.
+        4. Delegate link verification to the link_checker agent.
+        5. Store guests and verified links in memory.
+        6. Write a summary with link status annotations to the clipboard.
+        """)
+        .withTools(Tools.USER_QUESTION, Tools.READ_ANY_FILE, Tools.WRITE_CLIPBOARD)
+        .withSubAgent(linkChecker)
+        .withEpisodicMemory();
+
+var response = transcriber.act();
+```
+
+Custom tool name, description, and max delegation depth:
+
+```java
+var agent = new Agent("coordinator")
+        .withTool(new SubAgentTool(linkChecker, "verify_links",
+                "Verifies all URLs in the given text", 2));
+```
+
 ## Built-in Tools
 
 | Tool | Name | Description |
