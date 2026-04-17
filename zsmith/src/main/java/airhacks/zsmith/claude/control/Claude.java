@@ -26,12 +26,10 @@ public interface Claude {
     String fallbackModelName = "claude-sonnet-4-6";
 
     enum Models {
+        CLAUDE_47_OPUS("claude-opus-4-7"),
         CLAUDE_46_OPUS("claude-opus-4-6"),
         CLAUDE_46_SONNET(Claude.fallbackModelName),
-        CLAUDE_45_OPUS("claude-opus-4-5-20251101"),
-        CLAUDE_45_SONNET("claude-sonnet-4-5-20250929"),
-        CLAUDE_41_OPUS("claude-opus-4-1-20250805"),
-        CLAUDE_40_OPUS("claude-opus-4-20250514");
+        CLAUDE_45_OPUS("claude-opus-4-5-20251101");
 
         private String modelName;
         private String fallbackModelName;
