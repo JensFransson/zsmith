@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import airhacks.zsmith.http.boundary.AgentHttpServer;
 import airhacks.zsmith.http.boundary.ChatEngine;
 
-Duration timeout = Duration.ofMillis(500);
+AgentHttpServerITDuration.ofMillis(500);
 
 void main() throws Exception {
     chatEchoesBodyAndGeneratesSessionId();
