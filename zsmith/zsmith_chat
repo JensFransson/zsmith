@@ -1,0 +1,178 @@
+#!/usr/bin/java --source 25
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+// Solarized ANSI colors (from Log.java)
+static final String BLUE   = "\033[38;2;38;139;210m";
+static final String ORANGE = "\033[38;2;203;75;22m";
+static final String CYAN   = "\033[38;2;42;161;152m";
+static final String GREEN  = "\033[38;2;133;153;0m";
+static final String RED    = "\033[38;2;220;50;47m";
+static final String RESET  = "\u001B[0m";
+
+static final String SESSION_HEADER = "X-Session-Id";
+
+record Config(String host, int port, String sessionId, int timeout) {}
+
+record Response(int status, String body, String sessionId) {}
+
+void main(String[] args) {
+    var config = parseArgs(args);
+    var client = HttpClient.newHttpClient();
+    var sessionId = config.sessionId();
+
+    banner(config);
+
+    var reader = System.console() != null
+            ? System.console().reader()
+            : new BufferedReader(new InputStreamReader(System.in));
+
+    try (reader) {
+        String line;
+        while (true) {
+            System.out.print(BLUE + "> " + RESET);
+            System.out.flush();
+            line = reader instanceof BufferedReader br ? br.readLine() : System.console().readLine();
+            if (line == null) break;
+            line = line.strip();
+            if (line.isEmpty()) continue;
+
+            if (line.startsWith("/")) {
+                if (line.equals("/quit") || line.equals("/exit")) break;
+                sessionId = handleCommand(line, client, config, sessionId);
+                continue;
+            }
+
+            var response = chat(client, config, sessionId, line);
+            if (response.status() == 200) {
+                if (sessionId == null) sessionId = response.sessionId();
+                System.out.println(ORANGE + response.body() + RESET);
+            } else {
+                System.out.println(RED + "Error " + response.status() + ": " + response.body() + RESET);
+            }
+        }
+    } catch (Exception e) {
+        System.out.println(RED + "Fatal: " + e.getMessage() + RESET);
+        System.exit(1);
+    }
+
+    System.out.println(CYAN + "Bye." + RESET);
+}
+
+String handleCommand(String line, HttpClient client, Config config, String sessionId) {
+    var parts = line.split("\\s+", 2);
+    var cmd = parts[0];
+
+    switch (cmd) {
+        case "/help" -> {
+            System.out.println(CYAN + """
+                /help          Show this help
+                /act [seed]    Trigger autonomous action
+                /session       Show current session ID
+                /quit, /exit   Exit""" + RESET);
+        }
+        case "/session" -> {
+            System.out.println(GREEN + "Session: " + (sessionId != null ? sessionId : "(not yet established)") + RESET);
+        }
+        case "/act" -> {
+            var seed = parts.length > 1 ? parts[1] : "";
+            var response = act(client, config, sessionId, seed);
+            if (response.status() == 200) {
+                if (sessionId == null) sessionId = response.sessionId();
+                System.out.println(ORANGE + response.body() + RESET);
+            } else {
+                System.out.println(RED + "Error " + response.status() + ": " + response.body() + RESET);
+            }
+        }
+        default -> System.out.println(RED + "Unknown command: " + cmd + ". Type /help" + RESET);
+    }
+    return sessionId;
+}
+
+Response chat(HttpClient client, Config config, String sessionId, String message) {
+    return send(client, config, sessionId, "/chat", message);
+}
+
+Response act(HttpClient client, Config config, String sessionId, String seed) {
+    return send(client, config, sessionId, "/act", seed);
+}
+
+Response send(HttpClient client, Config config, String sessionId, String path, String body) {
+    var uri = URI.create("http://" + config.host() + ":" + config.port() + path);
+    var builder = HttpRequest.newBuilder(uri)
+            .timeout(Duration.ofSeconds(config.timeout()))
+            .header("Content-Type", "text/plain; charset=utf-8")
+            .POST(BodyPublishers.ofString(body));
+    if (sessionId != null) {
+        builder.header(SESSION_HEADER, sessionId);
+    }
+
+    var waiting = new AtomicBoolean(true);
+    var spinner = Thread.startVirtualThread(() -> {
+        try {
+            while (waiting.get()) {
+                System.out.print(CYAN + "." + RESET);
+                System.out.flush();
+                Thread.sleep(500);
+            }
+        } catch (InterruptedException _) {}
+    });
+
+    try {
+        var response = client.send(builder.build(), BodyHandlers.ofString());
+        waiting.set(false);
+        spinner.join();
+        System.out.println();
+        var returnedSession = response.headers().firstValue(SESSION_HEADER).orElse(sessionId);
+        return new Response(response.statusCode(), response.body(), returnedSession);
+    } catch (java.net.ConnectException e) {
+        waiting.set(false);
+        try { spinner.join(); } catch (InterruptedException _) {}
+        System.out.println();
+        return new Response(-1, "Connection refused — is the server running on " + config.host() + ":" + config.port() + "?", sessionId);
+    } catch (Exception e) {
+        waiting.set(false);
+        try { spinner.join(); } catch (InterruptedException _) {}
+        System.out.println();
+        return new Response(-1, e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName(), sessionId);
+    }
+}
+
+void banner(Config config) {
+    System.out.println(CYAN + "zsmith-chat — connecting to " + config.host() + ":" + config.port() + RESET);
+    System.out.println(CYAN + "Type a message to chat, /help for commands, /quit to exit" + RESET);
+    if (config.sessionId() != null) {
+        System.out.println(GREEN + "Resuming session: " + config.sessionId() + RESET);
+    }
+    System.out.println();
+}
+
+Config parseArgs(String[] args) {
+    var host = "localhost";
+    var port = 8080;
+    String sessionId = null;
+    var timeout = 120;
+
+    for (int i = 0; i < args.length; i++) {
+        switch (args[i]) {
+            case "--host" -> host = args[++i];
+            case "--port" -> port = Integer.parseInt(args[++i]);
+            case "--session" -> sessionId = args[++i];
+            case "--timeout" -> timeout = Integer.parseInt(args[++i]);
+            default -> {
+                System.out.println("Usage: zsmith-chat [--host HOST] [--port PORT] [--session ID] [--timeout SECS]");
+                System.exit(1);
+            }
+        }
+    }
+    return new Config(host, port, sessionId, timeout);
+}
