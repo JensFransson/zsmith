@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.tui.control.ChatClient;
 import airhacks.zsmith.tui.entity.Config;
+import airhacks.zsmith.tui.entity.Response;
 
 public class Chat {
 
@@ -42,13 +43,7 @@ public class Chat {
                     continue;
                 }
 
-                var response = this.client.chat(this.sessionId, line);
-                if (response.status() == 200) {
-                    if (this.sessionId == null) this.sessionId = response.sessionId();
-                    Log.answer(response.body());
-                } else {
-                    Log.error("Error " + response.status() + ": " + response.body());
-                }
+                handleResponse(this.client.chat(this.sessionId, line));
             }
         } catch (Exception e) {
             Log.error("Fatal: " + e.getMessage());
@@ -56,6 +51,15 @@ public class Chat {
         }
 
         Log.info("Bye.");
+    }
+
+    void handleResponse(Response response) {
+        if (response.status() == 200) {
+            if (this.sessionId == null) this.sessionId = response.sessionId();
+            Log.answer(response.body());
+        } else {
+            Log.error("Error " + response.status() + ": " + response.body());
+        }
     }
 
     void handleCommand(String line) {
@@ -71,13 +75,7 @@ public class Chat {
             case "/session" -> Log.info("Session: " + (this.sessionId != null ? this.sessionId : "(not yet established)"));
             case "/act" -> {
                 var seed = parts.length > 1 ? parts[1] : "";
-                var response = this.client.act(this.sessionId, seed);
-                if (response.status() == 200) {
-                    if (this.sessionId == null) this.sessionId = response.sessionId();
-                    Log.answer(response.body());
-                } else {
-                    Log.error("Error " + response.status() + ": " + response.body());
-                }
+                handleResponse(this.client.act(this.sessionId, seed));
             }
             default -> Log.error("Unknown command: " + cmd + ". Type /help");
         }
