@@ -1,7 +1,6 @@
 package airhacks.zsmith.http.control;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -18,12 +17,13 @@ public record ChatHandler(ChatEngine engine, Sessions sessions) implements HttpH
                 Exchanges.sendPlain(exchange, 405, "Method not allowed — use POST");
                 return;
             }
-            var body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+            var body = new String(exchange.getRequestBody().readAllBytes());
             if (body.isEmpty()) {
                 Exchanges.sendPlain(exchange, 400, "Request body must not be empty");
                 return;
             }
-            var sessionId = this.sessions.resolveOrCreate(exchange.getRequestHeaders().getFirst(Sessions.HEADER));
+            var sessionIdHeader = exchange.getRequestHeaders().getFirst(Sessions.HEADER);
+            var sessionId = this.sessions.resolveOrCreate(sessionIdHeader);
             exchange.getResponseHeaders().add(Sessions.HEADER, sessionId);
             var lock = this.sessions.lockFor(sessionId);
             lock.lock();
