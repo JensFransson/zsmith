@@ -5,4 +5,5 @@ jar.dir=zbo/
 jar.file.name=zsmith.jar
 resources.dir=<discovered by zb>
 sources.dir=<discovered by zb>
+main.class=ZSmith
 post.build.hook=zunit
