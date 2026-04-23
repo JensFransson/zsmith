@@ -15,6 +15,8 @@ public interface Tool {
 
     String execute(JSONObject input);
 
+    default boolean parallel() { return false; }
+
     default JSONObject toToolDefinition() {
         return new JSONObject()
                 .put("name", toolName())

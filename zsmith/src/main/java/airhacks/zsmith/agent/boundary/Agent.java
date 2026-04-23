@@ -7,17 +7,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.json.JSONArray;
 
-import airhacks.zsmith.http.boundary.AgentHttpServer;
-import airhacks.zsmith.http.boundary.ChatEngine;
-import airhacks.zsmith.memory.entity.Memory;
-import airhacks.zsmith.memory.entity.Message;
 import airhacks.zsmith.claude.control.Claude;
 import airhacks.zsmith.configuration.control.ZCfg;
+import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
+import airhacks.zsmith.episodicmemory.control.RecallMemoryTool;
+import airhacks.zsmith.episodicmemory.control.StoreMemoryTool;
+import airhacks.zsmith.http.boundary.AgentHttpServer;
+import airhacks.zsmith.http.boundary.ChatEngine;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.logging.control.ProgressBar;
+import airhacks.zsmith.memory.entity.Memory;
+import airhacks.zsmith.memory.entity.Message;
+import airhacks.zsmith.skills.boundary.SkillStore;
+import airhacks.zsmith.skills.control.LoadSkillTool;
+import airhacks.zsmith.subagent.control.SubAgentTool;
+import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 import airhacks.zsmith.tools.boundary.ToolProfiles;
 import airhacks.zsmith.tools.control.Console;
 import airhacks.zsmith.tools.control.LaunchAppTool;
@@ -25,17 +34,10 @@ import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.control.ToolPermission;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
-import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
-import airhacks.zsmith.episodicmemory.control.RecallMemoryTool;
-import airhacks.zsmith.episodicmemory.control.StoreMemoryTool;
-import airhacks.zsmith.skills.boundary.SkillStore;
-import airhacks.zsmith.skills.control.LoadSkillTool;
-import airhacks.zsmith.subagent.control.SubAgentTool;
-import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
         float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version = "2026.04.20.01";
+    public static final String version = "2026.04.23.01";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -264,7 +266,31 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             addAssistantContentToMemory(content);
 
             var toolResults = new JSONArray();
-            for (var toolUse : toolUses) {
+            var parallelTools = toolUses.stream()
+                    .filter(tu -> {
+                        var tool = this.tools.get(tu.name());
+                        return tool != null && tool.parallel();
+                    })
+                    .toList();
+            var sequentialTools = toolUses.stream()
+                    .filter(tu -> !parallelTools.contains(tu))
+                    .toList();
+
+            if (!parallelTools.isEmpty()) {
+                try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                    var futures = parallelTools.stream()
+                            .map(tu -> Map.entry(tu, executor.submit(() -> executeTool(tu))))
+                            .toList();
+                    for (var entry : futures) {
+                        try {
+                            toolResults.put(entry.getValue().get().toContentBlock());
+                        } catch (Exception e) {
+                            toolResults.put(ToolResult.error(entry.getKey().id(), e.getMessage()).toContentBlock());
+                        }
+                    }
+                }
+            }
+            for (var toolUse : sequentialTools) {
                 var result = executeTool(toolUse);
                 toolResults.put(result.toContentBlock());
             }

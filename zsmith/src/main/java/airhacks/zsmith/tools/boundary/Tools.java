@@ -44,4 +44,7 @@ public enum Tools implements Tool {
 
     @Override
     public String execute(JSONObject input) { return delegate.execute(input); }
+
+    @Override
+    public boolean parallel() { return delegate.parallel(); }
 }

@@ -27,6 +27,9 @@ public class LinkCheckerTool implements Tool {
     }
 
     @Override
+    public boolean parallel() { return true; }
+
+    @Override
     public String toolName() {
         return "check_link";
     }
