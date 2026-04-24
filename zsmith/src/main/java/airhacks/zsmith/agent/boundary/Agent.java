@@ -37,7 +37,7 @@ import airhacks.zsmith.tools.entity.ToolUse;
 
 public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
         float temperature, EpisodicMemoryStore episodicMemory) {
-    public static final String version = "2026.04.23.01";
+    public static final String version = "2026.04.24.01";
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
@@ -146,6 +146,10 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
 
     public Agent withSubAgent(Agent childAgent) {
         return withTool(new SubAgentTool(childAgent));
+    }
+
+    public Agent withSequentialSubAgent(Agent childAgent) {
+        return withTool(new SubAgentTool(childAgent, false));
     }
 
     public Agent withHttpServer(int port) {

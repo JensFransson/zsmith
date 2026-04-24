@@ -15,23 +15,35 @@ public class SubAgentTool implements Tool {
     private final String name;
     private final String toolDescription;
     private final int maxDepth;
+    private final boolean runParallel;
 
-    public SubAgentTool(Agent subAgent, String name, String description, int maxDepth) {
+    public SubAgentTool(Agent subAgent, String name, String description, int maxDepth, boolean parallel) {
         this.subAgent = subAgent;
         this.name = name;
         this.toolDescription = description;
         this.maxDepth = maxDepth;
+        this.runParallel = parallel;
+    }
+
+    public SubAgentTool(Agent subAgent, String name, String description, int maxDepth) {
+        this(subAgent, name, description, maxDepth, true);
     }
 
     public SubAgentTool(Agent subAgent, String name, String description) {
         this(subAgent, name, description, DEFAULT_MAX_DEPTH);
     }
 
-    public SubAgentTool(Agent subAgent) {
+    public SubAgentTool(Agent subAgent, boolean parallel) {
         this(subAgent,
                 "delegate_to_" + subAgent.name(),
                 "Delegates a task to the '%s' sub-agent. Send a clear, complete task description and the sub-agent will work on it independently and return the result."
-                        .formatted(subAgent.name()));
+                        .formatted(subAgent.name()),
+                DEFAULT_MAX_DEPTH,
+                parallel);
+    }
+
+    public SubAgentTool(Agent subAgent) {
+        this(subAgent, true);
     }
 
     @Override
@@ -52,6 +64,11 @@ public class SubAgentTool implements Tool {
     public String inputSchema() {
         return Tool.schema(
                 Prop.string(Field.task, "The task to delegate to the sub-agent. Be specific and complete."));
+    }
+
+    @Override
+    public boolean parallel() {
+        return this.runParallel;
     }
 
     @Override
