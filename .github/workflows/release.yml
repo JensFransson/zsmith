@@ -30,13 +30,10 @@ jobs:
         working-directory: zsmith
         run: java -jar ../zb.jar
 
-      - name: Rename artifact
-        run: cp zsmith/zbo/zsmith.jar zsmith-${{ steps.version.outputs.version }}.jar
-
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version }}.${{ github.run_number }}
           name: zsmith ${{ steps.version.outputs.version }} (build ${{ github.run_number }})
-          files: zsmith-${{ steps.version.outputs.version }}.jar
+          files: zsmith/zbo/zsmith.jar
           generate_release_notes: true
