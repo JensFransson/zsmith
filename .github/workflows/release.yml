@@ -31,9 +31,10 @@ jobs:
         run: java -jar ../zb.jar
 
       - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.version }}.${{ github.run_number }}
-          name: zsmith ${{ steps.version.outputs.version }} (build ${{ github.run_number }})
-          files: zsmith/zbo/zsmith.jar
-          generate_release_notes: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}.${{ github.run_number }}" \
+            zsmith/zbo/zsmith.jar \
+            --title "zsmith ${{ steps.version.outputs.version }} (build ${{ github.run_number }})" \
+            --generate-notes
