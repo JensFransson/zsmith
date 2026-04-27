@@ -1,14 +1,20 @@
 package airhacks.zsmith.subagent.control;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.json.JSONObject;
 
 import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.tools.control.Tool;
 
 public class SubAgentTool implements Tool {
 
     static final int DEFAULT_MAX_DEPTH = 3;
+    static final String FIRST_RUN_MARKER = ".first_run_completed";
     static final ScopedValue<Integer> DEPTH = ScopedValue.newInstance();
 
     private final Agent subAgent;
@@ -68,7 +74,7 @@ public class SubAgentTool implements Tool {
 
     @Override
     public boolean parallel() {
-        return this.runParallel;
+        return this.runParallel && firstRunCompleted();
     }
 
     @Override
@@ -83,9 +89,32 @@ public class SubAgentTool implements Tool {
             var result = ScopedValue.where(DEPTH, currentDepth + 1)
                     .call(() -> this.subAgent.chat(task));
             Log.subagent("sub-agent '%s' completed".formatted(this.subAgent.name()));
+            markFirstRunCompleted();
             return result;
         } catch (Exception e) {
             return "Error: Sub-agent '%s' failed: %s".formatted(this.subAgent.name(), e.getMessage());
         }
+    }
+
+    boolean firstRunCompleted() {
+        return Files.exists(markerPath());
+    }
+
+    void markFirstRunCompleted() {
+        var path = markerPath();
+        try {
+            Files.createDirectories(path.getParent());
+            if (!Files.exists(path)) {
+                Files.writeString(path, "");
+            }
+        } catch (IOException e) {
+            Log.warning("could not write first-run marker for "
+                    + this.subAgent.name() + ": " + e.getMessage());
+        }
+    }
+
+    Path markerPath() {
+        var userHome = System.getProperty("user.home");
+        return Path.of(userHome, "." + ZCfg.APP_NAME, this.subAgent.name(), FIRST_RUN_MARKER);
     }
 }
