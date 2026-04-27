@@ -253,6 +253,8 @@ var agent = new Agent()
 
 Agents can delegate tasks to other agents via `withSubAgent()`. The child agent becomes a callable tool (`delegate_to_<name>`).
 
+By default, multiple `withSubAgent()` invocations run in parallel — but the **first successful run of each subagent is forced sequential** so that any `confirm`-level tool permission prompts appear cleanly one at a time on stdout/stdin instead of colliding across virtual threads. Once a subagent has completed once, a marker is written to `~/.zsmith/<subAgentName>/.first_run_completed` and subsequent runs fan out in parallel. Use `withSequentialSubAgent()` to opt out of parallelism entirely; delete the marker file to force another sequential warm-up.
+
 Podcast transcription example — the coordinator asks for the transcript path, reads the file, delegates link verification, stores guests and links in memory, and copies the result to the clipboard:
 
 ```java
