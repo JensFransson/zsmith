@@ -13,7 +13,7 @@ public interface Version {
         if (fromManifest != null) {
             return fromManifest.strip();
         }
-        try (var in = Version.class.getResourceAsStream(versionFile)) {
+        try (var in = Version.class.getClassLoader().getResourceAsStream(versionFile)) {
             if (in != null) {
                 return new String(in.readAllBytes()).strip();
             }

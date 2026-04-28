@@ -21,7 +21,7 @@ jobs:
 
       - name: Extract version
         id: version
-        run: echo "version=$(cat zsmith/src/main/resources/version.txt)" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(cat zsmith/version.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Fetch zb
         run: curl -fL -o zb.jar https://github.com/AdamBien/zb/releases/latest/download/zb.jar
