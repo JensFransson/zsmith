@@ -12,6 +12,10 @@ public class Version {
     };
 
     public static String current() {
+        var fromManifest = Version.class.getPackage().getImplementationVersion();
+        if (fromManifest != null) {
+            return fromManifest.strip();
+        }
         try (var in = Version.class.getResourceAsStream(VERSION_FILE)) {
             if (in != null) {
                 return new String(in.readAllBytes()).strip();
