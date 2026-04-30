@@ -33,6 +33,7 @@ import airhacks.zsmith.tools.boundary.ToolProfiles;
 import airhacks.zsmith.tools.control.Console;
 import airhacks.zsmith.tools.control.LaunchAppTool;
 import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.ToolInvocationEvent;
 import airhacks.zsmith.tools.control.ToolPermission;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
@@ -197,39 +198,56 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     ToolResult executeTool(ToolUse toolUse) {
-        var tool = this.tools.get(toolUse.name());
-        if (tool == null) {
-            Log.tool("tool not available: " + toolUse.name());
-            return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
-        }
-        var permission = ToolPermission.resolve(toolUse.name());
-        if (permission == ToolPermission.DENY) {
-            Log.tool("tool denied: " + toolUse.name());
-            return ToolResult.error(toolUse.id(), "Denied: tool not permitted by agent configuration");
-        }
-        if (permission == ToolPermission.CONFIRM) {
-            var answer = Console.prompt("Allow " + toolUse.name() + " with " + toolUse.input() + "? (yes/always/no/never): ");
-            if ("always".equalsIgnoreCase(answer) || "a".equalsIgnoreCase(answer)) {
-                ZCfg.storeAgentProperty(this.name, ToolPermission.PREFIX + toolUse.name(), "allow");
-                Log.tool("tool permission persisted: " + toolUse.name() + " = allow");
-            } else if ("never".equalsIgnoreCase(answer)) {
-                ZCfg.storeAgentProperty(this.name, ToolPermission.PREFIX + toolUse.name(), "deny");
-                Log.tool("tool permission persisted: " + toolUse.name() + " = deny");
-                return ToolResult.error(toolUse.id(), "Denied: user rejected tool execution (persisted)");
-            } else if (!"yes".equalsIgnoreCase(answer) && !"y".equalsIgnoreCase(answer)) {
-                Log.tool("tool rejected by user: " + toolUse.name());
-                return ToolResult.error(toolUse.id(), "Denied: user rejected tool execution");
-            }
-        }
+        var event = new ToolInvocationEvent();
+        event.agentName = this.name;
+        event.toolName = toolUse.name();
+        event.begin();
         try {
-            var start = System.currentTimeMillis();
-            var result = tool.execute(toolUse.input());
-            var duration = System.currentTimeMillis() - start;
-            Log.toolEnd("%s %dms".formatted(toolUse.name(), duration));
-            return ToolResult.success(toolUse.id(), result);
-        } catch (Exception e) {
-            Log.tool("tool error: " + toolUse.name() + " — " + e.getMessage());
-            return ToolResult.error(toolUse.id(), e.getMessage());
+            var tool = this.tools.get(toolUse.name());
+            if (tool == null) {
+                Log.tool("tool not available: " + toolUse.name());
+                event.outcome = "not_available";
+                return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
+            }
+            var permission = ToolPermission.resolve(toolUse.name());
+            if (permission == ToolPermission.DENY) {
+                Log.tool("tool denied: " + toolUse.name());
+                event.outcome = "denied";
+                return ToolResult.error(toolUse.id(), "Denied: tool not permitted by agent configuration");
+            }
+            if (permission == ToolPermission.CONFIRM) {
+                var answer = Console.prompt("Allow " + toolUse.name() + " with " + toolUse.input() + "? (yes/always/no/never): ");
+                if ("always".equalsIgnoreCase(answer) || "a".equalsIgnoreCase(answer)) {
+                    ZCfg.storeAgentProperty(this.name, ToolPermission.PREFIX + toolUse.name(), "allow");
+                    Log.tool("tool permission persisted: " + toolUse.name() + " = allow");
+                } else if ("never".equalsIgnoreCase(answer)) {
+                    ZCfg.storeAgentProperty(this.name, ToolPermission.PREFIX + toolUse.name(), "deny");
+                    Log.tool("tool permission persisted: " + toolUse.name() + " = deny");
+                    event.outcome = "denied";
+                    return ToolResult.error(toolUse.id(), "Denied: user rejected tool execution (persisted)");
+                } else if (!"yes".equalsIgnoreCase(answer) && !"y".equalsIgnoreCase(answer)) {
+                    Log.tool("tool rejected by user: " + toolUse.name());
+                    event.outcome = "denied";
+                    return ToolResult.error(toolUse.id(), "Denied: user rejected tool execution");
+                }
+            }
+            try {
+                var start = System.currentTimeMillis();
+                var result = tool.execute(toolUse.input());
+                var duration = System.currentTimeMillis() - start;
+                Log.toolEnd("%s %dms".formatted(toolUse.name(), duration));
+                event.outcome = "success";
+                event.resultSize = result == null ? 0 : result.length();
+                return ToolResult.success(toolUse.id(), result);
+            } catch (Exception e) {
+                Log.tool("tool error: " + toolUse.name() + " — " + e.getMessage());
+                event.outcome = "error";
+                return ToolResult.error(toolUse.id(), e.getMessage());
+            }
+        } finally {
+            if (event.shouldCommit()) {
+                event.commit();
+            }
         }
     }
 
