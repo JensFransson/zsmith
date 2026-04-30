@@ -79,20 +79,36 @@ public class SubAgentTool implements Tool {
 
     @Override
     public String execute(JSONObject input) {
-        var currentDepth = DEPTH.orElse(0);
-        if (currentDepth >= this.maxDepth) {
-            return "Error: Maximum sub-agent depth (%d) exceeded".formatted(this.maxDepth);
-        }
-        var task = input.getString(Field.task.name());
-        Log.subagent("delegating to sub-agent '%s': %s".formatted(this.subAgent.name(), task));
+        var event = new SubAgentDispatchEvent();
+        event.childAgent = this.subAgent.name();
+        event.depth = DEPTH.orElse(0);
+        var firstRunDone = firstRunCompleted();
+        event.firstRun = !firstRunDone;
+        event.mode = (this.runParallel && firstRunDone) ? "parallel" : "sequential";
+        event.begin();
         try {
-            var result = ScopedValue.where(DEPTH, currentDepth + 1)
-                    .call(() -> this.subAgent.chat(task));
-            Log.subagent("sub-agent '%s' completed".formatted(this.subAgent.name()));
-            markFirstRunCompleted();
-            return result;
-        } catch (Exception e) {
-            return "Error: Sub-agent '%s' failed: %s".formatted(this.subAgent.name(), e.getMessage());
+            if (event.depth >= this.maxDepth) {
+                event.outcome = "depth_exceeded";
+                return "Error: Maximum sub-agent depth (%d) exceeded".formatted(this.maxDepth);
+            }
+            var task = input.getString(Field.task.name());
+            event.taskSize = task.length();
+            Log.subagent("delegating to sub-agent '%s': %s".formatted(this.subAgent.name(), task));
+            try {
+                var result = ScopedValue.where(DEPTH, event.depth + 1)
+                        .call(() -> this.subAgent.chat(task));
+                Log.subagent("sub-agent '%s' completed".formatted(this.subAgent.name()));
+                markFirstRunCompleted();
+                event.outcome = "success";
+                return result;
+            } catch (Exception e) {
+                event.outcome = "error";
+                return "Error: Sub-agent '%s' failed: %s".formatted(this.subAgent.name(), e.getMessage());
+            }
+        } finally {
+            if (event.shouldCommit()) {
+                event.commit();
+            }
         }
     }
 
