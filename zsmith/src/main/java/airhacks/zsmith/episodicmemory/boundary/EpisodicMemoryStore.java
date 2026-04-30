@@ -11,6 +11,7 @@ import java.util.Objects;
 
 import org.json.JSONArray;
 
+import airhacks.zsmith.episodicmemory.control.MemoryAccessEvent;
 import airhacks.zsmith.episodicmemory.entity.Episode;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.configuration.control.ZCfg;
@@ -89,14 +90,29 @@ public class EpisodicMemoryStore {
     }
 
     void save() {
-        var array = new JSONArray();
-        this.episodes.stream()
-                .map(Episode::toJSON)
-                .forEach(array::put);
+        var event = new MemoryAccessEvent();
+        event.store = "episodic";
+        event.operation = "save";
+        event.episodeCount = this.episodes.size();
+        event.begin();
         try {
-            Files.writeString(this.filePath, array.toString());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            var array = new JSONArray();
+            this.episodes.stream()
+                    .map(Episode::toJSON)
+                    .forEach(array::put);
+            var payload = array.toString();
+            event.payloadSize = payload.length();
+            try {
+                Files.writeString(this.filePath, payload);
+                event.outcome = "success";
+            } catch (IOException e) {
+                event.outcome = "io_error";
+                throw new UncheckedIOException(e);
+            }
+        } finally {
+            if (event.shouldCommit()) {
+                event.commit();
+            }
         }
     }
 
@@ -104,17 +120,30 @@ public class EpisodicMemoryStore {
         if (!Files.exists(this.filePath)) {
             return;
         }
+        var event = new MemoryAccessEvent();
+        event.store = "episodic";
+        event.operation = "load";
+        event.begin();
         try {
             var json = Files.readString(this.filePath);
+            event.payloadSize = json.length();
             var array = new JSONArray(json);
             for (int i = 0; i < array.length(); i++) {
                 var episode = Episode.fromJSON(array.getJSONObject(i));
                 this.episodes.add(episode);
             }
+            event.episodeCount = this.episodes.size();
+            event.outcome = "success";
         } catch (IOException e) {
             Log.warning("could not load episodic memory from " + this.filePath + ": " + e.getMessage());
+            event.outcome = "io_error";
         } catch (IllegalArgumentException | IllegalStateException e) {
             Log.warning("malformed JSON in " + this.filePath + ": " + e.getMessage());
+            event.outcome = "parse_error";
+        } finally {
+            if (event.shouldCommit()) {
+                event.commit();
+            }
         }
     }
 }
