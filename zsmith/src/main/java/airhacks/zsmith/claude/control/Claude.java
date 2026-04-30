@@ -134,13 +134,45 @@ public interface Claude {
      */
     static String invoke(String message) {
         Log.agent("using claude model: %s".formatted(currentModel.modelName()));
-        var body = send(message);
+        var body = sendInstrumented(message, currentModel.modelName(), false);
         if (body.statusCode() == 529) {
             Log.error("claude is overloaded, retrying with fallback model: %s".formatted(currentModel.fallbackModelName()));
             var fallbackMessage = replaceModel(message, currentModel.modelName(), currentModel.fallbackModelName());
-            body = send(fallbackMessage);
+            body = sendInstrumented(fallbackMessage, currentModel.fallbackModelName(), true);
         }
         return body.body();
+    }
+
+    static HttpResponse<String> sendInstrumented(String message, String model, boolean fallback) {
+        var event = new ClaudeAPICallEvent();
+        event.begin();
+        var response = send(message);
+        if (event.shouldCommit()) {
+            event.model = model;
+            event.fallback = fallback;
+            event.statusCode = response.statusCode();
+            populateUsage(event, response);
+            event.commit();
+        }
+        return response;
+    }
+
+    static void populateUsage(ClaudeAPICallEvent event, HttpResponse<String> response) {
+        if (response.statusCode() != 200) {
+            return;
+        }
+        try {
+            var json = new JSONObject(response.body());
+            event.stopReason = json.optString("stop_reason", null);
+            var usage = json.optJSONObject("usage");
+            if (usage != null) {
+                event.inputTokens = usage.optInt("input_tokens");
+                event.outputTokens = usage.optInt("output_tokens");
+                event.cacheReadTokens = usage.optInt("cache_read_input_tokens");
+                event.cacheCreationTokens = usage.optInt("cache_creation_input_tokens");
+            }
+        } catch (RuntimeException ignored) {
+        }
     }
 
     static String replaceModel(String message, String originalModel, String fallbackModel) {
