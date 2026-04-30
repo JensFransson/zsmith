@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 
 import org.json.JSONArray;
 
+import airhacks.zsmith.agent.control.AgentTurnEvent;
 import airhacks.zsmith.agent.control.Version;
 import airhacks.zsmith.claude.control.Claude;
 import airhacks.zsmith.configuration.control.ZCfg;
@@ -243,66 +244,81 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
 
         var progress = new ProgressBar(this.maxIterations);
         for (int iteration = 0; iteration < this.maxIterations; iteration++) {
-            progress.update(iteration + 1);
-            var response = Claude.invoke(
-                    this.systemPrompt,
-                    this.memory.toJSON(),
-                    toolDefinitions(),
-                    this.temperature);
-            progress.addClaudeInvocation();
+            var turnEvent = new AgentTurnEvent();
+            turnEvent.agentName = this.name;
+            turnEvent.iteration = iteration;
+            turnEvent.begin();
+            try {
+                progress.update(iteration + 1);
+                var response = Claude.invoke(
+                        this.systemPrompt,
+                        this.memory.toJSON(),
+                        toolDefinitions(),
+                        this.temperature);
+                progress.addClaudeInvocation();
 
-            var content = response.getJSONArray("content");
-            var stopReason = response.optString("stop_reason", "end_turn");
+                var content = response.getJSONArray("content");
+                var stopReason = response.optString("stop_reason", "end_turn");
+                turnEvent.stopReason = stopReason;
 
-            var textParts = extractTextContent(content);
-            var toolUses = extractToolUses(content);
+                var textParts = extractTextContent(content);
+                var toolUses = extractToolUses(content);
+                turnEvent.toolUseCount = toolUses.size();
 
-            if (toolUses.isEmpty() || !"tool_use".equals(stopReason)) {
-                if (!textParts.isEmpty()) {
-                    var assistantResponse = String.join("\n", textParts);
-                    this.memory.addAssistantMessage(assistantResponse);
-                    Log.answer(assistantResponse);
+                if (toolUses.isEmpty() || !"tool_use".equals(stopReason)) {
+                    turnEvent.terminal = true;
+                    if (!textParts.isEmpty()) {
+                        var assistantResponse = String.join("\n", textParts);
+                        this.memory.addAssistantMessage(assistantResponse);
+                        Log.answer(assistantResponse);
+                        progress.summary();
+                        return assistantResponse;
+                    }
                     progress.summary();
-                    return assistantResponse;
+                    return "";
                 }
-                progress.summary();
-                return "";
-            }
 
-            addAssistantContentToMemory(content);
+                addAssistantContentToMemory(content);
 
-            var toolResults = new JSONArray();
-            var parallelTools = toolUses.stream()
-                    .filter(tu -> {
-                        var tool = this.tools.get(tu.name());
-                        return tool != null && tool.parallel();
-                    })
-                    .toList();
-            var sequentialTools = toolUses.stream()
-                    .filter(tu -> !parallelTools.contains(tu))
-                    .toList();
+                var toolResults = new JSONArray();
+                var parallelTools = toolUses.stream()
+                        .filter(tu -> {
+                            var tool = this.tools.get(tu.name());
+                            return tool != null && tool.parallel();
+                        })
+                        .toList();
+                var sequentialTools = toolUses.stream()
+                        .filter(tu -> !parallelTools.contains(tu))
+                        .toList();
+                turnEvent.parallelToolCount = parallelTools.size();
+                turnEvent.sequentialToolCount = sequentialTools.size();
 
-            if (!parallelTools.isEmpty()) {
-                try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-                    var futures = parallelTools.stream()
-                            .map(tu -> Map.entry(tu, executor.submit(() -> executeTool(tu))))
-                            .toList();
-                    for (var entry : futures) {
-                        try {
-                            toolResults.put(entry.getValue().get().toContentBlock());
-                        } catch (Exception e) {
-                            toolResults.put(ToolResult.error(entry.getKey().id(), e.getMessage()).toContentBlock());
+                if (!parallelTools.isEmpty()) {
+                    try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                        var futures = parallelTools.stream()
+                                .map(tu -> Map.entry(tu, executor.submit(() -> executeTool(tu))))
+                                .toList();
+                        for (var entry : futures) {
+                            try {
+                                toolResults.put(entry.getValue().get().toContentBlock());
+                            } catch (Exception e) {
+                                toolResults.put(ToolResult.error(entry.getKey().id(), e.getMessage()).toContentBlock());
+                            }
                         }
                     }
                 }
+                for (var toolUse : sequentialTools) {
+                    var result = executeTool(toolUse);
+                    toolResults.put(result.toContentBlock());
+                }
+                progress.addToolInvocations(toolUses.size());
+                var message = Message.withContentBlocks("user", toolResults);
+                this.memory.addMessage(message);
+            } finally {
+                if (turnEvent.shouldCommit()) {
+                    turnEvent.commit();
+                }
             }
-            for (var toolUse : sequentialTools) {
-                var result = executeTool(toolUse);
-                toolResults.put(result.toContentBlock());
-            }
-            progress.addToolInvocations(toolUses.size());
-            var message = Message.withContentBlocks("user", toolResults);
-            this.memory.addMessage(message);
         }
 
         Log.warning("max iterations reached (" + this.maxIterations + ")");
