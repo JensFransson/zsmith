@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.skills.control.SkillLoadEvent;
 import airhacks.zsmith.skills.entity.Skill;
 
 public class SkillStore {
@@ -55,14 +56,26 @@ public class SkillStore {
         if (!Files.isRegularFile(skillFile)) {
             return;
         }
+        var event = new SkillLoadEvent();
+        event.path = skillFile.toString();
+        event.begin();
         try {
             var raw = Files.readString(skillFile);
             var skill = parseSkillFile(raw, skillDir.getFileName().toString(), skillFile);
             this.skills.put(skill.name(), skill);
+            event.skillName = skill.name();
+            event.contentSize = skill.content().length();
+            event.outcome = "loaded";
         } catch (IOException e) {
             Log.warning("could not read skill file " + skillFile + ": " + e.getMessage());
+            event.outcome = "io_error";
         } catch (IllegalArgumentException e) {
             Log.warning("invalid skill file " + skillFile + ": " + e.getMessage());
+            event.outcome = "parse_error";
+        } finally {
+            if (event.shouldCommit()) {
+                event.commit();
+            }
         }
     }
 
