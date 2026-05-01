@@ -1,4 +1,4 @@
-package airhacks.zsmith.subagent.control;
+package airhacks.zsmith.subagent.entity;
 
 import jdk.jfr.Category;
 import jdk.jfr.Description;
@@ -13,20 +13,20 @@ import jdk.jfr.Name;
 public class SubAgentDispatchEvent extends Event {
 
     @Label("Child Agent")
-    String childAgent;
+    public String childAgent;
 
     @Label("Mode")
-    String mode;
+    public String mode;
 
     @Label("Depth")
-    int depth;
+    public int depth;
 
     @Label("First Run")
-    boolean firstRun;
+    public boolean firstRun;
 
     @Label("Outcome")
-    String outcome;
+    public String outcome;
 
     @Label("Task Size")
-    int taskSize;
+    public int taskSize;
 }

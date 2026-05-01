@@ -1,4 +1,4 @@
-package airhacks.zsmith.episodicmemory.control;
+package airhacks.zsmith.episodicmemory.entity;
 
 import jdk.jfr.Category;
 import jdk.jfr.Description;

@@ -1,4 +1,4 @@
-package airhacks.zsmith.claude.control;
+package airhacks.zsmith.claude.entity;
 
 import jdk.jfr.Category;
 import jdk.jfr.Description;
@@ -13,26 +13,26 @@ import jdk.jfr.Name;
 public class ClaudeAPICallEvent extends Event {
 
     @Label("Model")
-    String model;
+    public String model;
 
     @Label("Fallback Attempt")
-    boolean fallback;
+    public boolean fallback;
 
     @Label("HTTP Status")
-    int statusCode;
+    public int statusCode;
 
     @Label("Stop Reason")
-    String stopReason;
+    public String stopReason;
 
     @Label("Input Tokens")
-    int inputTokens;
+    public int inputTokens;
 
     @Label("Output Tokens")
-    int outputTokens;
+    public int outputTokens;
 
     @Label("Cache Read Tokens")
-    int cacheReadTokens;
+    public int cacheReadTokens;
 
     @Label("Cache Creation Tokens")
-    int cacheCreationTokens;
+    public int cacheCreationTokens;
 }

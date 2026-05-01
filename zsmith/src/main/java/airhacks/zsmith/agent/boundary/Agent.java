@@ -12,8 +12,8 @@ import java.util.concurrent.Executors;
 
 import org.json.JSONArray;
 
-import airhacks.zsmith.agent.control.AgentTurnEvent;
 import airhacks.zsmith.agent.control.Version;
+import airhacks.zsmith.agent.entity.AgentTurnEvent;
 import airhacks.zsmith.claude.control.Claude;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
@@ -33,8 +33,8 @@ import airhacks.zsmith.tools.boundary.ToolProfiles;
 import airhacks.zsmith.tools.control.Console;
 import airhacks.zsmith.tools.control.LaunchAppTool;
 import airhacks.zsmith.tools.control.Tool;
-import airhacks.zsmith.tools.control.ToolInvocationEvent;
 import airhacks.zsmith.tools.control.ToolPermission;
+import airhacks.zsmith.tools.entity.ToolInvocationEvent;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
 

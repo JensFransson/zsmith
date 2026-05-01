@@ -1,4 +1,4 @@
-package airhacks.zsmith.skills.control;
+package airhacks.zsmith.skills.entity;
 
 import jdk.jfr.Category;
 import jdk.jfr.Description;

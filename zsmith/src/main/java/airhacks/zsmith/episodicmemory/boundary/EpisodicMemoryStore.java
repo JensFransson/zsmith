@@ -11,8 +11,8 @@ import java.util.Objects;
 
 import org.json.JSONArray;
 
-import airhacks.zsmith.episodicmemory.control.MemoryAccessEvent;
 import airhacks.zsmith.episodicmemory.entity.Episode;
+import airhacks.zsmith.episodicmemory.entity.MemoryAccessEvent;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;

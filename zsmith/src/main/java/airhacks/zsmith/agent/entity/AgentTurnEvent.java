@@ -1,4 +1,4 @@
-package airhacks.zsmith.agent.control;
+package airhacks.zsmith.agent.entity;
 
 import jdk.jfr.Category;
 import jdk.jfr.Description;

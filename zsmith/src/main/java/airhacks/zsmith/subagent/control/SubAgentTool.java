@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.agent.boundary.Agent;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.subagent.entity.SubAgentDispatchEvent;
 import airhacks.zsmith.tools.control.Tool;
 
 public class SubAgentTool implements Tool {

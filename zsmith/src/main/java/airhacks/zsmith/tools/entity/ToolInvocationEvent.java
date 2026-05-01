@@ -1,4 +1,4 @@
-package airhacks.zsmith.tools.control;
+package airhacks.zsmith.tools.entity;
 
 import jdk.jfr.Category;
 import jdk.jfr.Description;

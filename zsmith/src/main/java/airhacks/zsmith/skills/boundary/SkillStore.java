@@ -10,8 +10,8 @@ import java.util.stream.Collectors;
 
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
-import airhacks.zsmith.skills.control.SkillLoadEvent;
 import airhacks.zsmith.skills.entity.Skill;
+import airhacks.zsmith.skills.entity.SkillLoadEvent;
 
 public class SkillStore {
 
