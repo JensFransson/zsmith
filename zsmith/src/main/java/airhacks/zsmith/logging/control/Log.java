@@ -20,7 +20,8 @@ public enum Log {
     MEMORY("🧠", Color.YELLOW, System.out),
     REQUEST("📤", Color.GREEN, System.out, "log.request"),
     RESPONSE("📥", Color.VIOLET, System.out, "log.response"),
-    LLM("🧩", Color.CYAN, System.out, "log.llm");
+    LLM("🧩", Color.CYAN, System.out, "log.llm"),
+    TOKENS("🪙", Color.YELLOW, System.out);
 
     private PrintStream out;
 
@@ -150,6 +151,10 @@ public enum Log {
 
     public static void llm(String message) {
         Log.LLM.out(message);
+    }
+
+    public static void tokens(String message) {
+        Log.TOKENS.out(message);
     }
 
     public static void clearScreen() {

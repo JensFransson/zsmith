@@ -147,14 +147,22 @@ public interface Claude {
         var event = new ClaudeAPICallEvent();
         event.begin();
         var response = send(message);
+        event.model = model;
+        event.fallback = fallback;
+        event.statusCode = response.statusCode();
+        populateUsage(event, response);
+        logTokens(event);
         if (event.shouldCommit()) {
-            event.model = model;
-            event.fallback = fallback;
-            event.statusCode = response.statusCode();
-            populateUsage(event, response);
             event.commit();
         }
         return response;
+    }
+
+    static void logTokens(ClaudeAPICallEvent event) {
+        if (event.statusCode != 200) return;
+        Log.tokens("in=%d out=%d cache_read=%d cache_create=%d".formatted(
+            event.inputTokens, event.outputTokens,
+            event.cacheReadTokens, event.cacheCreationTokens));
     }
 
     static void populateUsage(ClaudeAPICallEvent event, HttpResponse<String> response) {
