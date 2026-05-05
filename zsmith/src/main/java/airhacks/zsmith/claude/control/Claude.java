@@ -24,24 +24,28 @@ public interface Claude {
     int MAX_TOKENS = 4000;
     String ANTHROPIC_VERSION = ZCfg.requiredString("anthropic.version");
     String ANTHROPIC_API_KEY = ZCfg.requiredString("anthropic.api.key");
-    Models defaultModel = Models.CLAUDE_46_OPUS;
+    Models defaultModel = Models.CLAUDE_47_OPUS;
     String fallbackModelName = "claude-sonnet-4-6";
 
     enum Models {
-        CLAUDE_47_OPUS("claude-opus-4-7"),
+        CLAUDE_47_OPUS("claude-opus-4-7", false),
         CLAUDE_46_OPUS("claude-opus-4-6"),
-        CLAUDE_46_SONNET(Claude.fallbackModelName),
-        CLAUDE_45_OPUS("claude-opus-4-5-20251101");
+        CLAUDE_46_SONNET(Claude.fallbackModelName);
 
         private String modelName;
         private String fallbackModelName;
+        private boolean supportsTemperature;
 
-        Models(String modelName,String fallbackModelName) {
+        Models(String modelName, String fallbackModelName, boolean supportsTemperature) {
             this.fallbackModelName = fallbackModelName;
             this.modelName = modelName;
+            this.supportsTemperature = supportsTemperature;
+        }
+        Models(String modelName, boolean supportsTemperature) {
+            this(modelName, Claude.fallbackModelName, supportsTemperature);
         }
         Models(String modelName) {
-            this(modelName,Claude.fallbackModelName);
+            this(modelName, Claude.fallbackModelName, true);
         }
 
         public String modelName() {
@@ -50,6 +54,10 @@ public interface Claude {
 
         public String fallbackModelName(){
             return this.fallbackModelName;
+        }
+
+        public boolean supportsTemperature() {
+            return this.supportsTemperature;
         }
 
         boolean matches(String partialName) {
@@ -109,12 +117,14 @@ public interface Claude {
     }
 
     static JSONObject claudeMessage(JSONArray messages, float temperature, String system) {
-        return new JSONObject()
+        var payload = new JSONObject()
                 .put("max_tokens", MAX_TOKENS)
                 .put("messages", messages)
-                .put("temperature", temperature)
                 .put("system", system);
-
+        if (currentModel.supportsTemperature()) {
+            payload.put("temperature", temperature);
+        }
+        return payload;
     }
 
     static JSONArray messagePrompt(String user) {
@@ -140,6 +150,9 @@ public interface Claude {
             Log.error("claude is overloaded, retrying with fallback model: %s".formatted(currentModel.fallbackModelName()));
             var fallbackMessage = replaceModel(message, currentModel.modelName(), currentModel.fallbackModelName());
             body = sendInstrumented(fallbackMessage, currentModel.fallbackModelName(), true);
+        }
+        if (body.statusCode() != 200) {
+            throw new IllegalStateException("claude API error %d: %s".formatted(body.statusCode(), body.body()));
         }
         return body.body();
     }
