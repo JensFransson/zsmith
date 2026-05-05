@@ -28,24 +28,23 @@ public interface Claude {
     String fallbackModelName = "claude-sonnet-4-6";
 
     enum Models {
-        CLAUDE_47_OPUS("claude-opus-4-7", false),
-        CLAUDE_46_OPUS("claude-opus-4-6"),
-        CLAUDE_46_SONNET(Claude.fallbackModelName);
+        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, false, true, true),
+        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, true, true, true),
+        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, true, true, true);
 
         private String modelName;
         private String fallbackModelName;
         private boolean supportsTemperature;
+        private boolean supportsEffort;
+        private boolean supportsAdaptiveThinking;
 
-        Models(String modelName, String fallbackModelName, boolean supportsTemperature) {
-            this.fallbackModelName = fallbackModelName;
+        Models(String modelName, String fallbackModelName, boolean supportsTemperature,
+               boolean supportsEffort, boolean supportsAdaptiveThinking) {
             this.modelName = modelName;
+            this.fallbackModelName = fallbackModelName;
             this.supportsTemperature = supportsTemperature;
-        }
-        Models(String modelName, boolean supportsTemperature) {
-            this(modelName, Claude.fallbackModelName, supportsTemperature);
-        }
-        Models(String modelName) {
-            this(modelName, Claude.fallbackModelName, true);
+            this.supportsEffort = supportsEffort;
+            this.supportsAdaptiveThinking = supportsAdaptiveThinking;
         }
 
         public String modelName() {
@@ -58,6 +57,14 @@ public interface Claude {
 
         public boolean supportsTemperature() {
             return this.supportsTemperature;
+        }
+
+        public boolean supportsEffort() {
+            return this.supportsEffort;
+        }
+
+        public boolean supportsAdaptiveThinking() {
+            return this.supportsAdaptiveThinking;
         }
 
         boolean matches(String partialName) {
@@ -124,7 +131,34 @@ public interface Claude {
         if (currentModel.supportsTemperature()) {
             payload.put("temperature", temperature);
         }
+        var thinking = thinkingConfig();
+        if (thinking != null) {
+            payload.put("thinking", thinking);
+        }
+        var outputConfig = outputConfig();
+        if (outputConfig != null) {
+            payload.put("output_config", outputConfig);
+        }
         return payload;
+    }
+
+    static JSONObject thinkingConfig() {
+        if (!currentModel.supportsAdaptiveThinking()) return null;
+        var mode = ZCfg.string("claude.thinking", null);
+        if (mode == null || mode.isBlank()) return null;
+        var thinking = new JSONObject().put("type", mode);
+        var display = ZCfg.string("claude.thinking.display", null);
+        if (display != null && !display.isBlank() && "adaptive".equals(mode)) {
+            thinking.put("display", display);
+        }
+        return thinking;
+    }
+
+    static JSONObject outputConfig() {
+        if (!currentModel.supportsEffort()) return null;
+        var effort = ZCfg.string("claude.effort", null);
+        if (effort == null || effort.isBlank()) return null;
+        return new JSONObject().put("effort", effort);
     }
 
     static JSONArray messagePrompt(String user) {
