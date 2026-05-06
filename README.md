@@ -186,6 +186,35 @@ void main() {
 
 No package declaration, no class wrapper — Java 25 implicit classes keep the script minimal. Install system-wide by copying the jar and script to a PATH directory, adjusting the `--class-path` accordingly.
 
+A minimal calculator agent — see [`examples/calculator`](examples/calculator):
+
+```java
+#!/usr/bin/java --class-path=../zsmith/zbo/zsmith.jar  --source 25
+
+import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.tools.boundary.Tools;
+
+void main() {
+
+var calculator = new Agent("calculator", """
+        You are a calculator assistant.
+        1. Ask the user for a math expression.
+        2. Use the calculator tool to evaluate it.
+        3. Show the result to the user.
+        4. Loop until the user types 'quit'.
+        """)
+        .withTools(Tools.USER_QUESTION, Tools.USER_MESSAGE, Tools.CALCULATOR);
+
+calculator.act();
+}
+```
+
+Run it directly:
+
+```bash
+./examples/calculator
+```
+
 ## Skills
 
 Skills are reusable prompt snippets stored as `SKILL.md` files. Each skill uses frontmatter for metadata:
