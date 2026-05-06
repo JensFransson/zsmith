@@ -215,6 +215,27 @@ Run it directly:
 ./examples/calculator
 ```
 
+### JFR Configuration
+
+zsmith emits JDK Flight Recorder events for every agent turn, Claude API call, tool invocation, sub-agent dispatch, skill load, and memory access — all under the `zsmith` category. To record them while running the calculator, add `-XX:StartFlightRecording` to the shebang:
+
+```java
+#!/usr/bin/java -XX:StartFlightRecording=filename=calculator.jfr,dumponexit=true,settings=profile --class-path=../zsmith/zbo/zsmith.jar --source 25
+```
+
+Open `calculator.jfr` in JDK Mission Control and filter the event browser by category `zsmith` to see:
+
+| Event | Category | What it captures |
+|-------|----------|------------------|
+| `airhacks.zsmith.agent.Turn` | `zsmith / agent` | One iteration of the chat loop with stop reason and tool counts |
+| `airhacks.zsmith.claude.APICall` | `zsmith / claude` | HTTP call to the Anthropic Messages API with token usage |
+| `airhacks.zsmith.tools.Invocation` | `zsmith / tools` | Single tool execution with outcome and result size |
+| `airhacks.zsmith.subagent.Dispatch` | `zsmith / subagent` | Delegation to a sub-agent |
+| `airhacks.zsmith.skills.Load` | `zsmith / skills` | Skill read from disk during `SkillStore` init |
+| `airhacks.zsmith.memory.Access` | `zsmith / memory` | Read or write of a persistent memory store |
+
+For a focused recording, pass a custom `.jfc` file enabling only the `airhacks.zsmith.*` events via `settings=zsmith.jfc`.
+
 ## Skills
 
 Skills are reusable prompt snippets stored as `SKILL.md` files. Each skill uses frontmatter for metadata:
