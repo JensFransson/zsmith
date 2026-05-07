@@ -2,6 +2,7 @@ package airhacks.zsmith.tools.control;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -89,10 +90,16 @@ public class LaunchAppTool implements Tool {
 
     List<String> buildCommandLine(String arguments) {
         var parts = new ArrayList<String>();
-        parts.add(this.command);
+        parts.addAll(tokenize(this.command));
         if (arguments != null && !arguments.isBlank()) {
-            parts.addAll(List.of(arguments.trim().split("\\s+")));
+            parts.addAll(tokenize(arguments));
         }
         return parts;
+    }
+
+    static List<String> tokenize(String input) {
+        return Arrays.stream(input.trim().split(" "))
+                .filter(s -> !s.isEmpty())
+                .toList();
     }
 }

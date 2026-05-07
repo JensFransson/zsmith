@@ -27,4 +27,9 @@ void main() {
     var badResult = badTool.execute(new JSONObject().put("arguments", "test"));
     assert badResult.contains("Error") : "expected error but got: " + badResult;
 
+    // command string may carry inline flags — they must be tokenised and executed
+    var inlineFlagsTool = new LaunchAppTool("echo_with_flag", "echo with -n", "echo -n");
+    var inlineResult = inlineFlagsTool.execute(new JSONObject().put("arguments", "hello"));
+    assert "hello".equals(inlineResult) : "expected 'hello' (echo -n suppresses newline) but got: " + inlineResult;
+
 }
