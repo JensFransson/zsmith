@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpClient.Redirect;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 
@@ -15,7 +16,7 @@ public class LinkCheckerTool implements Tool {
 
     static final int CONNECT_TIMEOUT_SECONDS = 10;
     static final int REQUEST_TIMEOUT_SECONDS = 10;
-    static final int MAX_BODY_LENGTH = 5000;
+    static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
     private final HttpClient httpClient;
 
@@ -36,7 +37,7 @@ public class LinkCheckerTool implements Tool {
 
     @Override
     public String description() {
-        return "Checks a URL and returns response information including status code, content type, and body preview";
+        return "Verifies a URL is reachable. Returns status code, final URL after redirects, and content type. Use fetch_url to retrieve page or API content.";
     }
 
     enum Field { url }
@@ -65,26 +66,11 @@ public class LinkCheckerTool implements Tool {
         }
 
         try {
-            var request = HttpRequest.newBuilder()
-                    .uri(uri)
-                    .timeout(Duration.ofSeconds(REQUEST_TIMEOUT_SECONDS))
-                    .GET()
-                    .build();
-
-            var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            var statusCode = response.statusCode();
-            var contentType = response.headers()
-                    .firstValue("Content-Type")
-                    .orElse("unknown");
-            var body = response.body();
-            var truncatedBody = body.length() > MAX_BODY_LENGTH
-                    ? body.substring(0, MAX_BODY_LENGTH)
-                    : body;
-
-            return "Status: %d\nContent-Type: %s\nBody (first 5000 chars):\n%s"
-                    .formatted(statusCode, contentType, truncatedBody);
-
+            var response = send(uri, "HEAD");
+            if (response.statusCode() == 405 || response.statusCode() == 501) {
+                response = send(uri, "GET");
+            }
+            return format(response);
         } catch (HttpTimeoutException e) {
             return "Error: Connection timed out";
         } catch (IOException e) {
@@ -95,5 +81,22 @@ public class LinkCheckerTool implements Tool {
         } catch (Exception e) {
             return "Error: " + e.getMessage();
         }
+    }
+
+    HttpResponse<Void> send(URI uri, String method) throws IOException, InterruptedException {
+        var request = HttpRequest.newBuilder()
+                .uri(uri)
+                .timeout(Duration.ofSeconds(REQUEST_TIMEOUT_SECONDS))
+                .header("User-Agent", USER_AGENT)
+                .header("Accept", "*/*")
+                .method(method, HttpRequest.BodyPublishers.noBody())
+                .build();
+        return httpClient.send(request, BodyHandlers.discarding());
+    }
+
+    static String format(HttpResponse<?> response) {
+        var contentType = response.headers().firstValue("Content-Type").orElse("unknown");
+        return "Status: %d\nFinal-URL: %s\nContent-Type: %s"
+                .formatted(response.statusCode(), response.uri(), contentType);
     }
 }

@@ -383,7 +383,8 @@ var agent = new Agent("coordinator")
 | `WriteFileTool` | `write_file` | Writes content to a file within the sandbox directory |
 | `ListFilesTool` | `list_files` | Lists all files within the sandbox directory |
 | `ReadAnyFileTool` | `read_any_file` | Reads a file from any location on the filesystem |
-| `LinkCheckerTool` | `check_link` | Checks a URL and returns response information including status code, content type, and body preview |
+| `LinkCheckerTool` | `check_link` | Verifies a URL is reachable; returns status code, final URL after redirects, and content type |
+| `FetchUrlTool` | `fetch_url` | Fetches a URL with a browser User-Agent and returns status, content type, and up to 20000 chars of the body |
 | `UserConfirmationTool` | `user_confirmation` | Asks the user a yes/no question and returns the answer |
 | `UserQuestionTool` | `user_question` | Asks the user a question and returns the typed answer |
 | `UserMessageTool` | `user_message` | Presents a message to the user |
