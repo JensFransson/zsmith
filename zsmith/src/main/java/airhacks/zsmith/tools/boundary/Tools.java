@@ -5,6 +5,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.tools.control.CalculatorTool;
 import airhacks.zsmith.tools.control.CurrentTimeTool;
 import airhacks.zsmith.tools.control.ExecuteScriptTool;
+import airhacks.zsmith.tools.control.FetchUrlTool;
 import airhacks.zsmith.tools.control.LinkCheckerTool;
 import airhacks.zsmith.tools.control.ReadAnyFileTool;
 import airhacks.zsmith.tools.control.ReadClipboardTool;
@@ -22,6 +23,7 @@ public enum Tools implements Tool {
     WRITE_CLIPBOARD(new WriteClipboardTool()),
     READ_ANY_FILE(new ReadAnyFileTool()),
     LINK_CHECKER(new LinkCheckerTool()),
+    FETCH_URL(new FetchUrlTool()),
     USER_CONFIRMATION(new UserConfirmationTool()),
     USER_MESSAGE(new UserMessageTool()),
     USER_QUESTION(new UserQuestionTool()),
