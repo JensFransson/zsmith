@@ -13,6 +13,7 @@ import airhacks.zsmith.tools.control.Tool;
 import airhacks.zsmith.tools.control.UserConfirmationTool;
 import airhacks.zsmith.tools.control.UserMessageTool;
 import airhacks.zsmith.tools.control.UserQuestionTool;
+import airhacks.zsmith.tools.control.WriteAnyFileTool;
 import airhacks.zsmith.tools.control.WriteClipboardTool;
 
 public enum Tools implements Tool {
@@ -22,6 +23,7 @@ public enum Tools implements Tool {
     READ_CLIPBOARD(new ReadClipboardTool()),
     WRITE_CLIPBOARD(new WriteClipboardTool()),
     READ_ANY_FILE(new ReadAnyFileTool()),
+    WRITE_ANY_FILE(new WriteAnyFileTool()),
     LINK_CHECKER(new LinkCheckerTool()),
     FETCH_URL(new FetchUrlTool()),
     USER_CONFIRMATION(new UserConfirmationTool()),

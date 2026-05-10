@@ -7,6 +7,7 @@ import airhacks.zsmith.tools.control.ListFilesTool;
 import airhacks.zsmith.tools.control.ReadAnyFileTool;
 import airhacks.zsmith.tools.control.ReadFileTool;
 import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.WriteAnyFileTool;
 import airhacks.zsmith.tools.control.WriteFileTool;
 
 /**
@@ -33,7 +34,8 @@ public interface ToolProfiles {
 
     static List<Tool> fileIO(String agentName) {
         var sandbox = new SandboxedFileSystem(ZCfg.sandboxPath(agentName));
-        return List.of(new ReadFileTool(sandbox), new WriteFileTool(sandbox), new ListFilesTool(sandbox), new ReadAnyFileTool());
+        return List.of(new ReadFileTool(sandbox), new WriteFileTool(sandbox), new ListFilesTool(sandbox),
+                new ReadAnyFileTool(), new WriteAnyFileTool());
     }
 
     static List<Tool> all() {

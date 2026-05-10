@@ -3,6 +3,7 @@ package airhacks.zsmith.tools.boundary;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import airhacks.zsmith.logging.control.Log;
 
@@ -68,7 +69,11 @@ public class SandboxedFileSystem {
     }
 
     public void writeFile(String relativePath, String content) {
-        Log.debug("Writing file: " + relativePath);
+        writeFile(relativePath, content, false);
+    }
+
+    public void writeFile(String relativePath, String content, boolean append) {
+        Log.debug((append ? "Appending to file: " : "Writing file: ") + relativePath);
         Path resolved;
         try {
             resolved = resolve(relativePath);
@@ -82,11 +87,17 @@ public class SandboxedFileSystem {
                 Log.debug("Creating directories: " + parent);
                 Files.createDirectories(parent);
             }
-            Files.writeString(resolved, content);
-            Log.debug("Wrote " + content.length() + " chars to " + relativePath);
+            if (append) {
+                Files.writeString(resolved, content,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.APPEND);
+            } else {
+                Files.writeString(resolved, content);
+            }
+            Log.debug((append ? "Appended " : "Wrote ") + content.length() + " chars to " + relativePath);
         } catch (IOException e) {
             Log.error("Could not write file: " + relativePath, e);
-            throw new RuntimeException("Error: Could not write file");
+            throw new RuntimeException("Error: Could not write file: " + e.getMessage(), e);
         }
     }
 
