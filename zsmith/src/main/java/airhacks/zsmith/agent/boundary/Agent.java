@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -176,6 +177,10 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
 
     public Agent withSkills(String path) {
         return withSkills(new SkillStore(List.of(Path.of(path))));
+    }
+
+    public Agent withSkillsNamed(String... names) {
+        return withSkills(SkillStore.forAgent(this.name).filtered(Set.of(names)));
     }
 
     public Agent withSkills(SkillStore store) {

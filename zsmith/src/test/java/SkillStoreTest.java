@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import java.util.Objects;
+import java.util.Set;
 
 import airhacks.zsmith.skills.boundary.SkillStore;
 
@@ -17,6 +18,9 @@ void main() throws IOException {
     emptyDirectoryProducesEmptyCatalog();
     nonExistentDirectoryIsIgnored();
     loadReturnsNullForUnknownSkill();
+    filteredKeepsOnlyNamedSkills();
+    filteredIgnoresUnknownNames();
+    filteredEmptySetProducesEmptyStore();
 }
 
 void loadSkillWithFrontmatter() throws IOException {
@@ -158,6 +162,68 @@ void loadReturnsNullForUnknownSkill() throws IOException {
     } finally {
         deleteRecursively(tempDir);
     }
+}
+
+void filteredKeepsOnlyNamedSkills() throws IOException {
+    var tempDir = Files.createTempDirectory("zunit-skillstore");
+    try {
+        writeSkill(tempDir, "alpha", "alpha description", "alpha content");
+        writeSkill(tempDir, "beta", "beta description", "beta content");
+        writeSkill(tempDir, "gamma", "gamma description", "gamma content");
+
+        var store = new SkillStore(List.of(tempDir));
+        var filtered = store.filtered(Set.of("alpha", "gamma"));
+
+        assert filtered.allSkills().size() == 2 : "expected 2 skills but got " + filtered.allSkills().size();
+        assert filtered.load("alpha") != null : "alpha should be present";
+        assert filtered.load("gamma") != null : "gamma should be present";
+        assert filtered.load("beta") == null : "beta should have been filtered out";
+    } finally {
+        deleteRecursively(tempDir);
+    }
+}
+
+void filteredIgnoresUnknownNames() throws IOException {
+    var tempDir = Files.createTempDirectory("zunit-skillstore");
+    try {
+        writeSkill(tempDir, "alpha", "alpha description", "alpha content");
+
+        var store = new SkillStore(List.of(tempDir));
+        var filtered = store.filtered(Set.of("alpha", "missing"));
+
+        assert filtered.allSkills().size() == 1 : "expected 1 skill but got " + filtered.allSkills().size();
+        assert filtered.load("alpha") != null : "alpha should be present";
+        assert filtered.load("missing") == null : "missing should not be present";
+    } finally {
+        deleteRecursively(tempDir);
+    }
+}
+
+void filteredEmptySetProducesEmptyStore() throws IOException {
+    var tempDir = Files.createTempDirectory("zunit-skillstore");
+    try {
+        writeSkill(tempDir, "alpha", "alpha description", "alpha content");
+
+        var store = new SkillStore(List.of(tempDir));
+        var filtered = store.filtered(Set.of());
+
+        assert filtered.allSkills().isEmpty() : "expected empty filtered store";
+        assert "".equals(filtered.catalog()) : "expected empty catalog but got: " + filtered.catalog();
+    } finally {
+        deleteRecursively(tempDir);
+    }
+}
+
+static void writeSkill(Path baseDir, String name, String description, String content) throws IOException {
+    var skillDir = baseDir.resolve(name);
+    Files.createDirectories(skillDir);
+    Files.writeString(skillDir.resolve("SKILL.md"), """
+            ---
+            name: %s
+            description: %s
+            ---
+            %s
+            """.formatted(name, description, content));
 }
 
 static void deleteRecursively(Path path) throws IOException {

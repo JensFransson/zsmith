@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import airhacks.zsmith.configuration.control.ZCfg;
@@ -26,6 +27,23 @@ public class SkillStore {
             scanDirectory(dir);
         }
         Log.info("skills loaded: " + this.skills.size());
+    }
+
+    SkillStore(Map<String, Skill> skills) {
+        this.skills = new LinkedHashMap<>(skills);
+    }
+
+    public SkillStore filtered(Set<String> names) {
+        var retained = new LinkedHashMap<String, Skill>();
+        for (var name : names) {
+            var skill = this.skills.get(name);
+            if (skill == null) {
+                Log.warning("skill not found, skipped from filter: " + name);
+                continue;
+            }
+            retained.put(name, skill);
+        }
+        return new SkillStore(retained);
     }
 
     public static SkillStore forAgent(String agentName) {
