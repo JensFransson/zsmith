@@ -24,16 +24,21 @@ public class WriteFileTool implements Tool {
 
     @Override
     public String description() {
-        return "Writes content to a file within the sandbox directory";
+        return "Writes content to a file inside the agent's sandbox directory. "
+                + "Path must be relative to the sandbox root; absolute paths and \"..\" segments are rejected. "
+                + "Overwrites the file by default; pass append=\"true\" to append. "
+                + "Creates missing parent directories. "
+                + "Use write_any_file for paths outside the sandbox.";
     }
 
-    enum Field { path, content }
+    enum Field { path, content, append }
 
     @Override
     public String inputSchema() {
         return Tool.schema(
-                Prop.string(Field.path, "Relative path to the file to write"),
-                Prop.string(Field.content, "Content to write to the file")
+                Prop.string(Field.path, "Relative path to the file to write (sandboxed)"),
+                Prop.string(Field.content, "Content to write to the file"),
+                Prop.stringEnum(Field.append, "Append to existing file instead of overwriting", "true", "false").optional()
         );
     }
 
@@ -46,13 +51,15 @@ public class WriteFileTool implements Tool {
             return "Error: Missing required parameter: content";
         }
         var path = input.getString(Field.path.name());
+        var append = input.has(Field.append.name())
+                && Boolean.parseBoolean(input.getString(Field.append.name()));
         try {
-            this.fs.writeFile(path, input.getString(Field.content.name()));
-            return "File written successfully: " + path;
+            this.fs.writeFile(path, input.getString(Field.content.name()), append);
+            return (append ? "Appended to file: " : "File written successfully: ") + path;
         } catch (IllegalArgumentException e) {
-            return "Error: Invalid path";
+            return "Error: Invalid path: " + e.getMessage();
         } catch (RuntimeException e) {
-            return "Error: Could not write file";
+            return e.getMessage() != null ? e.getMessage() : "Error: Could not write file";
         }
     }
 }
