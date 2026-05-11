@@ -21,7 +21,7 @@ import airhacks.zsmith.logging.control.Log;
 
 public interface Claude {
 
-    int MAX_TOKENS = 4000;
+    int MAX_TOKENS = 32000;
     String ANTHROPIC_VERSION = ZCfg.requiredString("anthropic.version");
     String ANTHROPIC_API_KEY = ZCfg.requiredString("anthropic.api.key");
     Models defaultModel = Models.CLAUDE_47_OPUS;
