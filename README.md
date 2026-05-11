@@ -274,6 +274,15 @@ var agent = new Agent()
         .withSkills("path/to/skills");
 ```
 
+Preselected skills — load only the named skills from the default resolution chain:
+
+```java
+var agent = new Agent("planner")
+        .withSkillsNamed("explain", "summarize");
+```
+
+Skills not matching the given names are excluded from the catalog and from `load_skill`.
+
 ## Episodic Memory
 
 Agents store and recall information across conversations using `EpisodicMemoryStore`. Memories are persisted to a JSON file and classified by type: `user`, `feedback`, `project`, `reference`.
