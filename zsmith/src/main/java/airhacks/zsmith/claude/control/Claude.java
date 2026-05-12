@@ -213,9 +213,15 @@ public interface Claude {
 
     static void logTokens(ClaudeAPICallEvent event) {
         if (event.statusCode != 200) return;
-        Log.tokens("in=%d out=%d cache_read=%d cache_create=%d".formatted(
-            event.inputTokens, event.outputTokens,
+        var max = currentModel.maxTokens();
+        var headroom = max - event.outputTokens;
+        Log.tokens("in=%d out=%d/%d (headroom=%d) cache_read=%d cache_create=%d".formatted(
+            event.inputTokens, event.outputTokens, max, headroom,
             event.cacheReadTokens, event.cacheCreationTokens));
+        if (event.outputTokens >= max * 0.9) {
+            Log.warning("output tokens (%d) at %.0f%% of max (%d) — response may be truncated"
+                .formatted(event.outputTokens, 100.0 * event.outputTokens / max, max));
+        }
     }
 
     static void populateUsage(ClaudeAPICallEvent event, HttpResponse<String> response) {
