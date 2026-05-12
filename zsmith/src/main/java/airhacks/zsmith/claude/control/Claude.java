@@ -21,30 +21,31 @@ import airhacks.zsmith.logging.control.Log;
 
 public interface Claude {
 
-    int MAX_TOKENS = 32000;
     String ANTHROPIC_VERSION = ZCfg.requiredString("anthropic.version");
     String ANTHROPIC_API_KEY = ZCfg.requiredString("anthropic.api.key");
     Models defaultModel = Models.CLAUDE_47_OPUS;
     String fallbackModelName = "claude-sonnet-4-6";
 
     enum Models {
-        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, false, true, true),
-        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, true, true, true),
-        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, true, true, true);
+        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, false, true, true, 32_000),
+        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, true, true, true, 32_000),
+        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, true, true, true, 64_000);
 
         private String modelName;
         private String fallbackModelName;
         private boolean supportsTemperature;
         private boolean supportsEffort;
         private boolean supportsAdaptiveThinking;
+        private int maxTokens;
 
         Models(String modelName, String fallbackModelName, boolean supportsTemperature,
-               boolean supportsEffort, boolean supportsAdaptiveThinking) {
+               boolean supportsEffort, boolean supportsAdaptiveThinking, int maxTokens) {
             this.modelName = modelName;
             this.fallbackModelName = fallbackModelName;
             this.supportsTemperature = supportsTemperature;
             this.supportsEffort = supportsEffort;
             this.supportsAdaptiveThinking = supportsAdaptiveThinking;
+            this.maxTokens = maxTokens;
         }
 
         public String modelName() {
@@ -65,6 +66,10 @@ public interface Claude {
 
         public boolean supportsAdaptiveThinking() {
             return this.supportsAdaptiveThinking;
+        }
+
+        public int maxTokens() {
+            return this.maxTokens;
         }
 
         boolean matches(String partialName) {
@@ -125,7 +130,7 @@ public interface Claude {
 
     static JSONObject claudeMessage(JSONArray messages, float temperature, String system) {
         var payload = new JSONObject()
-                .put("max_tokens", MAX_TOKENS)
+                .put("max_tokens", currentModel.maxTokens())
                 .put("messages", messages)
                 .put("system", system);
         if (currentModel.supportsTemperature()) {
