@@ -75,7 +75,59 @@ anthropic.api.key=sk-ant-...
 anthropic.version=2023-06-01
 ```
 
-The default model is `claude-opus-4-6`. Override via system property:
+### LLM Provider
+
+zsmith ships with two clients, selected at runtime via `llm.provider`:
+
+```properties
+llm.provider=claude     # default — Anthropic Messages API
+# llm.provider=openai   # OpenAI Chat Completions API
+```
+
+Agent code is unchanged either way — request and response are translated internally so the Agent loop only ever sees Anthropic-shaped content blocks.
+
+#### Claude endpoint
+
+By default, requests go to `https://api.anthropic.com/v1/messages`. To point at a local Anthropic-compatible endpoint:
+
+```properties
+claude.scheme=http
+claude.host=localhost
+claude.port=8080
+```
+
+`claude.port` is optional — omit it to use the scheme default. `claude.scheme` defaults to `https`, `claude.host` to `api.anthropic.com`. The path `/v1/messages` is fixed.
+
+#### OpenAI endpoint
+
+By default, requests go to `https://api.openai.com/v1/chat/completions`. Configurable knobs:
+
+```properties
+openai.api.key=sk-...      # optional — omitted Authorization header when blank (useful for local servers)
+openai.model=gpt-4o        # default
+openai.max.tokens=4096     # default
+openai.scheme=https        # default
+openai.host=api.openai.com # default
+openai.port=                # default unset (uses scheme default port)
+```
+
+The OpenAI client has no fallback model — unlike Claude's 529→fallback retry, OpenAI errors propagate directly.
+
+To point at a local Ollama server:
+
+```properties
+llm.provider=openai
+openai.host=localhost
+openai.port=11434
+openai.scheme=http
+openai.model=llama3.1
+```
+
+LM Studio (default port 1234), llama.cpp `--api`, and vLLM expose the same Chat Completions shape and work identically.
+
+### Model
+
+The default Claude model is `claude-opus-4-6`. Override via system property:
 
 ```bash
 java -Dmodel=sonnet -cp zbo/zsmith.jar MyAgent.java

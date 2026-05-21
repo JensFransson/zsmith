@@ -15,7 +15,7 @@ import org.json.JSONArray;
 
 import airhacks.zsmith.agent.control.Version;
 import airhacks.zsmith.agent.entity.AgentTurnEvent;
-import airhacks.zsmith.claude.control.Claude;
+import airhacks.zsmith.llm.control.LLM;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.control.RecallMemoryTool;
@@ -273,12 +273,12 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             turnEvent.begin();
             try {
                 progress.update(iteration + 1);
-                var response = Claude.invoke(
+                var response = LLM.invoke(
                         this.systemPrompt,
                         this.memory.toJSON(),
                         toolDefinitions(),
                         this.temperature);
-                progress.addClaudeInvocation();
+                progress.addLLMInvocation();
 
                 var content = response.getJSONArray("content");
                 var stopReason = response.optString("stop_reason", "end_turn");

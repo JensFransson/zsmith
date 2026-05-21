@@ -21,10 +21,16 @@ import airhacks.zsmith.logging.control.Log;
 
 public interface Claude {
 
-    String ANTHROPIC_VERSION = ZCfg.requiredString("anthropic.version");
-    String ANTHROPIC_API_KEY = ZCfg.requiredString("anthropic.api.key");
     Models defaultModel = Models.CLAUDE_47_OPUS;
     String fallbackModelName = "claude-sonnet-4-6";
+
+    static String apiKey() {
+        return ZCfg.requiredString("anthropic.api.key");
+    }
+
+    static String apiVersion() {
+        return ZCfg.requiredString("anthropic.version");
+    }
 
     enum Models {
         CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, false, true, true, 32_000),
@@ -96,8 +102,16 @@ public interface Claude {
     }
 
     HttpClient client = HttpClient.newHttpClient();
-    URI uri = URI.create("https://api.anthropic.com/v1/messages");
+    URI uri = endpoint();
     Models currentModel = Models.fromSystemProperty();
+
+    static URI endpoint() {
+        var scheme = ZCfg.string("claude.scheme", "https");
+        var host = ZCfg.string("claude.host", "api.anthropic.com");
+        var port = ZCfg.integer("claude.port", -1);
+        var authority = port > 0 ? host + ":" + port : host;
+        return URI.create("%s://%s/v1/messages".formatted(scheme, authority));
+    }
 
     static JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
         var payloadJSON = claudeMessage(messages, temperature, system);
@@ -249,9 +263,9 @@ public interface Claude {
     static HttpResponse<String> send(String message) {
         var request = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))
-                .header("x-api-key", ANTHROPIC_API_KEY)
+                .header("x-api-key", apiKey())
                 .header("content-type", "application/json")
-                .header("anthropic-version", ANTHROPIC_VERSION)
+                .header("anthropic-version", apiVersion())
                 .build();
         try {
             return client.send(request, BodyHandlers.ofString());
