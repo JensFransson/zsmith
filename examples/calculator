@@ -7,7 +7,7 @@ void main() {
 
 var calculator = new Agent("calculator", """
 You are a calculator assistant.
-1. Ask the user for a math expression.
+1. Use the user_question tool to ask the user for a math expression.
 2. Use the calculator tool to evaluate it.
 3. Show the result to the user.
 4. Loop until the user types 'quit'.
