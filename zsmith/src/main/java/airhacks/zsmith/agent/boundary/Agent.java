@@ -20,6 +20,7 @@ import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.control.RecallMemoryTool;
 import airhacks.zsmith.episodicmemory.control.StoreMemoryTool;
+import airhacks.zsmith.errors.control.Errors;
 import airhacks.zsmith.http.boundary.AgentHttpServer;
 import airhacks.zsmith.http.boundary.ChatEngine;
 import airhacks.zsmith.logging.control.Log;
@@ -266,6 +267,17 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         this.memory.addUserMessage(userMessage);
 
         var progress = new ProgressBar(this.maxIterations);
+        try {
+            return chatLoop(progress);
+        } catch (RuntimeException e) {
+            var summary = Errors.summarize(e);
+            Log.error(summary);
+            progress.summary();
+            return summary;
+        }
+    }
+
+    String chatLoop(ProgressBar progress) {
         for (int iteration = 0; iteration < this.maxIterations; iteration++) {
             var turnEvent = new AgentTurnEvent();
             turnEvent.agentName = this.name;
