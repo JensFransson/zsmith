@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.skills.control.SkillParser;
 import airhacks.zsmith.skills.entity.Skill;
 import airhacks.zsmith.skills.entity.SkillLoadEvent;
 
@@ -79,7 +80,7 @@ public class SkillStore {
         event.begin();
         try {
             var raw = Files.readString(skillFile);
-            var skill = parseSkillFile(raw, skillDir.getFileName().toString(), skillFile);
+            var skill = SkillParser.parse(raw, skillDir.getFileName().toString(), skillFile);
             this.skills.put(skill.name(), skill);
             event.skillName = skill.name();
             event.contentSize = skill.content().length();
@@ -95,37 +96,6 @@ public class SkillStore {
                 event.commit();
             }
         }
-    }
-
-    static Skill parseSkillFile(String raw, String directoryName, Path path) {
-        String name = directoryName;
-        String description = null;
-        String content;
-
-        if (raw.startsWith("---")) {
-            var endIndex = raw.indexOf("---", 3);
-            if (endIndex > 3) {
-                var frontmatter = raw.substring(3, endIndex).strip();
-                content = raw.substring(endIndex + 3).strip();
-
-                for (var line : frontmatter.lines().toList()) {
-                    var colonIndex = line.indexOf(':');
-                    if (colonIndex <= 0) continue;
-                    var key = line.substring(0, colonIndex).strip();
-                    var value = line.substring(colonIndex + 1).strip();
-                    switch (key) {
-                        case "name" -> name = value;
-                        case "description" -> description = value;
-                    }
-                }
-            } else {
-                content = raw;
-            }
-        } else {
-            content = raw;
-        }
-
-        return new Skill(name, description, content, path);
     }
 
     public Skill load(String name) {
