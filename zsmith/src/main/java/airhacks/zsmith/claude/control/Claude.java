@@ -21,8 +21,8 @@ import airhacks.zsmith.logging.control.Log;
 
 public interface Claude {
 
-    Models defaultModel = Models.CLAUDE_47_OPUS;
-    String fallbackModelName = "claude-sonnet-4-6";
+    Models defaultModel = Models.CLAUDE_48_OPUS;
+    String fallbackModelName = "claude-sonnet-4-7";
 
     static String apiKey() {
         return ZCfg.requiredString("anthropic.api.key");
@@ -33,8 +33,9 @@ public interface Claude {
     }
 
     enum Models {
+        CLAUDE_48_OPUS("claude-opus-4-8", Claude.fallbackModelName, false, true, true, 32_000),
         CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, false, true, true, 32_000),
-        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, true, true, true, 32_000),
+        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, false, true, true, 32_000),
         CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, true, true, true, 64_000);
 
         private String modelName;
