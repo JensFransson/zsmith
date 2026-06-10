@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import org.json.JSONArray;
 
 import airhacks.zsmith.agent.control.Version;
+import airhacks.zsmith.agent.entity.AgentDefaults;
 import airhacks.zsmith.agent.entity.AgentTurnEvent;
 import airhacks.zsmith.llm.control.LLM;
 import airhacks.zsmith.configuration.control.ZCfg;
@@ -45,41 +46,40 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     
     public static final String version = Version.current();
 
-    static final String DEFAULT_NAME = "zsmith";
-    static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
-    static final int DEFAULT_MAX_ITERATIONS = 100;
-    static final float DEFAULT_TEMPERATURE = 0.1f;
-
     static {
         Log.agent("zsmith v" + version);
         ZCfg.loadBaseConfig("zsmith");
     }
 
     public Agent(String name, String systemPrompt) {
+        this(name, systemPrompt, AgentDefaults.fromConfig());
+    }
+
+    private Agent(String name, String systemPrompt, AgentDefaults defaults) {
         this(
-                name != null ? name : DEFAULT_NAME,
-                resolveSystemPrompt(name != null ? name : DEFAULT_NAME, systemPrompt),
+                name != null ? name : defaults.name(),
+                resolveSystemPrompt(name != null ? name : defaults.name(), systemPrompt, defaults),
                 new Memory(),
                 new HashMap<>(),
-                DEFAULT_MAX_ITERATIONS,
-                DEFAULT_TEMPERATURE,
+                defaults.maxIterations(),
+                defaults.temperature(),
                 null);
         ZCfg.loadNamedAgentConfig(this.name);
     }
 
-    static String resolveSystemPrompt(String agentName, String fallback) {
+    static String resolveSystemPrompt(String agentName, String fallback, AgentDefaults defaults) {
         var prompt = SystemPromptLoader.load(ZCfg.APP_NAME, agentName);
         if (prompt != null)
             return prompt;
-        return fallback != null ? fallback : DEFAULT_SYSTEM_PROMPT;
+        return fallback != null ? fallback : defaults.systemPrompt();
     }
 
     public Agent(String name) {
-        this(name, DEFAULT_SYSTEM_PROMPT);
+        this(name, null);
     }
 
     public Agent() {
-        this(DEFAULT_NAME, DEFAULT_SYSTEM_PROMPT);
+        this(null, null);
     }
 
     public Agent withTool(Tool tool) {
