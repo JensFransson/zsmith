@@ -10,6 +10,20 @@ Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and 
 - **Anthropic API key** — set `anthropic.api.key` in `~/.zsmith/app.properties` or as a system property
 - **Build with zb** — run `./zb.sh` to produce `zbo/zsmith.jar` (no Maven/Gradle needed)
 
+## Installation
+
+Fetch the latest prebuilt `zsmith.jar` into `./zbo/` without cloning or building:
+
+```bash
+curl -O https://raw.githubusercontent.com/AdamBien/zsmith/main/zsinstall
+chmod +x zsinstall
+./zsinstall
+```
+
+`zsinstall` is a single-file Java 25 script that downloads the latest release asset from GitHub into `./zbo/zsmith.jar` — matching the `-cp zbo/zsmith.jar` shebang used by the example agents. Re-run any time to upgrade.
+
+Based on the [`java-cli-script`](https://airails.dev) skill from [airails.dev](https://airails.dev) — single-file, zero-dependency, shebang-launched Java 25 utilities.
+
 ## Usage
 
 ```java
