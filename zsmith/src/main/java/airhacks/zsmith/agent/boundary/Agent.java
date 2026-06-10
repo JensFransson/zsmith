@@ -176,7 +176,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         return withSkills(SkillStore.forAgent(this.name));
     }
 
-    public Agent withSkills(String path) {
+    public Agent withSkillsFromDirectory(String path) {
         return withSkills(new SkillStore(List.of(Path.of(path))));
     }
 
