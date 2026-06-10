@@ -187,7 +187,7 @@ public interface Claude {
      * ...
      */
     static String invoke(String message) {
-        Log.agent("using claude model: %s".formatted(currentModel.modelName()));
+        Log.agent("requesting claude model: %s".formatted(currentModel.modelName()));
         var body = sendInstrumented(message, currentModel.modelName(), false);
         if (body.statusCode() == 529) {
             Log.error("claude is overloaded, retrying with fallback model: %s".formatted(currentModel.fallbackModelName()));
@@ -235,6 +235,11 @@ public interface Claude {
         try {
             var json = new JSONObject(response.body());
             event.stopReason = json.optString("stop_reason", null);
+            var servedModel = json.optString("model", null);
+            if (servedModel != null && !servedModel.isBlank()) {
+                Log.agent("served by claude model: %s".formatted(servedModel));
+                event.model = servedModel;
+            }
             var usage = json.optJSONObject("usage");
             if (usage != null) {
                 event.inputTokens = usage.optInt("input_tokens");
