@@ -47,8 +47,8 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
 
     static final String DEFAULT_NAME = "zsmith";
     static final String DEFAULT_SYSTEM_PROMPT = "You are a helpful assistant.";
-    static final int DEFAULT_MAX_ITERATIONS = 20;
-    static final float DEFAULT_TEMPERATURE = 0.7f;
+    static final int DEFAULT_MAX_ITERATIONS = 100;
+    static final float DEFAULT_TEMPERATURE = 0.1f;
 
     static {
         Log.agent("zsmith v" + version);
