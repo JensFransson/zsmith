@@ -32,27 +32,24 @@ public interface Claude {
         return ZCfg.requiredString("anthropic.version");
     }
 
+    enum Capability { TEMPERATURE, EFFORT, ADAPTIVE_THINKING }
+
     enum Models {
-        CLAUDE_48_OPUS("claude-opus-4-8", Claude.fallbackModelName, false, true, true, 32_000),
-        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, false, true, true, 32_000),
-        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, false, true, true, 32_000),
-        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, true, true, true, 64_000);
+        CLAUDE_48_OPUS("claude-opus-4-8", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
+        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
+        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
+        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, 64_000, EnumSet.allOf(Capability.class));
 
         private String modelName;
         private String fallbackModelName;
-        private boolean supportsTemperature;
-        private boolean supportsEffort;
-        private boolean supportsAdaptiveThinking;
         private int maxTokens;
+        private EnumSet<Capability> capabilities;
 
-        Models(String modelName, String fallbackModelName, boolean supportsTemperature,
-               boolean supportsEffort, boolean supportsAdaptiveThinking, int maxTokens) {
+        Models(String modelName, String fallbackModelName, int maxTokens, EnumSet<Capability> capabilities) {
             this.modelName = modelName;
             this.fallbackModelName = fallbackModelName;
-            this.supportsTemperature = supportsTemperature;
-            this.supportsEffort = supportsEffort;
-            this.supportsAdaptiveThinking = supportsAdaptiveThinking;
             this.maxTokens = maxTokens;
+            this.capabilities = capabilities;
         }
 
         public String modelName() {
@@ -63,16 +60,8 @@ public interface Claude {
             return this.fallbackModelName;
         }
 
-        public boolean supportsTemperature() {
-            return this.supportsTemperature;
-        }
-
-        public boolean supportsEffort() {
-            return this.supportsEffort;
-        }
-
-        public boolean supportsAdaptiveThinking() {
-            return this.supportsAdaptiveThinking;
+        public boolean supports(Capability capability) {
+            return this.capabilities.contains(capability);
         }
 
         public int maxTokens() {
@@ -148,7 +137,7 @@ public interface Claude {
                 .put("max_tokens", currentModel.maxTokens())
                 .put("messages", messages)
                 .put("system", system);
-        if (currentModel.supportsTemperature()) {
+        if (currentModel.supports(Capability.TEMPERATURE)) {
             payload.put("temperature", temperature);
         }
         var thinking = thinkingConfig();
@@ -163,7 +152,7 @@ public interface Claude {
     }
 
     static JSONObject thinkingConfig() {
-        if (!currentModel.supportsAdaptiveThinking()) return null;
+        if (!currentModel.supports(Capability.ADAPTIVE_THINKING)) return null;
         var mode = ZCfg.string("claude.thinking", null);
         if (mode == null || mode.isBlank()) return null;
         var thinking = new JSONObject().put("type", mode);
@@ -175,7 +164,7 @@ public interface Claude {
     }
 
     static JSONObject outputConfig() {
-        if (!currentModel.supportsEffort()) return null;
+        if (!currentModel.supports(Capability.EFFORT)) return null;
         var effort = ZCfg.string("claude.effort", null);
         if (effort == null || effort.isBlank()) return null;
         return new JSONObject().put("effort", effort);
