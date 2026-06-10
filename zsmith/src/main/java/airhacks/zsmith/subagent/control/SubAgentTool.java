@@ -92,7 +92,15 @@ public class SubAgentTool implements Tool {
                 event.outcome = "depth_exceeded";
                 return "Error: Maximum sub-agent depth (%d) exceeded".formatted(this.maxDepth);
             }
-            var task = input.getString(Field.task.name());
+            var taskKey = Field.task.name();
+            if (!input.has(taskKey) || input.optString(taskKey, "").isBlank()) {
+                Log.subagent("sub-agent '%s' invoked without '%s' — received keys: %s"
+                        .formatted(this.subAgent.name(), taskKey, input.keySet()));
+                event.outcome = "missing_task";
+                return "Error: missing required '%s' field. Provide the full task description as a string under '%s'."
+                        .formatted(taskKey, taskKey);
+            }
+            var task = input.getString(taskKey);
             event.taskSize = task.length();
             Log.subagent("delegating to sub-agent '%s': %s".formatted(this.subAgent.name(), task));
             try {
