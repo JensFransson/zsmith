@@ -36,15 +36,20 @@ public class SkillStore {
 
     public SkillStore filtered(Set<String> names) {
         var retained = new LinkedHashMap<String, Skill>();
-        for (var name : names) {
+        for (var raw : names) {
+            var name = normalizeName(raw);
             var skill = this.skills.get(name);
             if (skill == null) {
-                Log.warning("skill not found, skipped from filter: " + name);
+                Log.warning("skill not found, skipped from filter: " + raw);
                 continue;
             }
             retained.put(name, skill);
         }
         return new SkillStore(retained);
+    }
+
+    static String normalizeName(String raw) {
+        return raw == null ? "" : raw.trim().replace("/", "");
     }
 
     public static SkillStore forAgent(String agentName) {

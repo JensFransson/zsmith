@@ -238,9 +238,11 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
                 }
             }
             try {
+                Log.tool("→ %s %s".formatted(toolUse.name(), truncate(String.valueOf(toolUse.input()), 200)));
                 var start = System.currentTimeMillis();
                 var result = tool.execute(toolUse.input());
                 var duration = System.currentTimeMillis() - start;
+                Log.tool("← %s %s".formatted(toolUse.name(), result == null ? "<null>" : truncate(result, 200)));
                 Log.toolEnd("%s %dms".formatted(toolUse.name(), duration));
                 event.outcome = "success";
                 event.resultSize = result == null ? 0 : result.length();
@@ -272,12 +274,15 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         } catch (RuntimeException e) {
             var summary = Errors.summarize(e);
             Log.error(summary);
-            progress.summary();
             return summary;
         }
     }
 
     String chatLoop(ProgressBar progress) {
+        var toolCounts = new HashMap<String, Integer>();
+        String lastText = null;
+        String exitReason = "max_iterations";
+        try {
         for (int iteration = 0; iteration < this.maxIterations; iteration++) {
             var turnEvent = new AgentTurnEvent();
             turnEvent.agentName = this.name;
@@ -299,17 +304,20 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
                 var textParts = extractTextContent(content);
                 var toolUses = extractToolUses(content);
                 turnEvent.toolUseCount = toolUses.size();
+                if (!textParts.isEmpty()) {
+                    lastText = String.join("\n", textParts);
+                }
+                toolUses.forEach(tu -> toolCounts.merge(tu.name(), 1, Integer::sum));
 
                 if (toolUses.isEmpty() || !"tool_use".equals(stopReason)) {
                     turnEvent.terminal = true;
+                    exitReason = stopReason;
                     if (!textParts.isEmpty()) {
                         var assistantResponse = String.join("\n", textParts);
                         this.memory.addAssistantMessage(assistantResponse);
                         Log.answer(assistantResponse);
-                        progress.summary();
                         return assistantResponse;
                     }
-                    progress.summary();
                     return "";
                 }
 
@@ -357,8 +365,19 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         }
 
         Log.warning("max iterations reached (" + this.maxIterations + ")");
-        progress.summary();
         return "Max iterations reached";
+        } finally {
+            Log.agent("loop end (%s) memory=%d messages tool_counts=%s"
+                    .formatted(exitReason, this.memory.size(), toolCounts));
+            if (lastText != null) {
+                Log.agent("last assistant text: " + truncate(lastText, 500));
+            }
+            progress.summary();
+        }
+    }
+
+    static String truncate(String text, int max) {
+        return text.length() <= max ? text : text.substring(0, max) + "… (+%d chars)".formatted(text.length() - max);
     }
 
     public void clearMemory() {
