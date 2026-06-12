@@ -24,6 +24,10 @@ public interface LightMetal {
         return ZCfg.integer(MAX_TOKENS_PROPERTY, DEFAULT_MAX_TOKENS);
     }
 
+    static boolean available() {
+        return ChatHolder.lookup() != null;
+    }
+
     static JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
         var payload = anthropicPayload(system, messages, tools, temperature);
         var payloadString = payload.toString();
@@ -35,7 +39,13 @@ public interface LightMetal {
         event.model = payload.getString("model");
         Log.agent("invoking lightmetal model: " + event.model);
 
-        var answer = ChatHolder.get().apply(payloadString);
+        var chat = ChatHolder.lookup();
+        if (chat == null) {
+            throw new IllegalStateException(
+                    "no UnaryOperator<String> service found — add lightmetal.jar to the classpath "
+                            + "(see https://github.com/AdamBien/lightmetal)");
+        }
+        var answer = chat.apply(payloadString);
         var response = new JSONObject(answer);
         populateUsage(event, response);
         logTokens(event);
@@ -53,7 +63,7 @@ public interface LightMetal {
         return invoke(system, messages, null, temperature);
     }
 
-    private static JSONObject anthropicPayload(String system, JSONArray messages, JSONArray tools, float temperature) {
+    static JSONObject anthropicPayload(String system, JSONArray messages, JSONArray tools, float temperature) {
         var payload = new JSONObject()
                 .put("model", modelPath())
                 .put("system", system == null ? "" : system)
@@ -66,7 +76,7 @@ public interface LightMetal {
         return payload;
     }
 
-    private static void populateUsage(LightMetalAPICallEvent event, JSONObject response) {
+    static void populateUsage(LightMetalAPICallEvent event, JSONObject response) {
         event.stopReason = response.optString("stop_reason", null);
         var usage = response.optJSONObject("usage");
         if (usage != null) {
@@ -75,7 +85,7 @@ public interface LightMetal {
         }
     }
 
-    private static void logTokens(LightMetalAPICallEvent event) {
+    static void logTokens(LightMetalAPICallEvent event) {
         var max = maxTokens();
         var headroom = max - event.outputTokens;
         Log.tokens("in=%d out=%d/%d (headroom=%d)".formatted(
@@ -89,36 +99,40 @@ public interface LightMetal {
     final class ChatHolder {
 
         static volatile UnaryOperator<String> instance;
+        static volatile boolean discovered;
 
-        static UnaryOperator<String> get() {
-            var local = instance;
-            if (local != null) return local;
+        static UnaryOperator<String> lookup() {
+            if (discovered) return instance;
             synchronized (ChatHolder.class) {
-                if (instance == null) {
+                if (!discovered) {
                     instance = discover();
+                    discovered = true;
                 }
                 return instance;
             }
         }
 
         @SuppressWarnings("unchecked")
-        private static UnaryOperator<String> discover() {
-            var found = ServiceLoader.load(UnaryOperator.class)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException(
-                            "no UnaryOperator<String> service found — add lightmetal.jar to the classpath "
-                                    + "(see https://github.com/AdamBien/lightmetal)"));
-            var chat = (UnaryOperator<String>) found;
+        static UnaryOperator<String> discover() {
+            var found = ServiceLoader.load(UnaryOperator.class).findFirst().orElse(null);
+            if (found == null) return null;
             if (found instanceof AutoCloseable closeable) {
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    try {
-                        closeable.close();
-                    } catch (Exception ignored) {
-                    }
-                }, "lightmetal-shutdown"));
+                registerShutdownHook(closeable);
             }
             Log.agent("lightmetal provider discovered: " + found.getClass().getName());
-            return chat;
+            return (UnaryOperator<String>) found;
+        }
+
+        static void registerShutdownHook(AutoCloseable closeable) {
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> closeQuietly(closeable), "lightmetal-shutdown"));
+        }
+
+        static void closeQuietly(AutoCloseable closeable) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                Log.error("lightmetal close failed", e);
+            }
         }
     }
 }

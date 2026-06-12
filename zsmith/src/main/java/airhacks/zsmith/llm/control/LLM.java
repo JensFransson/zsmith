@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.claude.control.Claude;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.lightmetal.control.LightMetal;
+import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.openai.control.OpenAI;
 
 public interface LLM {
@@ -33,6 +34,13 @@ public interface LLM {
         public abstract JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature);
 
         public static Provider fromConfig() {
+            if (LightMetal.available()) {
+                var configured = ZCfg.string("llm.provider", null);
+                if (configured != null && !"lightmetal".equalsIgnoreCase(configured)) {
+                    Log.agent("lightmetal.jar on classpath — overriding llm.provider=" + configured);
+                }
+                return LIGHTMETAL;
+            }
             var configured = ZCfg.string("llm.provider", "claude");
             try {
                 return Provider.valueOf(configured.toUpperCase());

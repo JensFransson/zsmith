@@ -142,10 +142,9 @@ LM Studio (default port 1234), llama.cpp `--api`, and vLLM expose the same Chat 
 
 #### LightMetal (embedded local inference)
 
-[LightMetal](https://github.com/AdamBien/lightmetal) is a Java 25 GGUF runner that talks to Apple Silicon's Metal via the Foreign Function & Memory API. zsmith reaches it via the `UnaryOperator<String>` SPI (`lm.generation.boundary.LightMetalChat`), so the only compile-time dependency is `java.base` — drop `lightmetal.jar` on the classpath at runtime and the provider is discovered automatically. The GGUF is loaded once on the first call and reused for every subsequent turn.
+[LightMetal](https://github.com/AdamBien/lightmetal) is a Java 25 GGUF runner that talks to Apple Silicon's Metal via the Foreign Function & Memory API. zsmith reaches it via the `UnaryOperator<String>` SPI (`lm.generation.boundary.LightMetalChat`), so the only compile-time dependency is `java.base` — drop `lightmetal.jar` on the classpath at runtime and the provider is **auto-selected**, overruling `llm.provider` whatever it is set to. The classpath is the explicit signal; no extra config is needed. The GGUF is loaded once on the first call and reused for every subsequent turn.
 
 ```properties
-llm.provider=lightmetal
 lightmetal.model=/abs/path/to/model.gguf   # required — GGUF file
 lightmetal.max.tokens=4096                 # optional — default 4096
 ```
