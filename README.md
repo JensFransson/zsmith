@@ -91,11 +91,12 @@ anthropic.version=2023-06-01
 
 ### LLM Provider
 
-zsmith ships with two clients, selected at runtime via `llm.provider`:
+zsmith ships with three clients, selected at runtime via `llm.provider`:
 
 ```properties
-llm.provider=claude     # default — Anthropic Messages API
-# llm.provider=openai   # OpenAI Chat Completions API
+llm.provider=claude         # default — Anthropic Messages API
+# llm.provider=openai       # OpenAI Chat Completions API
+# llm.provider=lightmetal   # local GGUF inference via lightmetal.jar (in-process)
 ```
 
 Agent code is unchanged either way — request and response are translated internally so the Agent loop only ever sees Anthropic-shaped content blocks.
@@ -138,6 +139,31 @@ openai.model=llama3.1
 ```
 
 LM Studio (default port 1234), llama.cpp `--api`, and vLLM expose the same Chat Completions shape and work identically.
+
+#### LightMetal (embedded local inference)
+
+[LightMetal](https://github.com/AdamBien/lightmetal) is a Java 25 GGUF runner that talks to Apple Silicon's Metal via the Foreign Function & Memory API. zsmith reaches it via the `UnaryOperator<String>` SPI (`lm.generation.boundary.LightMetalChat`), so the only compile-time dependency is `java.base` — drop `lightmetal.jar` on the classpath at runtime and the provider is discovered automatically. The GGUF is loaded once on the first call and reused for every subsequent turn.
+
+```properties
+llm.provider=lightmetal
+lightmetal.model=/abs/path/to/model.gguf   # required — GGUF file
+lightmetal.max.tokens=4096                 # optional — default 4096
+```
+
+LightMetal natively understands Anthropic-shaped `tools` and emits `tool_use` content blocks, so the Agent loop works the same as with Claude. Run agent scripts with `--enable-native-access=ALL-UNNAMED` so the FFM call into `libllama.dylib` is allowed:
+
+```java
+#!/usr/bin/java --class-path=zbo/zsmith.jar:lightmetal.jar --enable-native-access=ALL-UNNAMED --source 25
+```
+
+For benchmarking or remote inference you can also point the **Claude** client at LightMetal's HTTP server (`-serve` mode) — its `/v1/messages` endpoint is byte-compatible with Anthropic's:
+
+```properties
+llm.provider=claude
+claude.scheme=http
+claude.host=localhost
+claude.port=8080
+```
 
 ### Model
 

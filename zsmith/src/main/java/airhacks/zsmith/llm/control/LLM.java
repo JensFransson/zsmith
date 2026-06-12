@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import airhacks.zsmith.claude.control.Claude;
 import airhacks.zsmith.configuration.control.ZCfg;
+import airhacks.zsmith.lightmetal.control.LightMetal;
 import airhacks.zsmith.openai.control.OpenAI;
 
 public interface LLM {
@@ -20,6 +21,12 @@ public interface LLM {
             @Override
             public JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
                 return OpenAI.invoke(system, messages, tools, temperature);
+            }
+        },
+        LIGHTMETAL {
+            @Override
+            public JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
+                return LightMetal.invoke(system, messages, tools, temperature);
             }
         };
 
