@@ -306,6 +306,14 @@ Run it directly:
 ./examples/calculator
 ```
 
+A file-driven variant — see [`examples/fileCalculator`](examples/fileCalculator) — asks the user for input and output paths, reads a math expression from the input file, evaluates it, and writes the numeric result to the output file. Its shebang also lists `lightmetal.jar` on the classpath:
+
+```java
+#!/usr/bin/java --class-path=../zsmith/zbo/zsmith.jar:../../lightmetal/zbo/lightmetal.jar --enable-native-access=ALL-UNNAMED --source 25
+```
+
+The `../../lightmetal/zbo/lightmetal.jar` entry is **optional**. Drop it (and `--enable-native-access`) to run against Claude. Keep it to auto-select [LightMetal](#lightmetal-embedded-local-inference) for fully on-device inference — no other config change required, just set `lightmetal.model`.
+
 ### JFR Configuration
 
 zsmith emits JDK Flight Recorder events for every agent turn, Claude API call, tool invocation, sub-agent dispatch, skill load, and memory access — all under the `zsmith` category. To record them while running the calculator, add `-XX:StartFlightRecording` to the shebang:
