@@ -1,5 +1,6 @@
 package airhacks.zsmith.lightmetal.control;
 
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.function.UnaryOperator;
 
@@ -16,8 +17,9 @@ public interface LightMetal {
     String MAX_TOKENS_PROPERTY = "lightmetal.max.tokens";
     int DEFAULT_MAX_TOKENS = 4096;
 
-    static String modelPath() {
-        return ZCfg.requiredString(MODEL_PROPERTY);
+    static Optional<String> modelOverride() {
+        var value = ZCfg.string(MODEL_PROPERTY);
+        return (value == null || value.isBlank()) ? Optional.empty() : Optional.of(value);
     }
 
     static int maxTokens() {
@@ -36,7 +38,7 @@ public interface LightMetal {
 
         var event = new LightMetalAPICallEvent();
         event.begin();
-        event.model = payload.getString("model");
+        event.model = payload.optString("model", "(from lightmetal config)");
         Log.agent("invoking lightmetal model: " + event.model);
 
         var chat = ChatHolder.lookup();
@@ -47,6 +49,7 @@ public interface LightMetal {
         }
         var answer = chat.apply(payloadString);
         var response = new JSONObject(answer);
+        event.model = response.optString("model", event.model);
         populateUsage(event, response);
         logTokens(event);
         if (event.shouldCommit()) {
@@ -65,11 +68,14 @@ public interface LightMetal {
 
     static JSONObject anthropicPayload(String system, JSONArray messages, JSONArray tools, float temperature) {
         var payload = new JSONObject()
-                .put("model", modelPath())
                 .put("system", system == null ? "" : system)
                 .put("messages", messages)
                 .put("max_tokens", maxTokens())
                 .put("temperature", temperature);
+        // Omit `model` in the default case so lightmetal owns it via its own ZCfg.
+        // Only include it when zsmith is explicitly overriding (e.g. running a
+        // different GGUF for one agent without touching ~/.lightmetal/app.properties).
+        modelOverride().ifPresent(override -> payload.put("model", override));
         if (tools != null && !tools.isEmpty()) {
             payload.put("tools", tools);
         }
