@@ -3,29 +3,15 @@ package airhacks.zsmith.tools.control;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import org.json.JSONObject;
+public interface CurrentTimeTool {
 
-public class CurrentTimeTool implements Tool {
+    DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    @Override
-    public String toolName() {
-        return "current_time";
-    }
-
-    @Override
-    public String description() {
-        return "Returns the current date and time";
-    }
-
-    @Override
-    public String inputSchema() {
-        return Tool.emptySchema();
-    }
-
-    @Override
-    public String execute(JSONObject input) {
-        var now = LocalDateTime.now();
-        var formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return now.format(formatter);
+    static Tool create() {
+        return Tool.of(
+                "current_time",
+                "Returns the current date and time",
+                Tool.emptySchema(),
+                input -> LocalDateTime.now().format(FORMAT));
     }
 }

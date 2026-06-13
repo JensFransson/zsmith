@@ -18,8 +18,8 @@ import airhacks.zsmith.tools.control.WriteClipboardTool;
 
 public enum Tools implements Tool {
 
-    CALCULATOR(new CalculatorTool()),
-    CURRENT_TIME(new CurrentTimeTool()),
+    CALCULATOR(CalculatorTool.create()),
+    CURRENT_TIME(CurrentTimeTool.create()),
     READ_CLIPBOARD(new ReadClipboardTool()),
     WRITE_CLIPBOARD(new WriteClipboardTool()),
     READ_ANY_FILE(new ReadAnyFileTool()),

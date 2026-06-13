@@ -11,7 +11,7 @@ void main() {
 
     // can be registered alongside other tools
     var multi = new Agent().withSystemPrompt("You are a helpful assistant.")
-            .withTool(new CalculatorTool())
+            .withTool(CalculatorTool.create())
             .withTool(new LinkCheckerTool());
     assert multi.tools().containsKey("check_link") : "agent should contain 'check_link' tool";
     assert multi.tools().containsKey("calculator") : "agent should contain 'calculator' tool";
