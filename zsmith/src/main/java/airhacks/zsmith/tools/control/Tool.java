@@ -1,6 +1,7 @@
 package airhacks.zsmith.tools.control;
 
 import java.util.List;
+import java.util.function.Function;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -45,6 +46,16 @@ public interface Tool {
         public Prop<E> optional() {
             return new Prop<>(name, type, description, enumValues, false);
         }
+    }
+
+    static Tool of(String name, String description, String inputSchema,
+                   Function<JSONObject, String> execute) {
+        record SimpleTool(String toolName, String description, String inputSchema,
+                          Function<JSONObject, String> fn) implements Tool {
+            @Override
+            public String execute(JSONObject input) { return fn.apply(input); }
+        }
+        return new SimpleTool(name, description, inputSchema, execute);
     }
 
     static String emptySchema() {
