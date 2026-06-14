@@ -43,7 +43,7 @@ public class LinkCheckerTool implements Tool {
     enum Field { url }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.url, "The URL to check"));
     }
 

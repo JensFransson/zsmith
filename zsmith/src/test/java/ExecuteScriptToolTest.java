@@ -15,7 +15,7 @@ void main() throws IOException {
         // tool definition
         assert "execute_script".equals(tool.toolName()) : "expected 'execute_script' but got: " + tool.toolName();
         assert !tool.description().isBlank() : "description should not be blank";
-        assert !tool.inputSchema().isBlank() : "inputSchema should not be blank";
+        assert tool.inputSchema().has("properties") : "inputSchema should have properties";
 
         // execute successful script
         var hello = createScript(tempDir, "hello.sh", "#!/bin/sh\necho hello world");

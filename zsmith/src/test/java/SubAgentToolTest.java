@@ -18,8 +18,8 @@ void main() throws Exception {
             : "description should mention agent name: " + tool.description();
 
     // input schema is valid
-    assert !tool.inputSchema().isBlank() : "inputSchema should not be blank";
-    assert tool.inputSchema().contains("task") : "inputSchema should have 'task' field";
+    assert tool.inputSchema().has("properties") : "inputSchema should have properties";
+    assert tool.inputSchema().toString().contains("task") : "inputSchema should have 'task' field";
 
     // tool definition shape
     var definition = tool.toToolDefinition();

@@ -44,7 +44,7 @@ public enum Tools implements Tool {
     public String description() { return delegate.description(); }
 
     @Override
-    public String inputSchema() { return delegate.inputSchema(); }
+    public JSONObject inputSchema() { return delegate.inputSchema(); }
 
     @Override
     public String execute(JSONObject input) { return delegate.execute(input); }

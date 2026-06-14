@@ -51,7 +51,7 @@ public class LaunchAppTool implements Tool {
     enum Field { arguments }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.arguments, "Arguments to pass to the application"));
     }
 

@@ -35,7 +35,7 @@ void main() throws IOException {
         // tool definition
         assert "load_skill".equals(tool.toolName()) : "expected 'load_skill' but got: " + tool.toolName();
         assert !tool.description().isBlank() : "description should not be blank";
-        assert !tool.inputSchema().isBlank() : "inputSchema should not be blank";
+        assert tool.inputSchema().has("properties") : "inputSchema should have properties";
     } finally {
         try (var walk = Files.walk(tempDir)) {
             walk.sorted(Comparator.reverseOrder())

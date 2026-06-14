@@ -20,7 +20,7 @@ public class WriteClipboardTool implements Tool {
     enum Field { text }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.text, "The text to write to the clipboard"));
     }
 

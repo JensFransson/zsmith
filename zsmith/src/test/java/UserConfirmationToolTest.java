@@ -11,7 +11,7 @@ void main() {
     assert tool.description() != null && !tool.description().isBlank() : "description should be non-empty";
 
     // input schema contains question and required
-    var schema = tool.inputSchema();
+    var schema = tool.inputSchema().toString();
     assert schema.contains("\"question\"") : "inputSchema should contain '\"question\"'";
     assert schema.contains("\"required\"") : "inputSchema should contain '\"required\"'";
 

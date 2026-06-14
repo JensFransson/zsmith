@@ -31,7 +31,7 @@ public class UserMessageTool implements Tool {
     enum Field { message }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.message, "The message to present to the user"));
     }
 

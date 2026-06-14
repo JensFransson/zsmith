@@ -15,7 +15,7 @@ void main() {
     assert !tool.description().isBlank() : "description should be non-empty";
 
     // input schema contains url and required
-    var schema = tool.inputSchema();
+    var schema = tool.inputSchema().toString();
     assert schema.contains("\"url\"") : "inputSchema should contain '\"url\"'";
     assert schema.contains("\"required\"") : "inputSchema should contain '\"required\"'";
 

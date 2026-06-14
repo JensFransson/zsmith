@@ -8,7 +8,7 @@ void main() {
     // tool definition
     assert "open_in_editor".equals(tool.toolName()) : "expected 'open_in_editor' but got: " + tool.toolName();
     assert "Opens a file in VS Code".equals(tool.description()) : "unexpected description: " + tool.description();
-    assert !tool.inputSchema().isBlank() : "inputSchema should not be blank";
+    assert tool.inputSchema().has("properties") : "inputSchema should have properties";
 
     // execute with arguments
     var result = tool.execute(new JSONObject().put("arguments", "hello world"));

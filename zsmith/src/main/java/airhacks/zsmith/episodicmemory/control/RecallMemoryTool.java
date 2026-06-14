@@ -30,7 +30,7 @@ public class RecallMemoryTool implements Tool {
     enum Field { type, limit }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(
                 Prop.stringEnum(Field.type, "Optional type to filter memories",
                         "user", "feedback", "project", "reference").optional(),

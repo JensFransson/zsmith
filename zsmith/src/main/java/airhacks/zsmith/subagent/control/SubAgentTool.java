@@ -68,7 +68,7 @@ public class SubAgentTool implements Tool {
     }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(
                 Prop.string(Field.task, "The task to delegate to the sub-agent. Be specific and complete."));
     }

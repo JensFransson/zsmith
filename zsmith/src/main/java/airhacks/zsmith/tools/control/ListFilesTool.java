@@ -28,7 +28,7 @@ public class ListFilesTool implements Tool {
     }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.emptySchema();
     }
 

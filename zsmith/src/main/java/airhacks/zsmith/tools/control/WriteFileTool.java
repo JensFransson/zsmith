@@ -34,7 +34,7 @@ public class WriteFileTool implements Tool {
     enum Field { path, content, append }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(
                 Prop.string(Field.path, "Relative path to the file to write (sandboxed)"),
                 Prop.string(Field.content, "Content to write to the file"),

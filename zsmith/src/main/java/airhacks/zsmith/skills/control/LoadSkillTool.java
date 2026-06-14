@@ -27,7 +27,7 @@ public class LoadSkillTool implements Tool {
     enum Field { name }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.name, "The name of the skill to load"));
     }
 

@@ -21,7 +21,7 @@ public class ReadAnyFileTool implements Tool {
     enum Field { path }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.path, "Absolute path to the file to read"));
     }
 

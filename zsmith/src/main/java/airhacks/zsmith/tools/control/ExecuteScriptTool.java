@@ -36,7 +36,7 @@ public class ExecuteScriptTool implements Tool {
     enum Field { path }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.path, "Path to the script to execute"));
     }
 

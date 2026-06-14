@@ -15,7 +15,7 @@ void main() throws IOException {
     Objects.requireNonNull(tool.description(), "description should not be null");
     assert !tool.description().isBlank() : "description should be non-empty";
 
-    var schema = tool.inputSchema();
+    var schema = tool.inputSchema().toString();
     assert schema.contains("\"path\"") : "inputSchema should contain '\"path\"'";
     assert schema.contains("\"content\"") : "inputSchema should contain '\"content\"'";
     assert schema.contains("\"append\"") : "inputSchema should contain '\"append\"'";

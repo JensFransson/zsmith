@@ -12,7 +12,7 @@ public interface Tool {
 
     String description();
 
-    String inputSchema();
+    JSONObject inputSchema();
 
     String execute(JSONObject input);
 
@@ -22,7 +22,7 @@ public interface Tool {
         return new JSONObject()
                 .put("name", toolName())
                 .put("description", description())
-                .put("input_schema", new JSONObject(inputSchema()));
+                .put("input_schema", inputSchema());
     }
 
     record Prop<E extends Enum<E>>(E name, String type, String description, List<String> enumValues, boolean required) {
@@ -48,9 +48,9 @@ public interface Tool {
         }
     }
 
-    static Tool of(String name, String description, String inputSchema,
+    static Tool of(String name, String description, JSONObject inputSchema,
                    Function<JSONObject, String> execute) {
-        record SimpleTool(String toolName, String description, String inputSchema,
+        record SimpleTool(String toolName, String description, JSONObject inputSchema,
                           Function<JSONObject, String> fn) implements Tool {
             @Override
             public String execute(JSONObject input) { return fn.apply(input); }
@@ -58,12 +58,13 @@ public interface Tool {
         return new SimpleTool(name, description, inputSchema, execute);
     }
 
-    static String emptySchema() {
-        return """
-                {"type":"object","properties":{}}""";
+    static JSONObject emptySchema() {
+        return new JSONObject()
+                .put("type", "object")
+                .put("properties", new JSONObject());
     }
 
-    static String schema(Prop<?>... props) {
+    static JSONObject schema(Prop<?>... props) {
         var properties = new JSONObject();
         var required = new JSONArray();
         for (var prop : props) {
@@ -84,6 +85,6 @@ public interface Tool {
         if (!required.isEmpty()) {
             schema.put("required", required);
         }
-        return schema.toString();
+        return schema;
     }
 }

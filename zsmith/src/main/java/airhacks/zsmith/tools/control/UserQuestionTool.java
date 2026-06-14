@@ -29,7 +29,7 @@ public class UserQuestionTool implements Tool {
     enum Field { question }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(Prop.string(Field.question, "The question to ask the user"));
     }
 

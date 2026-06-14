@@ -34,7 +34,7 @@ public class StoreMemoryTool implements Tool {
     enum Field { content, type }
 
     @Override
-    public String inputSchema() {
+    public JSONObject inputSchema() {
         return Tool.schema(
                 Prop.string(Field.content, "The information to remember"),
                 Prop.stringEnum(Field.type, "The memory type: user, feedback, project, or reference",
