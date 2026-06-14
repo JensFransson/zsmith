@@ -5,7 +5,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.tools.control.LinkCheckerTool;
 
 void main() {
-    var tool = new LinkCheckerTool();
+    var tool = LinkCheckerTool.create();
 
     // tool name is "check_link"
     assert "check_link".equals(tool.toolName()) : "expected 'check_link' but got: " + tool.toolName();

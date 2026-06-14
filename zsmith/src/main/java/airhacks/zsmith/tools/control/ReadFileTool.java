@@ -2,46 +2,32 @@ package airhacks.zsmith.tools.control;
 
 import java.nio.file.Path;
 
-import airhacks.zsmith.tools.boundary.SandboxedFileSystem;
 import org.json.JSONObject;
 
-public class ReadFileTool implements Tool {
+import airhacks.zsmith.tools.boundary.SandboxedFileSystem;
 
-    private final SandboxedFileSystem fs;
-
-    public ReadFileTool(SandboxedFileSystem fs) {
-        this.fs = fs;
-    }
-
-    public static ReadFileTool of(String sandboxPath) {
-        var path = Path.of(sandboxPath);
-        return new ReadFileTool(new SandboxedFileSystem(path));
-    }
-
-    @Override
-    public String toolName() {
-        return "read_file";
-    }
-
-    @Override
-    public String description() {
-        return "Reads the contents of a file within the sandbox directory";
-    }
+public interface ReadFileTool {
 
     enum Field { path }
 
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.path, "Relative path to the file to read"));
+    static Tool of(String sandboxPath) {
+        return create(new SandboxedFileSystem(Path.of(sandboxPath)));
     }
 
-    @Override
-    public String execute(JSONObject input) {
+    static Tool create(SandboxedFileSystem fs) {
+        return Tool.of(
+                "read_file",
+                "Reads the contents of a file within the sandbox directory",
+                Tool.schema(Tool.Prop.string(Field.path, "Relative path to the file to read")),
+                input -> run(input, fs));
+    }
+
+    private static String run(JSONObject input, SandboxedFileSystem fs) {
         if (!input.has(Field.path.name())) {
             return "Error: Missing required parameter: path";
         }
         try {
-            return this.fs.readFile(input.getString(Field.path.name()));
+            return fs.readFile(input.getString(Field.path.name()));
         } catch (IllegalArgumentException e) {
             return "Error: Invalid path";
         }

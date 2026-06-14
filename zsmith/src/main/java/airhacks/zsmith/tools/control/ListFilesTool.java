@@ -3,37 +3,18 @@ package airhacks.zsmith.tools.control;
 import java.nio.file.Path;
 
 import airhacks.zsmith.tools.boundary.SandboxedFileSystem;
-import org.json.JSONObject;
 
-public class ListFilesTool implements Tool {
+public interface ListFilesTool {
 
-    SandboxedFileSystem fs;
-
-    public ListFilesTool(SandboxedFileSystem fs) {
-        this.fs = fs;
+    static Tool of(String sandboxPath) {
+        return create(new SandboxedFileSystem(Path.of(sandboxPath)));
     }
 
-    public static ListFilesTool of(String sandboxPath) {
-        return new ListFilesTool(new SandboxedFileSystem(Path.of(sandboxPath)));
-    }
-
-    @Override
-    public String toolName() {
-        return "list_files";
-    }
-
-    @Override
-    public String description() {
-        return "Lists all files within the sandbox directory";
-    }
-
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.emptySchema();
-    }
-
-    @Override
-    public String execute(JSONObject input) {
-        return this.fs.listFiles();
+    static Tool create(SandboxedFileSystem fs) {
+        return Tool.of(
+                "list_files",
+                "Lists all files within the sandbox directory",
+                Tool.emptySchema(),
+                input -> fs.listFiles());
     }
 }

@@ -50,12 +50,17 @@ public interface Tool {
 
     static Tool of(String name, String description, JSONObject inputSchema,
                    Function<JSONObject, String> execute) {
+        return of(name, description, inputSchema, execute, false);
+    }
+
+    static Tool of(String name, String description, JSONObject inputSchema,
+                   Function<JSONObject, String> execute, boolean parallel) {
         record SimpleTool(String toolName, String description, JSONObject inputSchema,
-                          Function<JSONObject, String> fn) implements Tool {
+                          Function<JSONObject, String> fn, boolean parallel) implements Tool {
             @Override
             public String execute(JSONObject input) { return fn.apply(input); }
         }
-        return new SimpleTool(name, description, inputSchema, execute);
+        return new SimpleTool(name, description, inputSchema, execute, parallel);
     }
 
     static JSONObject emptySchema() {

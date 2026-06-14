@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.tools.control.ExecuteScriptTool;
 
 void main() throws IOException {
-    var tool = new ExecuteScriptTool();
+    var tool = ExecuteScriptTool.create();
     var tempDir = Files.createTempDirectory("zunit-execscript");
     try {
         // tool definition

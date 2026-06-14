@@ -12,43 +12,29 @@ import java.time.Duration;
 
 import org.json.JSONObject;
 
-public class LinkCheckerTool implements Tool {
+public interface LinkCheckerTool {
 
-    static final int CONNECT_TIMEOUT_SECONDS = 10;
-    static final int REQUEST_TIMEOUT_SECONDS = 10;
-    static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+    int CONNECT_TIMEOUT_SECONDS = 10;
+    int REQUEST_TIMEOUT_SECONDS = 10;
+    String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
-    private final HttpClient httpClient;
-
-    public LinkCheckerTool() {
-        this.httpClient = HttpClient.newBuilder()
-                .connectTimeout(Duration.ofSeconds(CONNECT_TIMEOUT_SECONDS))
-                .followRedirects(Redirect.NORMAL)
-                .build();
-    }
-
-    @Override
-    public boolean parallel() { return true; }
-
-    @Override
-    public String toolName() {
-        return "check_link";
-    }
-
-    @Override
-    public String description() {
-        return "Verifies a URL is reachable. Returns status code, final URL after redirects, and content type. Use fetch_url to retrieve page or API content.";
-    }
+    HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(CONNECT_TIMEOUT_SECONDS))
+            .followRedirects(Redirect.NORMAL)
+            .build();
 
     enum Field { url }
 
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.url, "The URL to check"));
+    static Tool create() {
+        return Tool.of(
+                "check_link",
+                "Verifies a URL is reachable. Returns status code, final URL after redirects, and content type. Use fetch_url to retrieve page or API content.",
+                Tool.schema(Tool.Prop.string(Field.url, "The URL to check")),
+                LinkCheckerTool::run,
+                true);
     }
 
-    @Override
-    public String execute(JSONObject input) {
+    private static String run(JSONObject input) {
         if (!input.has(Field.url.name()) || input.getString(Field.url.name()).isBlank()) {
             return "Error: Missing required parameter: url";
         }
@@ -83,7 +69,7 @@ public class LinkCheckerTool implements Tool {
         }
     }
 
-    HttpResponse<Void> send(URI uri, String method) throws IOException, InterruptedException {
+    private static HttpResponse<Void> send(URI uri, String method) throws IOException, InterruptedException {
         var request = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(Duration.ofSeconds(REQUEST_TIMEOUT_SECONDS))
@@ -91,10 +77,10 @@ public class LinkCheckerTool implements Tool {
                 .header("Accept", "*/*")
                 .method(method, HttpRequest.BodyPublishers.noBody())
                 .build();
-        return httpClient.send(request, BodyHandlers.discarding());
+        return HTTP_CLIENT.send(request, BodyHandlers.discarding());
     }
 
-    static String format(HttpResponse<?> response) {
+    private static String format(HttpResponse<?> response) {
         var contentType = response.headers().firstValue("Content-Type").orElse("unknown");
         return "Status: %d\nFinal-URL: %s\nContent-Type: %s"
                 .formatted(response.statusCode(), response.uri(), contentType);

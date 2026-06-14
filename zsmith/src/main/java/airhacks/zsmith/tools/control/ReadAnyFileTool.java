@@ -6,27 +6,19 @@ import java.nio.file.Path;
 
 import org.json.JSONObject;
 
-public class ReadAnyFileTool implements Tool {
-
-    @Override
-    public String toolName() {
-        return "read_any_file";
-    }
-
-    @Override
-    public String description() {
-        return "Reads a file from any location on the filesystem";
-    }
+public interface ReadAnyFileTool {
 
     enum Field { path }
 
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.path, "Absolute path to the file to read"));
+    static Tool create() {
+        return Tool.of(
+                "read_any_file",
+                "Reads a file from any location on the filesystem",
+                Tool.schema(Tool.Prop.string(Field.path, "Absolute path to the file to read")),
+                ReadAnyFileTool::run);
     }
 
-    @Override
-    public String execute(JSONObject input) {
+    private static String run(JSONObject input) {
         if (!input.has(Field.path.name())) {
             return "Error: Missing required parameter: path";
         }

@@ -6,37 +6,23 @@ import org.json.JSONObject;
 
 import airhacks.zsmith.logging.control.Log;
 
-public class UserMessageTool implements Tool {
-
-    private final Consumer<String> messageConsumer;
-
-    public UserMessageTool() {
-        this(Log::user);
-    }
-
-    public UserMessageTool(Consumer<String> messageConsumer) {
-        this.messageConsumer = messageConsumer;
-    }
-
-    @Override
-    public String toolName() {
-        return "user_message";
-    }
-
-    @Override
-    public String description() {
-        return "Presents a message to the user. Use this to display important information, status updates, or notifications.";
-    }
+public interface UserMessageTool {
 
     enum Field { message }
 
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.message, "The message to present to the user"));
+    static Tool create() {
+        return create(Log::user);
     }
 
-    @Override
-    public String execute(JSONObject input) {
+    static Tool create(Consumer<String> messageConsumer) {
+        return Tool.of(
+                "user_message",
+                "Presents a message to the user. Use this to display important information, status updates, or notifications.",
+                Tool.schema(Tool.Prop.string(Field.message, "The message to present to the user")),
+                input -> run(input, messageConsumer));
+    }
+
+    private static String run(JSONObject input, Consumer<String> messageConsumer) {
         if (!input.has(Field.message.name()) || input.getString(Field.message.name()).isEmpty()) {
             return "Error: Missing or empty required parameter: message";
         }

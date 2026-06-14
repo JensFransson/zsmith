@@ -20,16 +20,16 @@ public enum Tools implements Tool {
 
     CALCULATOR(CalculatorTool.create()),
     CURRENT_TIME(CurrentTimeTool.create()),
-    READ_CLIPBOARD(new ReadClipboardTool()),
-    WRITE_CLIPBOARD(new WriteClipboardTool()),
-    READ_ANY_FILE(new ReadAnyFileTool()),
-    WRITE_ANY_FILE(new WriteAnyFileTool()),
-    LINK_CHECKER(new LinkCheckerTool()),
-    FETCH_URL(new FetchUrlTool()),
-    USER_CONFIRMATION(new UserConfirmationTool()),
-    USER_MESSAGE(new UserMessageTool()),
-    USER_QUESTION(new UserQuestionTool()),
-    EXECUTE_SCRIPT(new ExecuteScriptTool());
+    READ_CLIPBOARD(ReadClipboardTool.create()),
+    WRITE_CLIPBOARD(WriteClipboardTool.create()),
+    READ_ANY_FILE(ReadAnyFileTool.create()),
+    WRITE_ANY_FILE(WriteAnyFileTool.create()),
+    LINK_CHECKER(LinkCheckerTool.create()),
+    FETCH_URL(FetchUrlTool.create()),
+    USER_CONFIRMATION(UserConfirmationTool.create()),
+    USER_MESSAGE(UserMessageTool.create()),
+    USER_QUESTION(UserQuestionTool.create()),
+    EXECUTE_SCRIPT(ExecuteScriptTool.create());
 
     private final Tool delegate;
 

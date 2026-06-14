@@ -4,7 +4,7 @@ import airhacks.zsmith.tools.control.UserConfirmationTool;
 
 void main() {
     // tool name is "user_confirmation"
-    var tool = new UserConfirmationTool(prompt -> "yes");
+    var tool = UserConfirmationTool.create(prompt -> "yes");
     assert "user_confirmation".equals(tool.toolName()) : "expected 'user_confirmation' but got: " + tool.toolName();
 
     // description is non-empty
@@ -30,22 +30,22 @@ void main() {
     }
 
     // "yes" input returns "yes"
-    var yesResult = new UserConfirmationTool(prompt -> "yes")
+    var yesResult = UserConfirmationTool.create(prompt -> "yes")
             .execute(new JSONObject().put("question", "Proceed?"));
     assert "yes".equals(yesResult) : "expected 'yes' but got: " + yesResult;
 
     // "y" input returns "yes"
-    var yResult = new UserConfirmationTool(prompt -> "y")
+    var yResult = UserConfirmationTool.create(prompt -> "y")
             .execute(new JSONObject().put("question", "Proceed?"));
     assert "yes".equals(yResult) : "expected 'yes' but got: " + yResult;
 
     // non-affirmative input returns "no"
-    var maybeResult = new UserConfirmationTool(prompt -> "maybe")
+    var maybeResult = UserConfirmationTool.create(prompt -> "maybe")
             .execute(new JSONObject().put("question", "Proceed?"));
     assert "no".equals(maybeResult) : "expected 'no' but got: " + maybeResult;
 
     // explicit "no" returns "no"
-    var noResult = new UserConfirmationTool(prompt -> "no")
+    var noResult = UserConfirmationTool.create(prompt -> "no")
             .execute(new JSONObject().put("question", "Proceed?"));
     assert "no".equals(noResult) : "expected 'no' but got: " + noResult;
 }

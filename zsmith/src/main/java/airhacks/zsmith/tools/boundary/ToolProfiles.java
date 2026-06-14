@@ -34,8 +34,8 @@ public interface ToolProfiles {
 
     static List<Tool> fileIO(String agentName) {
         var sandbox = new SandboxedFileSystem(ZCfg.sandboxPath(agentName));
-        return List.of(new ReadFileTool(sandbox), new WriteFileTool(sandbox), new ListFilesTool(sandbox),
-                new ReadAnyFileTool(), new WriteAnyFileTool());
+        return List.of(ReadFileTool.create(sandbox), WriteFileTool.create(sandbox), ListFilesTool.create(sandbox),
+                ReadAnyFileTool.create(), WriteAnyFileTool.create());
     }
 
     static List<Tool> all() {

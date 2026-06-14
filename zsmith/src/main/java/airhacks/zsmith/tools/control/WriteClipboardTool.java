@@ -5,27 +5,19 @@ import java.awt.datatransfer.StringSelection;
 
 import org.json.JSONObject;
 
-public class WriteClipboardTool implements Tool {
-
-    @Override
-    public String toolName() {
-        return "write_clipboard";
-    }
-
-    @Override
-    public String description() {
-        return "Writes text content to the system clipboard";
-    }
+public interface WriteClipboardTool {
 
     enum Field { text }
 
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.text, "The text to write to the clipboard"));
+    static Tool create() {
+        return Tool.of(
+                "write_clipboard",
+                "Writes text content to the system clipboard",
+                Tool.schema(Tool.Prop.string(Field.text, "The text to write to the clipboard")),
+                WriteClipboardTool::run);
     }
 
-    @Override
-    public String execute(JSONObject input) {
+    private static String run(JSONObject input) {
         try {
             var text = input.getString(Field.text.name());
             var selection = new StringSelection(text);

@@ -112,7 +112,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public Agent withLaunchAppTool(String toolName, String description, String command) {
-        return withTool(new LaunchAppTool(toolName, description, command));
+        return withTool(LaunchAppTool.create(toolName, description, command));
     }
 
     public Agent withLaunchAppTool() {

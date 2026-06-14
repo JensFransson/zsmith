@@ -3,27 +3,17 @@ package airhacks.zsmith.tools.control;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 
-import org.json.JSONObject;
+public interface ReadClipboardTool {
 
-public class ReadClipboardTool implements Tool {
-
-    @Override
-    public String toolName() {
-        return "read_clipboard";
+    static Tool create() {
+        return Tool.of(
+                "read_clipboard",
+                "Reads the current text content from the system clipboard",
+                Tool.emptySchema(),
+                input -> read());
     }
 
-    @Override
-    public String description() {
-        return "Reads the current text content from the system clipboard";
-    }
-
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.emptySchema();
-    }
-
-    @Override
-    public String execute(JSONObject input) {
+    private static String read() {
         try {
             var clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
             var contents = clipboard.getContents(null);

@@ -1,6 +1,7 @@
 package airhacks.zsmith.tools.control;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,67 +12,47 @@ import org.json.JSONObject;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
 
-public class LaunchAppTool implements Tool {
+public interface LaunchAppTool {
 
-    static final int DEFAULT_TIMEOUT_SECONDS = 30;
+    int DEFAULT_TIMEOUT_SECONDS = 30;
 
-    private final String name;
-    private final String toolDescription;
-    private final String command;
-    private final int timeoutSeconds;
+    enum Field { arguments }
 
-    public LaunchAppTool(String name, String description, String command) {
-        this(name, description, command, DEFAULT_TIMEOUT_SECONDS);
+    static Tool create(String name, String description, String command) {
+        return create(name, description, command, DEFAULT_TIMEOUT_SECONDS);
     }
 
-    public LaunchAppTool(String name, String description, String command, int timeoutSeconds) {
-        this.name = name;
-        this.toolDescription = description;
-        this.command = command;
-        this.timeoutSeconds = timeoutSeconds;
+    static Tool create(String name, String description, String command, int timeoutSeconds) {
+        return Tool.of(
+                name,
+                description,
+                Tool.schema(Tool.Prop.string(Field.arguments, "Arguments to pass to the application")),
+                input -> run(input, command, timeoutSeconds));
     }
 
-    public static LaunchAppTool fromConfig() {
-        return new LaunchAppTool(
+    static Tool fromConfig() {
+        return create(
                 ZCfg.requiredString("launch.tool.name"),
                 ZCfg.requiredString("launch.tool.description"),
                 ZCfg.requiredString("launch.command"));
     }
 
-    @Override
-    public String toolName() {
-        return this.name;
-    }
-
-    @Override
-    public String description() {
-        return this.toolDescription;
-    }
-
-    enum Field { arguments }
-
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.arguments, "Arguments to pass to the application"));
-    }
-
-    @Override
-    public String execute(JSONObject input) {
+    private static String run(JSONObject input, String command, int timeoutSeconds) {
         var arguments = input.optString(Field.arguments.name(), "");
-        var commandLine = buildCommandLine(arguments);
+        var commandLine = buildCommandLine(command, arguments);
         try {
             Log.tool("launching: " + String.join(" ", commandLine));
             var process = new ProcessBuilder(commandLine)
-                    .directory(java.nio.file.Path.of(System.getProperty("user.dir")).toFile())
+                    .directory(Path.of(System.getProperty("user.dir")).toFile())
                     .redirectErrorStream(true)
                     .start();
 
             var output = new String(process.getInputStream().readAllBytes());
-            var completed = process.waitFor(this.timeoutSeconds, TimeUnit.SECONDS);
+            var completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
 
             if (!completed) {
                 process.destroyForcibly();
-                return output + "\nError: Command timed out after %ds".formatted(this.timeoutSeconds);
+                return output + "\nError: Command timed out after %ds".formatted(timeoutSeconds);
             }
 
             var exitCode = process.exitValue();
@@ -88,16 +69,16 @@ public class LaunchAppTool implements Tool {
         }
     }
 
-    List<String> buildCommandLine(String arguments) {
+    private static List<String> buildCommandLine(String command, String arguments) {
         var parts = new ArrayList<String>();
-        parts.addAll(tokenize(this.command));
+        parts.addAll(tokenize(command));
         if (arguments != null && !arguments.isBlank()) {
             parts.addAll(tokenize(arguments));
         }
         return parts;
     }
 
-    static List<String> tokenize(String input) {
+    private static List<String> tokenize(String input) {
         return Arrays.stream(input.trim().split(" "))
                 .filter(s -> !s.isEmpty())
                 .toList();

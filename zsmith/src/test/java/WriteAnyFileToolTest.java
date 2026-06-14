@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.tools.control.WriteAnyFileTool;
 
 void main() throws IOException {
-    var tool = new WriteAnyFileTool();
+    var tool = WriteAnyFileTool.create();
 
     assert "write_any_file".equals(tool.toolName()) : "expected 'write_any_file' but got: " + tool.toolName();
 

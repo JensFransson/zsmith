@@ -9,39 +9,25 @@ import org.json.JSONObject;
 
 import airhacks.zsmith.logging.control.Log;
 
-public class ExecuteScriptTool implements Tool {
+public interface ExecuteScriptTool {
 
-    static final int DEFAULT_TIMEOUT_SECONDS = 30;
-
-    private final int timeoutSeconds;
-
-    public ExecuteScriptTool() {
-        this(DEFAULT_TIMEOUT_SECONDS);
-    }
-
-    public ExecuteScriptTool(int timeoutSeconds) {
-        this.timeoutSeconds = timeoutSeconds;
-    }
-
-    @Override
-    public String toolName() {
-        return "execute_script";
-    }
-
-    @Override
-    public String description() {
-        return "Executes a script and returns its output";
-    }
+    int DEFAULT_TIMEOUT_SECONDS = 30;
 
     enum Field { path }
 
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.path, "Path to the script to execute"));
+    static Tool create() {
+        return create(DEFAULT_TIMEOUT_SECONDS);
     }
 
-    @Override
-    public String execute(JSONObject input) {
+    static Tool create(int timeoutSeconds) {
+        return Tool.of(
+                "execute_script",
+                "Executes a script and returns its output",
+                Tool.schema(Tool.Prop.string(Field.path, "Path to the script to execute")),
+                input -> run(input, timeoutSeconds));
+    }
+
+    private static String run(JSONObject input, int timeoutSeconds) {
         var scriptPath = Path.of(input.getString(Field.path.name()));
         if (!Files.isRegularFile(scriptPath)) {
             return "Error: Script not found: " + scriptPath;
@@ -57,11 +43,11 @@ public class ExecuteScriptTool implements Tool {
                     .start();
 
             var output = new String(process.getInputStream().readAllBytes());
-            var completed = process.waitFor(this.timeoutSeconds, TimeUnit.SECONDS);
+            var completed = process.waitFor(timeoutSeconds, TimeUnit.SECONDS);
 
             if (!completed) {
                 process.destroyForcibly();
-                return output + "\nError: Script timed out after %ds".formatted(this.timeoutSeconds);
+                return output + "\nError: Script timed out after %ds".formatted(timeoutSeconds);
             }
 
             var exitCode = process.exitValue();

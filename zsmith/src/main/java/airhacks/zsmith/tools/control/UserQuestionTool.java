@@ -4,37 +4,23 @@ import java.util.function.Function;
 
 import org.json.JSONObject;
 
-public class UserQuestionTool implements Tool {
-
-    private final Function<String, String> promptFunction;
-
-    public UserQuestionTool() {
-        this(Console::prompt);
-    }
-
-    public UserQuestionTool(Function<String, String> promptFunction) {
-        this.promptFunction = promptFunction;
-    }
-
-    @Override
-    public String toolName() {
-        return "user_question";
-    }
-
-    @Override
-    public String description() {
-        return "Asks the user a question and returns the typed answer";
-    }
+public interface UserQuestionTool {
 
     enum Field { question }
 
-    @Override
-    public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.question, "The question to ask the user"));
+    static Tool create() {
+        return create(Console::prompt);
     }
 
-    @Override
-    public String execute(JSONObject input) {
+    static Tool create(Function<String, String> promptFunction) {
+        return Tool.of(
+                "user_question",
+                "Asks the user a question and returns the typed answer",
+                Tool.schema(Tool.Prop.string(Field.question, "The question to ask the user")),
+                input -> run(input, promptFunction));
+    }
+
+    private static String run(JSONObject input, Function<String, String> promptFunction) {
         if (!input.has(Field.question.name()) || input.getString(Field.question.name()).isEmpty()) {
             throw new IllegalArgumentException("Missing or empty required parameter: question");
         }

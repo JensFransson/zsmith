@@ -3,7 +3,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.tools.control.LaunchAppTool;
 
 void main() {
-    var tool = new LaunchAppTool("open_in_editor", "Opens a file in VS Code", "echo");
+    var tool = LaunchAppTool.create("open_in_editor", "Opens a file in VS Code", "echo");
 
     // tool definition
     assert "open_in_editor".equals(tool.toolName()) : "expected 'open_in_editor' but got: " + tool.toolName();
@@ -23,12 +23,12 @@ void main() {
     assert noArgResult.isEmpty() : "expected empty output but got: " + noArgResult;
 
     // non-existent command
-    var badTool = new LaunchAppTool("bad", "bad", "/nonexistent/command");
+    var badTool = LaunchAppTool.create("bad", "bad", "/nonexistent/command");
     var badResult = badTool.execute(new JSONObject().put("arguments", "test"));
     assert badResult.contains("Error") : "expected error but got: " + badResult;
 
     // command string may carry inline flags — they must be tokenised and executed
-    var inlineFlagsTool = new LaunchAppTool("echo_with_flag", "echo with -n", "echo -n");
+    var inlineFlagsTool = LaunchAppTool.create("echo_with_flag", "echo with -n", "echo -n");
     var inlineResult = inlineFlagsTool.execute(new JSONObject().put("arguments", "hello"));
     assert "hello".equals(inlineResult) : "expected 'hello' (echo -n suppresses newline) but got: " + inlineResult;
 
