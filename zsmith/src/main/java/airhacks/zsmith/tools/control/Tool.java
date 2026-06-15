@@ -53,6 +53,11 @@ public interface Tool {
         return of(name, description, inputSchema, execute, false);
     }
 
+    static Tool of(String name, String description,
+                   Function<JSONObject, String> execute) {
+        return of(name, description, emptySchema(), execute, false);
+    }
+
     static Tool of(String name, String description, JSONObject inputSchema,
                    Function<JSONObject, String> execute, boolean parallel) {
         record SimpleTool(String toolName, String description, JSONObject inputSchema,

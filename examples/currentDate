@@ -10,7 +10,6 @@ void main() {
 var currentDate = Tool.of(
         "current_date",
         "Returns the current date in ISO format (yyyy-MM-dd).",
-        Tool.emptySchema(),
         _ -> LocalDate.now().toString());
 
 var printMessage = Tool.of(

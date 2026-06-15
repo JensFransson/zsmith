@@ -316,6 +316,55 @@ A file-driven variant — see [`examples/fileCalculator`](examples/fileCalculato
 
 The `../../lightmetal/zbo/lightmetal.jar` entry is **optional**. Drop it (and `--enable-native-access`) to run against Claude. Keep it to auto-select [LightMetal](#lightmetal-embedded-local-inference) for fully on-device inference — no other config change required, just set `lightmetal.model`.
 
+An inline-tool variant — see [`examples/currentDate`](examples/currentDate) — defines its tools directly in the script via `Tool.of(...)` instead of pulling them from the `Tools` enum:
+
+```java
+#!/usr/bin/java --class-path=../zsmith/zbo/zsmith.jar  --source 25
+
+import java.time.LocalDate;
+
+import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.tools.control.Tool;
+
+void main() {
+
+var currentDate = Tool.of(
+        "current_date",
+        "Returns the current date in ISO format (yyyy-MM-dd).",
+        _ -> LocalDate.now().toString());
+
+var printMessage = Tool.of(
+        "print_user_message",
+        "Prints a message to the user's console.",
+        Tool.schema(Tool.Prop.string(PrintField.message, "The message to print to the user")),
+        input -> {
+            IO.println(input.getString("message"));
+            return "Message printed to user";
+        });
+
+var agent = new Agent("current-date", """
+1. Use the current_date tool to obtain today's date.
+2. Use the print_user_message tool to print the date to the user.
+""")
+.withTools(currentDate, printMessage);
+
+agent.act();
+}
+
+enum PrintField { message }
+```
+
+Run it directly:
+
+```bash
+./examples/currentDate
+```
+
+`Tool.of(...)` is the inline counterpart to implementing the `Tool` interface — useful when a tool is small enough to live next to the agent that uses it. Two overloads are available:
+
+- `Tool.of(name, description, schema, fn)` — full form with an explicit input schema (use `Tool.schema(...)` to declare parameters).
+- `Tool.of(name, description, fn)` — short form for parameter-less tools; the input schema defaults to `Tool.emptySchema()`.
+
 ### JFR Configuration
 
 zsmith emits JDK Flight Recorder events for every agent turn, Claude API call, tool invocation, sub-agent dispatch, skill load, and memory access — all under the `zsmith` category. To record them while running the calculator, add `-XX:StartFlightRecording` to the shebang:
