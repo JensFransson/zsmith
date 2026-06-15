@@ -1,10 +1,15 @@
-#!/usr/bin/java --class-path=../zsmith/zbo/zsmith.jar  --source 25
+#!/usr/bin/java --class-path=../zsmith/zbo/zsmith.jar:./lightmetal.jar  --source 25
 
 import java.time.LocalDate;
 
 import airhacks.zsmith.agent.boundary.Agent;
 import airhacks.zsmith.tools.control.Tool;
 
+/**
+ * When {@code lightmetal.jar} is present on the classpath, zsmith communicates
+ * with LightMetal in-process (no HTTP, no IPC) — both run inside the same JVM
+ * and share the same heap.
+ */
 void main() {
 
 var currentDate = Tool.of(
