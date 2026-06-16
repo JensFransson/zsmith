@@ -143,7 +143,11 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     }
 
     public Agent withEpisodicMemory(EpisodicMemoryStore store) {
-        var agent = new Agent(this.name, this.systemPrompt, this.memory, this.tools, this.maxIterations,
+        var catalog = store.catalog();
+        var enrichedPrompt = catalog.isEmpty()
+                ? this.systemPrompt
+                : this.systemPrompt + "\n\n" + catalog;
+        var agent = new Agent(this.name, enrichedPrompt, this.memory, this.tools, this.maxIterations,
                 this.temperature, store);
         agent.tools.put("store_memory", new StoreMemoryTool(store));
         agent.tools.put("recall_memory", new RecallMemoryTool(store));
