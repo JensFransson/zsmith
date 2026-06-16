@@ -25,11 +25,11 @@ public interface LinkCheckerTool {
 
     enum Field { url }
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "check_link",
                 "Verifies a URL is reachable. Returns status code, final URL after redirects, and content type. Use fetch_url to retrieve page or API content.",
-                Tool.schema(Tool.Prop.string(Field.url, "The URL to check")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.url, "The URL to check")),
                 LinkCheckerTool::run,
                 true);
     }

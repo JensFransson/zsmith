@@ -4,9 +4,9 @@ import org.json.JSONObject;
 
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.skills.boundary.SkillStore;
-import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.ToolHandler;
 
-public class LoadSkillTool implements Tool {
+public class LoadSkillTool implements ToolHandler {
 
     private final SkillStore store;
 
@@ -28,7 +28,7 @@ public class LoadSkillTool implements Tool {
 
     @Override
     public JSONObject inputSchema() {
-        return Tool.schema(Prop.string(Field.name, "The name of the skill to load"));
+        return ToolHandler.schema(Prop.string(Field.name, "The name of the skill to load"));
     }
 
     @Override

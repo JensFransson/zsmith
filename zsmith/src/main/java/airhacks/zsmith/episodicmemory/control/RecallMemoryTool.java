@@ -7,9 +7,9 @@ import org.json.JSONObject;
 import airhacks.zsmith.episodicmemory.boundary.EpisodicMemoryStore;
 import airhacks.zsmith.episodicmemory.entity.Episode;
 import airhacks.zsmith.episodicmemory.entity.MemoryType;
-import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.ToolHandler;
 
-public class RecallMemoryTool implements Tool {
+public class RecallMemoryTool implements ToolHandler {
 
     private final EpisodicMemoryStore store;
 
@@ -31,7 +31,7 @@ public class RecallMemoryTool implements Tool {
 
     @Override
     public JSONObject inputSchema() {
-        return Tool.schema(
+        return ToolHandler.schema(
                 Prop.stringEnum(Field.type, "Optional type to filter memories",
                         "user", "feedback", "project", "reference").optional(),
                 Prop.integer(Field.limit, "Maximum number of recent memories to return. Defaults to 10.").optional()

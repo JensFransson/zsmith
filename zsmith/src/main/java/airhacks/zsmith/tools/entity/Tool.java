@@ -7,7 +7,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 @Retention(RUNTIME)
 @Target(TYPE)
-public @interface ToolDef {
+public @interface Tool {
 
     String name() default "";
 

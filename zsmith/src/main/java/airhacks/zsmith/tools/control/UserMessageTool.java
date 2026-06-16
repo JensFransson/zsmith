@@ -10,15 +10,15 @@ public interface UserMessageTool {
 
     enum Field { message }
 
-    static Tool create() {
+    static ToolHandler create() {
         return create(Log::user);
     }
 
-    static Tool create(Consumer<String> messageConsumer) {
-        return Tool.of(
+    static ToolHandler create(Consumer<String> messageConsumer) {
+        return ToolHandler.of(
                 "user_message",
                 "Presents a message to the user. Use this to display important information, status updates, or notifications.",
-                Tool.schema(Tool.Prop.string(Field.message, "The message to present to the user")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.message, "The message to present to the user")),
                 input -> run(input, messageConsumer));
     }
 

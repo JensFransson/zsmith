@@ -9,11 +9,11 @@ public interface WriteClipboardTool {
 
     enum Field { text }
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "write_clipboard",
                 "Writes text content to the system clipboard",
-                Tool.schema(Tool.Prop.string(Field.text, "The text to write to the clipboard")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.text, "The text to write to the clipboard")),
                 WriteClipboardTool::run);
     }
 

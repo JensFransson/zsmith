@@ -8,15 +8,15 @@ public interface UserQuestionTool {
 
     enum Field { question }
 
-    static Tool create() {
+    static ToolHandler create() {
         return create(Console::prompt);
     }
 
-    static Tool create(Function<String, String> promptFunction) {
-        return Tool.of(
+    static ToolHandler create(Function<String, String> promptFunction) {
+        return ToolHandler.of(
                 "user_question",
                 "Asks the user a question and returns the typed answer",
-                Tool.schema(Tool.Prop.string(Field.question, "The question to ask the user")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.question, "The question to ask the user")),
                 input -> run(input, promptFunction));
     }
 

@@ -10,15 +10,15 @@ public interface ReadFileTool {
 
     enum Field { path }
 
-    static Tool of(String sandboxPath) {
+    static ToolHandler of(String sandboxPath) {
         return create(new SandboxedFileSystem(Path.of(sandboxPath)));
     }
 
-    static Tool create(SandboxedFileSystem fs) {
-        return Tool.of(
+    static ToolHandler create(SandboxedFileSystem fs) {
+        return ToolHandler.of(
                 "read_file",
                 "Reads the contents of a file within the sandbox directory",
-                Tool.schema(Tool.Prop.string(Field.path, "Relative path to the file to read")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.path, "Relative path to the file to read")),
                 input -> run(input, fs));
     }
 

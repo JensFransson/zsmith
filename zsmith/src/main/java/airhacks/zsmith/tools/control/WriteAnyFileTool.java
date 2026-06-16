@@ -11,17 +11,17 @@ public interface WriteAnyFileTool {
 
     enum Field { path, content, append }
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "write_any_file",
                 "Writes content to a file at any absolute path on the filesystem. "
                         + "Overwrites the file by default; pass append=\"true\" to append. "
                         + "Creates missing parent directories. "
                         + "Use write_file for sandboxed writes; use this tool for paths outside the agent sandbox.",
-                Tool.schema(
-                        Tool.Prop.string(Field.path, "Absolute path to the file to write"),
-                        Tool.Prop.string(Field.content, "Content to write to the file"),
-                        Tool.Prop.stringEnum(Field.append, "Append to existing file instead of overwriting", "true", "false").optional()),
+                ToolHandler.schema(
+                        ToolHandler.Prop.string(Field.path, "Absolute path to the file to write"),
+                        ToolHandler.Prop.string(Field.content, "Content to write to the file"),
+                        ToolHandler.Prop.stringEnum(Field.append, "Append to existing file instead of overwriting", "true", "false").optional()),
                 WriteAnyFileTool::run);
     }
 

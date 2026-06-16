@@ -6,7 +6,7 @@ import java.util.function.Function;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-public interface Tool {
+public interface ToolHandler {
 
     String toolName();
 
@@ -48,20 +48,20 @@ public interface Tool {
         }
     }
 
-    static Tool of(String name, String description, JSONObject inputSchema,
+    static ToolHandler of(String name, String description, JSONObject inputSchema,
                    Function<JSONObject, String> execute) {
         return of(name, description, inputSchema, execute, false);
     }
 
-    static Tool of(String name, String description,
+    static ToolHandler of(String name, String description,
                    Function<JSONObject, String> execute) {
         return of(name, description, emptySchema(), execute, false);
     }
 
-    static Tool of(String name, String description, JSONObject inputSchema,
+    static ToolHandler of(String name, String description, JSONObject inputSchema,
                    Function<JSONObject, String> execute, boolean parallel) {
         record SimpleTool(String toolName, String description, JSONObject inputSchema,
-                          Function<JSONObject, String> fn, boolean parallel) implements Tool {
+                          Function<JSONObject, String> fn, boolean parallel) implements ToolHandler {
             @Override
             public String execute(JSONObject input) { return fn.apply(input); }
         }

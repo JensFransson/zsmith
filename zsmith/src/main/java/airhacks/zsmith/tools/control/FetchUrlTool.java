@@ -25,11 +25,11 @@ public interface FetchUrlTool {
 
     enum Field { url }
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "fetch_url",
                 "Fetches the content of a URL using a browser User-Agent and returns status, content type, and up to 20000 chars of the body. Use this to retrieve page or API content; use check_link only for lightweight reachability verification.",
-                Tool.schema(Tool.Prop.string(Field.url, "The URL to fetch")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.url, "The URL to fetch")),
                 FetchUrlTool::run,
                 true);
     }

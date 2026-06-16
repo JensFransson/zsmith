@@ -10,9 +10,9 @@ import airhacks.zsmith.agent.boundary.Agent;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
 import airhacks.zsmith.subagent.entity.SubAgentDispatchEvent;
-import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.ToolHandler;
 
-public class SubAgentTool implements Tool {
+public class SubAgentTool implements ToolHandler {
 
     static final int DEFAULT_MAX_DEPTH = 3;
     static final String FIRST_RUN_MARKER = ".first_run_completed";
@@ -69,7 +69,7 @@ public class SubAgentTool implements Tool {
 
     @Override
     public JSONObject inputSchema() {
-        return Tool.schema(
+        return ToolHandler.schema(
                 Prop.string(Field.task, "The task to delegate to the sub-agent. Be specific and complete."));
     }
 

@@ -18,19 +18,19 @@ public interface LaunchAppTool {
 
     enum Field { arguments }
 
-    static Tool create(String name, String description, String command) {
+    static ToolHandler create(String name, String description, String command) {
         return create(name, description, command, DEFAULT_TIMEOUT_SECONDS);
     }
 
-    static Tool create(String name, String description, String command, int timeoutSeconds) {
-        return Tool.of(
+    static ToolHandler create(String name, String description, String command, int timeoutSeconds) {
+        return ToolHandler.of(
                 name,
                 description,
-                Tool.schema(Tool.Prop.string(Field.arguments, "Arguments to pass to the application")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.arguments, "Arguments to pass to the application")),
                 input -> run(input, command, timeoutSeconds));
     }
 
-    static Tool fromConfig() {
+    static ToolHandler fromConfig() {
         return create(
                 ZCfg.requiredString("launch.tool.name"),
                 ZCfg.requiredString("launch.tool.description"),

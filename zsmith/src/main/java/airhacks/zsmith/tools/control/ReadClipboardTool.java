@@ -5,11 +5,11 @@ import java.awt.datatransfer.DataFlavor;
 
 public interface ReadClipboardTool {
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "read_clipboard",
                 "Reads the current text content from the system clipboard",
-                Tool.emptySchema(),
+                ToolHandler.emptySchema(),
                 input -> read());
     }
 

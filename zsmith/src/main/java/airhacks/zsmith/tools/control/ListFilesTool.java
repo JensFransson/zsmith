@@ -6,15 +6,15 @@ import airhacks.zsmith.tools.boundary.SandboxedFileSystem;
 
 public interface ListFilesTool {
 
-    static Tool of(String sandboxPath) {
+    static ToolHandler of(String sandboxPath) {
         return create(new SandboxedFileSystem(Path.of(sandboxPath)));
     }
 
-    static Tool create(SandboxedFileSystem fs) {
-        return Tool.of(
+    static ToolHandler create(SandboxedFileSystem fs) {
+        return ToolHandler.of(
                 "list_files",
                 "Lists all files within the sandbox directory",
-                Tool.emptySchema(),
+                ToolHandler.emptySchema(),
                 input -> fs.listFiles());
     }
 }

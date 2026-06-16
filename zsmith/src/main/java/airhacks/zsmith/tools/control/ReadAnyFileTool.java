@@ -10,11 +10,11 @@ public interface ReadAnyFileTool {
 
     enum Field { path }
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "read_any_file",
                 "Reads a file from any location on the filesystem",
-                Tool.schema(Tool.Prop.string(Field.path, "Absolute path to the file to read")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.path, "Absolute path to the file to read")),
                 ReadAnyFileTool::run);
     }
 

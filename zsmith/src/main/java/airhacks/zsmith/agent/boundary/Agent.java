@@ -35,13 +35,13 @@ import airhacks.zsmith.systemprompt.control.SystemPromptLoader;
 import airhacks.zsmith.tools.boundary.ToolProfiles;
 import airhacks.zsmith.tools.control.Console;
 import airhacks.zsmith.tools.control.LaunchAppTool;
-import airhacks.zsmith.tools.control.Tool;
+import airhacks.zsmith.tools.control.ToolHandler;
 import airhacks.zsmith.tools.control.ToolPermission;
 import airhacks.zsmith.tools.entity.ToolInvocationEvent;
 import airhacks.zsmith.tools.entity.ToolResult;
 import airhacks.zsmith.tools.entity.ToolUse;
 
-public record Agent(String name, String systemPrompt, Memory memory, Map<String, Tool> tools, int maxIterations,
+public record Agent(String name, String systemPrompt, Memory memory, Map<String, ToolHandler> tools, int maxIterations,
         float temperature, EpisodicMemoryStore episodicMemory) {
     
     public static final String version = Version.current();
@@ -82,19 +82,19 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
         this(null, null);
     }
 
-    public Agent withTool(Tool tool) {
+    public Agent withTool(ToolHandler tool) {
         this.tools.put(tool.toolName(), tool);
         return this;
     }
 
-    public Agent withTools(Tool... tools) {
+    public Agent withTools(ToolHandler... tools) {
         for (var tool : tools) {
             this.tools.put(tool.toolName(), tool);
         }
         return this;
     }
 
-    public Agent withTools(List<Tool> tools) {
+    public Agent withTools(List<ToolHandler> tools) {
         tools.forEach(this::withTool);
         return this;
     }
@@ -202,7 +202,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
     JSONArray toolDefinitions() {
         var array = new JSONArray();
         this.tools.values().stream()
-                .map(Tool::toToolDefinition)
+                .map(ToolHandler::toToolDefinition)
                 .forEach(array::put);
         return array;
     }
@@ -217,7 +217,7 @@ public record Agent(String name, String systemPrompt, Memory memory, Map<String,
             if (tool == null) {
                 Log.tool("tool not available: " + toolUse.name());
                 event.outcome = "not_available";
-                return ToolResult.error(toolUse.id(), "Tool not available: " + toolUse.name());
+                return ToolResult.error(toolUse.id(), "ToolHandler not available: " + toolUse.name());
             }
             var permission = ToolPermission.resolve(toolUse.name());
             if (permission == ToolPermission.DENY) {

@@ -15,15 +15,15 @@ public interface ExecuteScriptTool {
 
     enum Field { path }
 
-    static Tool create() {
+    static ToolHandler create() {
         return create(DEFAULT_TIMEOUT_SECONDS);
     }
 
-    static Tool create(int timeoutSeconds) {
-        return Tool.of(
+    static ToolHandler create(int timeoutSeconds) {
+        return ToolHandler.of(
                 "execute_script",
                 "Executes a script and returns its output",
-                Tool.schema(Tool.Prop.string(Field.path, "Path to the script to execute")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.path, "Path to the script to execute")),
                 input -> run(input, timeoutSeconds));
     }
 

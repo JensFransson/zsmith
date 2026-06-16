@@ -8,15 +8,15 @@ public interface UserConfirmationTool {
 
     enum Field { question }
 
-    static Tool create() {
+    static ToolHandler create() {
         return create(Console::prompt);
     }
 
-    static Tool create(Function<String, String> promptFunction) {
-        return Tool.of(
+    static ToolHandler create(Function<String, String> promptFunction) {
+        return ToolHandler.of(
                 "user_confirmation",
                 "Asks the user a yes/no question and returns the answer",
-                Tool.schema(Tool.Prop.string(Field.question, "The yes/no question to ask the user")),
+                ToolHandler.schema(ToolHandler.Prop.string(Field.question, "The yes/no question to ask the user")),
                 input -> run(input, promptFunction));
     }
 

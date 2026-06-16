@@ -7,11 +7,11 @@ public interface CurrentTimeTool {
 
     DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "current_time",
                 "Returns the current date and time",
-                Tool.emptySchema(),
+                ToolHandler.emptySchema(),
                 input -> LocalDateTime.now().format(FORMAT));
     }
 }

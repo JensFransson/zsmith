@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import airhacks.zsmith.tools.entity.ToolDef;
+import airhacks.zsmith.tools.entity.Tool;
 
 public class ToolRegistry {
 
@@ -16,9 +16,9 @@ public class ToolRegistry {
     public ToolRegistry register(Class<? extends RecordTool> toolClass) {
         if (!toolClass.isRecord())
             throw new IllegalArgumentException(toolClass + " must be a record");
-        var def = toolClass.getAnnotation(ToolDef.class);
+        var def = toolClass.getAnnotation(Tool.class);
         if (def == null)
-            throw new IllegalArgumentException(toolClass + " missing @ToolDef");
+            throw new IllegalArgumentException(toolClass + " missing @Tool");
         var components = toolClass.getRecordComponents();
         var name = def.name().isBlank() ? deriveName(toolClass) : def.name();
         byName.put(name, new Entry(

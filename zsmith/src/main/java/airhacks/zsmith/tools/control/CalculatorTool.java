@@ -6,15 +6,15 @@ public interface CalculatorTool {
 
     enum Field { operation, a, b }
 
-    static Tool create() {
-        return Tool.of(
+    static ToolHandler create() {
+        return ToolHandler.of(
                 "calculator",
                 "Performs basic arithmetic operations: add, subtract, multiply, divide",
-                Tool.schema(
-                        Tool.Prop.stringEnum(Field.operation, "The arithmetic operation to perform",
+                ToolHandler.schema(
+                        ToolHandler.Prop.stringEnum(Field.operation, "The arithmetic operation to perform",
                                 "add", "subtract", "multiply", "divide"),
-                        Tool.Prop.number(Field.a, "First operand"),
-                        Tool.Prop.number(Field.b, "Second operand")),
+                        ToolHandler.Prop.number(Field.a, "First operand"),
+                        ToolHandler.Prop.number(Field.b, "Second operand")),
                 CalculatorTool::run);
     }
 
