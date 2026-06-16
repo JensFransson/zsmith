@@ -1,6 +1,6 @@
 # zsmith
 
-Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and agentic loop support. No external libraries — only the Java standard library and a bundled JSON parser (`org.json`).
+Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and agentic loop support. No external libraries — only the Java standard library and a bundled JSON parser (`org.json`). Optionally integrates with [LightMetal](#lightmetal-embedded-local-inference) for fully on-device GGUF inference on Apple Silicon — drop `lightmetal.jar` on the classpath and it is auto-selected, no code or config change required.
 
 ![zsmith](zsmith.png)
 
@@ -22,7 +22,7 @@ chmod +x zsinstall
 
 `zsinstall` is a single-file Java 25 script that downloads the latest release asset from GitHub into `./zbo/zsmith.jar` — matching the `-cp zbo/zsmith.jar` shebang used by the example agents. Re-run any time to upgrade.
 
-Based on the [`java-cli-script`](https://airails.dev) skill from [airails.dev](https://airails.dev) — single-file, zero-dependency, shebang-launched Java 25 utilities.
+Based on the [`java-cli-script`](https://airails.dev) skill from [airails.dev](https://airails.dev) — single-file, zero-dependency, shebang-launched Java 25 utilities. Optional local inference via [LightMetal](https://github.com/AdamBien/lightmetal) — a Java 25 GGUF runner for Apple Silicon's Metal via the Foreign Function & Memory API.
 
 ## Usage
 
