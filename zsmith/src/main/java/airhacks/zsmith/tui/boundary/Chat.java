@@ -11,17 +11,42 @@ import airhacks.zsmith.tui.entity.Response;
 
 public class Chat {
 
+    static final String USAGE = "Usage: zschat [--host HOST] [--port PORT] [--session ID] [--timeout SECS]";
+
     static final String HELP = """
             /help          Show this help
             /act [seed]    Trigger autonomous action
             /session       Show current session ID
             /quit, /exit   Exit""";
 
-    ChatClient client;
-    Config config;
+    String host = "localhost";
+    int port = 8080;
     String sessionId;
+    int timeout = 120;
+    ChatClient client;
 
-    void start() {
+    public Chat withHost(String host) {
+        this.host = host;
+        return this;
+    }
+
+    public Chat withPort(int port) {
+        this.port = port;
+        return this;
+    }
+
+    public Chat withSession(String sessionId) {
+        this.sessionId = sessionId;
+        return this;
+    }
+
+    public Chat withTimeout(int timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    public void start() {
+        this.client = new ChatClient(new Config(this.host, this.port, this.timeout));
         banner();
         try (var input = new BufferedReader(new InputStreamReader(System.in))) {
             prompt();
@@ -32,6 +57,19 @@ public class Chat {
             Log.error("Fatal: " + problem.getMessage());
         }
         Log.info("Bye.");
+    }
+
+    Chat parse(String... args) {
+        for (var i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "--host" -> withHost(args[++i]);
+                case "--port" -> withPort(Integer.parseInt(args[++i]));
+                case "--session" -> withSession(args[++i]);
+                case "--timeout" -> withTimeout(Integer.parseInt(args[++i]));
+                default -> throw new IllegalArgumentException(USAGE);
+            }
+        }
+        return this;
     }
 
     boolean handle(String line) {
@@ -72,10 +110,10 @@ public class Chat {
     }
 
     void banner() {
-        Log.info("zsmith-chat — connecting to " + this.config.host() + ":" + this.config.port());
+        Log.info("zschat — connecting to " + this.host + ":" + this.port);
         Log.info("Type a message to chat, /help for commands, /quit to exit");
-        if (this.config.sessionId() != null) {
-            Log.info("Resuming session: " + this.config.sessionId());
+        if (this.sessionId != null) {
+            Log.info("Resuming session: " + this.sessionId);
         }
     }
 
@@ -86,13 +124,11 @@ public class Chat {
 
     void main(String... args) {
         try {
-            this.config = Config.parse(args);
+            parse(args);
         } catch (IllegalArgumentException invalid) {
             Log.error(invalid.getMessage());
             return;
         }
-        this.client = new ChatClient(this.config);
-        this.sessionId = this.config.sessionId();
         start();
     }
 }
