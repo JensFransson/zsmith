@@ -2,10 +2,11 @@
 
 import airhacks.zsmith.agent.boundary.Agent;
 import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.tui.control.CommandLine;
 
-void main(String[] args) {
+void main(String ...args) {
 
-    var port = args.length > 0 ? Integer.parseInt(args[0]) : 8080;
+    var port = CommandLine.port(args, 8080);
 
     var assistant = new Agent("assistant", """
             You are a fully loaded, versatile, and helpful assistant.
