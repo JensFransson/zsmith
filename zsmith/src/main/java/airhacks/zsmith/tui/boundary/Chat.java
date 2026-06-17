@@ -1,6 +1,7 @@
 package airhacks.zsmith.tui.boundary;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import airhacks.zsmith.logging.control.Log;
@@ -10,75 +11,64 @@ import airhacks.zsmith.tui.entity.Response;
 
 public class Chat {
 
-    final ChatClient client;
-    final Config config;
+    static final String HELP = """
+            /help          Show this help
+            /act [seed]    Trigger autonomous action
+            /session       Show current session ID
+            /quit, /exit   Exit""";
+
+    ChatClient client;
+    Config config;
     String sessionId;
 
-    public Chat(Config config) {
-        this.config = config;
-        this.client = new ChatClient(config);
-        this.sessionId = config.sessionId();
-    }
-
-    public void start() {
+    void start() {
         banner();
-
-        var reader = System.console() != null
-                ? System.console().reader()
-                : new BufferedReader(new InputStreamReader(System.in));
-
-        try (reader) {
-            String line;
-            while (true) {
-                System.out.print("> ");
-                System.out.flush();
-                line = reader instanceof BufferedReader br ? br.readLine() : System.console().readLine();
-                if (line == null) break;
-                line = line.strip();
-                if (line.isEmpty()) continue;
-
-                if (line.startsWith("/")) {
-                    if (line.equals("/quit") || line.equals("/exit")) break;
-                    handleCommand(line);
-                    continue;
-                }
-
-                handleResponse(this.client.chat(this.sessionId, line));
+        try (var input = new BufferedReader(new InputStreamReader(System.in))) {
+            prompt();
+            while (input.readLine() instanceof String line && handle(line)) {
+                prompt();
             }
-        } catch (Exception e) {
-            Log.error("Fatal: " + e.getMessage());
-            System.exit(1);
+        } catch (IOException problem) {
+            Log.error("Fatal: " + problem.getMessage());
         }
-
         Log.info("Bye.");
     }
 
-    void handleResponse(Response response) {
-        if (response.status() == 200) {
-            if (this.sessionId == null) this.sessionId = response.sessionId();
-            Log.answer(response.body());
-        } else {
-            Log.error("Error " + response.status() + ": " + response.body());
+    boolean handle(String line) {
+        var input = line.strip();
+        if (input.isEmpty()) {
+            return true;
+        }
+        if (input.equals("/quit") || input.equals("/exit")) {
+            return false;
+        }
+        if (input.startsWith("/")) {
+            command(input);
+            return true;
+        }
+        show(this.client.chat(this.sessionId, input));
+        return true;
+    }
+
+    void command(String line) {
+        var parts = line.split("\\s+", 2);
+        switch (parts[0]) {
+            case "/help" -> Log.info(HELP);
+            case "/session" -> Log.info("Session: " + (this.sessionId != null ? this.sessionId : "(not yet established)"));
+            case "/act" -> show(this.client.act(this.sessionId, parts.length > 1 ? parts[1] : ""));
+            default -> Log.error("Unknown command: " + parts[0] + ". Type /help");
         }
     }
 
-    void handleCommand(String line) {
-        var parts = line.split("\\s+", 2);
-        var cmd = parts[0];
-
-        switch (cmd) {
-            case "/help" -> Log.info("""
-                /help          Show this help
-                /act [seed]    Trigger autonomous action
-                /session       Show current session ID
-                /quit, /exit   Exit""");
-            case "/session" -> Log.info("Session: " + (this.sessionId != null ? this.sessionId : "(not yet established)"));
-            case "/act" -> {
-                var seed = parts.length > 1 ? parts[1] : "";
-                handleResponse(this.client.act(this.sessionId, seed));
-            }
-            default -> Log.error("Unknown command: " + cmd + ". Type /help");
+    void show(Response response) {
+        if (response.status() != 200) {
+            Log.error("Error " + response.status() + ": " + response.body());
+            return;
         }
+        if (this.sessionId == null) {
+            this.sessionId = response.sessionId();
+        }
+        Log.answer(response.body());
     }
 
     void banner() {
@@ -87,11 +77,22 @@ public class Chat {
         if (this.config.sessionId() != null) {
             Log.info("Resuming session: " + this.config.sessionId());
         }
-        System.out.println();
     }
 
-    public static void main(String[] args) {
-        var config = Config.parse(args);
-        new Chat(config).start();
+    void prompt() {
+        System.out.print("> ");
+        System.out.flush();
+    }
+
+    void main(String... args) {
+        try {
+            this.config = Config.parse(args);
+        } catch (IllegalArgumentException invalid) {
+            Log.error(invalid.getMessage());
+            return;
+        }
+        this.client = new ChatClient(this.config);
+        this.sessionId = this.config.sessionId();
+        start();
     }
 }
