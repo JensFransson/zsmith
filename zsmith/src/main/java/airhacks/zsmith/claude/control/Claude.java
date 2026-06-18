@@ -99,8 +99,9 @@ public interface Claude {
         var scheme = ZCfg.string("claude.scheme", "https");
         var host = ZCfg.string("claude.host", "api.anthropic.com");
         var port = ZCfg.integer("claude.port", -1);
+        var path = ZCfg.string("claude.path", "/v1/messages");
         var authority = port > 0 ? host + ":" + port : host;
-        return URI.create("%s://%s/v1/messages".formatted(scheme, authority));
+        return URI.create("%s://%s%s".formatted(scheme, authority, path));
     }
 
     static JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
@@ -256,12 +257,16 @@ public interface Claude {
     }
 
     static HttpResponse<String> send(String message) {
-        var request = HttpRequest.newBuilder(uri)
+        var builder = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))
                 .header("x-api-key", apiKey())
                 .header("content-type", "application/json")
-                .header("anthropic-version", apiVersion())
-                .build();
+                .header("anthropic-version", apiVersion());
+        var workspaceId = ZCfg.string("anthropic.workspace.id", null);
+        if (workspaceId != null && !workspaceId.isBlank()) {
+            builder.header("anthropic-workspace-id", workspaceId);
+        }
+        var request = builder.build();
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {
