@@ -104,9 +104,13 @@ public interface Claude {
         return URI.create("%s://%s%s".formatted(scheme, authority, path));
     }
 
+    static String modelName() {
+        return ZCfg.string("claude.model", currentModel.modelName());
+    }
+
     static JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
         var payloadJSON = claudeMessage(messages, temperature, system);
-        payloadJSON.put("model", currentModel.modelName());
+        payloadJSON.put("model", modelName());
         if (tools != null && !tools.isEmpty()) {
             payloadJSON.put("tools", tools);
         }
@@ -123,7 +127,7 @@ public interface Claude {
         var enclosedPrompt = messagePrompt(user);
         Log.request(enclosedPrompt.toString());
         var payloadJSON = Claude.claudeMessage(enclosedPrompt, temperature, system);
-        payloadJSON.put("model", currentModel.modelName());
+        payloadJSON.put("model", modelName());
         var payload = payloadJSON.toString();
         Log.request(payload);
         Log.llm(">> " + payload);
@@ -257,9 +261,10 @@ public interface Claude {
     }
 
     static HttpResponse<String> send(String message) {
+        var authHeader = ZCfg.string("anthropic.auth.header", "x-api-key");
         var builder = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))
-                .header("x-api-key", apiKey())
+                .header(authHeader, apiKey())
                 .header("content-type", "application/json")
                 .header("anthropic-version", apiVersion());
         var workspaceId = ZCfg.string("anthropic.workspace.id", null);
