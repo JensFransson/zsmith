@@ -25,11 +25,40 @@ public interface Claude {
     String fallbackModelName = "claude-sonnet-4-7";
 
     static String apiKey() {
+        if (bedrock()) {
+            var bedrockKey = ZCfg.string("bedrock.api.key", null);
+            if (bedrockKey != null && !bedrockKey.isBlank()) {
+                return bedrockKey;
+            }
+        }
         return ZCfg.requiredString("anthropic.api.key");
     }
 
+    String bedrockVersion = "2023-06-01";
+
     static String apiVersion() {
+        if (bedrock()) {
+            return ZCfg.string("anthropic.version", bedrockVersion);
+        }
         return ZCfg.requiredString("anthropic.version");
+    }
+
+    /**
+     * Amazon Bedrock Mantle's {@code bedrock-mantle} endpoint is almost entirely conventional:
+     * the only variable parts are the region, the model, and the API key. Selecting
+     * {@code llm.provider=bedrock} switches on convention-over-configuration — the scheme,
+     * host pattern, path, anthropic-version, and the {@code anthropic.} model prefix are all
+     * derived, so the same properties file can hold both the native Anthropic and the Bedrock
+     * configuration and flip between them with a single key.
+     *
+     * @see <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html">Amazon Bedrock endpoints</a>
+     */
+    static boolean bedrock() {
+        return "bedrock".equalsIgnoreCase(ZCfg.string("llm.provider", "claude"));
+    }
+
+    static String bedrockRegion() {
+        return ZCfg.requiredString("bedrock.region");
     }
 
     enum Capability { TEMPERATURE, EFFORT, ADAPTIVE_THINKING }
@@ -92,10 +121,13 @@ public interface Claude {
     }
 
     HttpClient client = HttpClient.newHttpClient();
-    URI uri = endpoint();
     Models currentModel = Models.fromSystemProperty();
 
     static URI endpoint() {
+        if (bedrock()) {
+            return URI.create("https://bedrock-mantle.%s.api.aws/anthropic/v1/messages"
+                    .formatted(bedrockRegion().trim()));
+        }
         var scheme = ZCfg.string("claude.scheme", "https");
         var host = ZCfg.string("claude.host", "api.anthropic.com");
         var port = ZCfg.integer("claude.port", -1);
@@ -105,7 +137,11 @@ public interface Claude {
     }
 
     static String modelName() {
-        return ZCfg.string("claude.model", currentModel.modelName());
+        var model = ZCfg.string("claude.model", currentModel.modelName());
+        if (bedrock() && !model.contains(".")) {
+            return "anthropic." + model;
+        }
+        return model;
     }
 
     static JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
@@ -200,7 +236,7 @@ public interface Claude {
             body = sendInstrumented(fallbackMessage, currentModel.fallbackModelName(), true);
         }
         if (body.statusCode() != 200) {
-            throw new IllegalStateException("claude API error %d: %s".formatted(body.statusCode(), body.body()));
+            throw new IllegalStateException("claude API error %d at %s: %s".formatted(body.statusCode(), endpoint(), body.body()));
         }
         return body.body();
     }
@@ -261,6 +297,8 @@ public interface Claude {
     }
 
     static HttpResponse<String> send(String message) {
+        var uri = endpoint();
+        Log.agent("claude endpoint: " + uri);
         var authHeader = ZCfg.string("anthropic.auth.header", "x-api-key");
         var builder = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))

@@ -95,6 +95,7 @@ zsmith ships with three clients, selected at runtime via `llm.provider`:
 
 ```properties
 llm.provider=claude         # default — Anthropic Messages API
+# llm.provider=bedrock      # Amazon Bedrock Mantle (Anthropic-compatible, reuses the Claude client)
 # llm.provider=openai       # OpenAI Chat Completions API
 # llm.provider=lightmetal   # local GGUF inference via lightmetal.jar (in-process)
 ```
@@ -111,7 +112,52 @@ claude.host=localhost
 claude.port=8080
 ```
 
-`claude.port` is optional — omit it to use the scheme default. `claude.scheme` defaults to `https`, `claude.host` to `api.anthropic.com`. The path `/v1/messages` is fixed.
+`claude.port` is optional — omit it to use the scheme default. `claude.scheme` defaults to `https`, `claude.host` to `api.anthropic.com`.
+
+Any Anthropic-compatible gateway can be reached by overriding these optional knobs — all default to the native Anthropic values, so leaving them unset preserves current behavior:
+
+```properties
+claude.path=/v1/messages              # request path (default)
+claude.model=claude-opus-4-8          # payload model id; default derived from -Dmodel / enum
+anthropic.auth.header=x-api-key       # name of the auth header carrying anthropic.api.key
+anthropic.workspace.id=               # adds anthropic-workspace-id header only when set
+```
+
+For a `Bearer`-token gateway, set `anthropic.auth.header=Authorization` and put the prefix in the key: `anthropic.api.key=Bearer <token>`.
+
+#### Amazon Bedrock Mantle
+
+[Amazon Bedrock Mantle](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html) exposes an Anthropic-compatible Messages API at its `bedrock-mantle` endpoint. It is selected with `llm.provider=bedrock` and reuses the Claude client — only the **region**, **model**, and **API key** vary; everything else is convention-derived.
+
+Because the native Anthropic and Bedrock settings never collide, **both can live in the same properties file** and you switch between them by flipping a single line:
+
+```properties
+# --- switch provider here ---
+llm.provider=claude        # native Anthropic API
+#llm.provider=bedrock      # Amazon Bedrock Mantle
+
+# --- native Anthropic ---
+anthropic.api.key=sk-ant-...
+anthropic.version=2023-06-01
+
+# --- Amazon Bedrock Mantle ---
+bedrock.region=eu-north-1
+bedrock.api.key=bedrock-api-...
+
+# --- shared ---
+claude.model=claude-haiku-4-5  # bare name works for both; pick one your Bedrock account can use
+```
+
+When `llm.provider=bedrock`, zsmith derives:
+
+- **endpoint** → `https://bedrock-mantle.<region>.api.aws/anthropic/v1/messages`
+- **anthropic-version** → `2023-06-01` (override with `anthropic.version` if needed)
+- **API key** → `bedrock.api.key`, falling back to `anthropic.api.key` when unset
+- **model prefix** → a **bare** `claude.model` gets the `anthropic.` prefix, so `claude.model=claude-haiku-4-5` resolves to `anthropic.claude-haiku-4-5`
+
+The same bare `claude.model` therefore works under both providers — used as-is for native Anthropic, `anthropic.`-prefixed under Bedrock. An id that already contains a `.` (e.g. `anthropic.claude-haiku-4-5`) is used verbatim. The 529→fallback retry is Anthropic-specific and does not apply to Bedrock model ids.
+
+> **Pick a model your account can use.** Bedrock returns `403 … is not available for this account` for models you have not been granted. List/enable models in the Bedrock console; your account's available Anthropic models determine valid `claude.model` values. See the [Bedrock Mantle docs](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html) for regions and the [endpoints reference](https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html).
 
 #### OpenAI endpoint
 
