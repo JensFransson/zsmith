@@ -24,6 +24,58 @@ chmod +x zsinstall
 
 Based on the [`java-cli-script`](https://airails.dev) skill from [airails.dev](https://airails.dev) — single-file, zero-dependency, shebang-launched Java 25 utilities. Optional local inference via [LightMetal](https://github.com/AdamBien/lightmetal) — a Java 25 GGUF runner for Apple Silicon's Metal via the Foreign Function & Memory API.
 
+## Quick Start
+
+Install the jar, add your API key, and run your first agent in under a minute.
+
+**1. Install the jar** (see [Installation](#installation)) — it lands in `./zbo/zsmith.jar`.
+
+**2. Add your Anthropic API key** to `~/.zsmith/app.properties`:
+
+```properties
+anthropic.api.key=sk-ant-...
+```
+
+**3. Save this as `calculator`** (no file extension) in the same directory as `zbo/`:
+
+```java
+#!/usr/bin/java --class-path=zbo/zsmith.jar --source 25
+
+import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.tools.boundary.Tools;
+
+void main() {
+    var calculator = new Agent("calculator", """
+            You are a calculator assistant.
+            1. Use the user_question tool to ask the user for a math expression.
+            2. Use the calculator tool to evaluate it.
+            3. Show the result to the user.
+            4. Loop until the user types 'quit'.
+            """)
+            .withTools(Tools.USER_QUESTION, Tools.USER_MESSAGE, Tools.CALCULATOR);
+    calculator.act();
+}
+```
+
+**4. Make it executable and run it:**
+
+```bash
+chmod +x calculator
+./calculator
+```
+
+The agent asks for a math expression, evaluates it with the `calculator` tool, prints the result, and loops until you type `quit`. No build step — Java 25 runs the script directly against the prebuilt jar.
+
+**No API key? Run fully on-device.** On Apple Silicon you can skip step 2 entirely: drop [`lightmetal.jar`](#lightmetal-embedded-local-inference) on the classpath and zsmith auto-selects local GGUF inference — no key, no network. Adjust the shebang in step 3:
+
+```java
+#!/usr/bin/java --class-path=zbo/zsmith.jar:lightmetal.jar --enable-native-access=ALL-UNNAMED --source 25
+```
+
+The agent code is unchanged — see [LightMetal](#lightmetal-embedded-local-inference) for model configuration.
+
+Once this works, read on for the library API, tool profiles, and configuration.
+
 ## Usage
 
 ```java
@@ -89,7 +141,61 @@ anthropic.api.key=sk-ant-...
 anthropic.version=2023-06-01
 ```
 
-### LLM Provider
+### Model
+
+The default Claude model is `claude-opus-4-8`. Override via system property:
+
+```bash
+java -Dmodel=sonnet -cp zbo/zsmith.jar MyAgent.java
+```
+
+Partial matching works — `sonnet` resolves to `claude-sonnet-4-7`, `4-7` to `claude-opus-4-7`, etc.
+
+### Properties Loading Order
+
+Loaded in order (each layer overrides the previous):
+
+1. `~/.zsmith/app.properties` — global defaults
+2. `./app.properties` — local project defaults
+3. `~/.zsmith/[agentName]/app.properties` — global agent-specific
+4. `./[agentName]/app.properties` — local agent-specific
+5. System properties — highest priority
+
+Only keys present in later files override earlier values; other keys are preserved.
+
+### Tool Permissions
+
+Control which tools require user confirmation before execution. Three permission levels: `allow` (execute silently), `deny` (reject), `confirm` (ask user first). Default is `confirm`.
+
+```properties
+tools.permissions.default=confirm
+tools.permissions.calculator=allow
+tools.permissions.current_time=allow
+tools.permissions.execute_script=confirm
+tools.permissions.read_any_file=confirm
+```
+
+Agent-specific permissions in `~/.zsmith/[agentName]/app.properties` override global defaults:
+
+```properties
+# A trusted automation agent
+tools.permissions.default=allow
+tools.permissions.execute_script=confirm
+```
+
+### System Prompt
+
+Loaded from `system.prompt` files in order (each layer overrides the previous):
+
+1. `~/.zsmith/[agentName]/system.prompt` — global agent-specific
+2. `./[agentName]/system.prompt` — local agent-specific
+3. `./system.prompt` — highest priority
+
+If no file is found, the constructor parameter is used as fallback.
+
+### Alternative LLM Providers
+
+> First-time users can skip this section — the default `claude` provider works out of the box. Come back when you want Amazon Bedrock, OpenAI, or local inference.
 
 zsmith ships with three clients, selected at runtime via `llm.provider`:
 
@@ -211,58 +317,6 @@ claude.scheme=http
 claude.host=localhost
 claude.port=8080
 ```
-
-### Model
-
-The default Claude model is `claude-opus-4-6`. Override via system property:
-
-```bash
-java -Dmodel=sonnet -cp zbo/zsmith.jar MyAgent.java
-```
-
-Partial matching works — `sonnet` resolves to `claude-sonnet-4-6`, `4-5` to `claude-opus-4-5-20251101`, etc.
-
-### Properties Loading Order
-
-Loaded in order (each layer overrides the previous):
-
-1. `~/.zsmith/app.properties` — global defaults
-2. `./app.properties` — local project defaults
-3. `~/.zsmith/[agentName]/app.properties` — global agent-specific
-4. `./[agentName]/app.properties` — local agent-specific
-5. System properties — highest priority
-
-Only keys present in later files override earlier values; other keys are preserved.
-
-### Tool Permissions
-
-Control which tools require user confirmation before execution. Three permission levels: `allow` (execute silently), `deny` (reject), `confirm` (ask user first). Default is `confirm`.
-
-```properties
-tools.permissions.default=confirm
-tools.permissions.calculator=allow
-tools.permissions.current_time=allow
-tools.permissions.execute_script=confirm
-tools.permissions.read_any_file=confirm
-```
-
-Agent-specific permissions in `~/.zsmith/[agentName]/app.properties` override global defaults:
-
-```properties
-# A trusted automation agent
-tools.permissions.default=allow
-tools.permissions.execute_script=confirm
-```
-
-### System Prompt
-
-Loaded from `system.prompt` files in order (each layer overrides the previous):
-
-1. `~/.zsmith/[agentName]/system.prompt` — global agent-specific
-2. `./[agentName]/system.prompt` — local agent-specific
-3. `./system.prompt` — highest priority
-
-If no file is found, the constructor parameter is used as fallback.
 
 ## Running the Examples
 
