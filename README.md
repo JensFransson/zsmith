@@ -1,6 +1,6 @@
 # zsmith
 
-Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and agentic loop support. No external libraries — only the Java standard library and a bundled JSON parser (`org.json`). Optionally integrates with [LightMetal](#lightmetal-embedded-local-inference) for fully on-device GGUF inference on Apple Silicon — drop `lightmetal.jar` on the classpath and it is auto-selected, no code or config change required.
+Zero-dependency AI agent framework with tool execution, SKILL.md and agentic loop support. The entire framework is a single **192 KB** jar — no external libraries, only the Java standard library. Optionally integrates with [LightMetal](#lightmetal-embedded-local-inference) for fully on-device GGUF inference on Apple Silicon — drop `lightmetal.jar` on the classpath and it is auto-selected, no code or config change required.
 
 ![zsmith](zsmith.png)
 
