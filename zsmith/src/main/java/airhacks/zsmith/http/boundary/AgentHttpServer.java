@@ -14,11 +14,11 @@ import airhacks.zsmith.logging.control.Log;
 
 public class AgentHttpServer {
 
-    static final String HOST = "0.0.0.0";
-    static final int BACKLOG = 0;
+    static String HOST = "0.0.0.0";
+    static int BACKLOG = 0;
 
-    final HttpServer server;
-    final ExecutorService executor;
+    HttpServer server;
+    ExecutorService executor;
 
     AgentHttpServer(HttpServer server, ExecutorService executor) {
         this.server = server;

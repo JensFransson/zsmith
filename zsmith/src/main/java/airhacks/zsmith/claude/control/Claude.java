@@ -43,16 +43,14 @@ public interface Claude {
         return ZCfg.requiredString("anthropic.version");
     }
 
-    /**
-     * Amazon Bedrock Mantle's {@code bedrock-mantle} endpoint is almost entirely conventional:
-     * the only variable parts are the region, the model, and the API key. Selecting
-     * {@code llm.provider=bedrock} switches on convention-over-configuration — the scheme,
-     * host pattern, path, anthropic-version, and the {@code anthropic.} model prefix are all
-     * derived, so the same properties file can hold both the native Anthropic and the Bedrock
-     * configuration and flip between them with a single key.
-     *
-     * @see <a href="https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html">Amazon Bedrock endpoints</a>
-     */
+    /// Amazon Bedrock Mantle's `bedrock-mantle` endpoint is almost entirely conventional:
+    /// the only variable parts are the region, the model, and the API key. Selecting
+    /// `llm.provider=bedrock` switches on convention-over-configuration — the scheme,
+    /// host pattern, path, anthropic-version, and the `anthropic.` model prefix are all
+    /// derived, so the same properties file can hold both the native Anthropic and the Bedrock
+    /// configuration and flip between them with a single key.
+    ///
+    /// @see [Amazon Bedrock endpoints](https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html)
     static boolean bedrock() {
         return "bedrock".equalsIgnoreCase(ZCfg.string("llm.provider", "claude"));
     }
@@ -63,22 +61,32 @@ public interface Claude {
 
     enum Capability { TEMPERATURE, EFFORT, ADAPTIVE_THINKING }
 
+    /// The HTTP wire format a model speaks. `ANTHROPIC` is the native Messages API
+    /// (`/anthropic/v1/messages`); `OPENAI` is the OpenAI-compatible Chat Completions API
+    /// (`/openai/v1/chat/completions`) that Bedrock Mantle exposes for non-Anthropic models
+    /// such as NVIDIA Nemotron. The protocol is a property of the model, not of the provider:
+    /// on the same Bedrock Mantle host an Opus model is `ANTHROPIC` while Nemotron is `OPENAI`.
+    enum Wire { ANTHROPIC, OPENAI }
+
     enum Models {
-        CLAUDE_48_OPUS("claude-opus-4-8", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
-        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
-        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
-        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, 64_000, EnumSet.allOf(Capability.class));
+        NVIDIA_NEMOTRON_SUPER_3_120B("nvidia.nemotron-super-3-120b", "nvidia.nemotron-super-3-120b", 32_000, EnumSet.of(Capability.TEMPERATURE), Wire.OPENAI),
+        CLAUDE_48_OPUS("claude-opus-4-8", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING), Wire.ANTHROPIC),
+        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING), Wire.ANTHROPIC),
+        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING), Wire.ANTHROPIC),
+        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, 64_000, EnumSet.allOf(Capability.class), Wire.ANTHROPIC);
 
         private String modelName;
         private String fallbackModelName;
         private int maxTokens;
         private EnumSet<Capability> capabilities;
+        private Wire wire;
 
-        Models(String modelName, String fallbackModelName, int maxTokens, EnumSet<Capability> capabilities) {
+        Models(String modelName, String fallbackModelName, int maxTokens, EnumSet<Capability> capabilities, Wire wire) {
             this.modelName = modelName;
             this.fallbackModelName = fallbackModelName;
             this.maxTokens = maxTokens;
             this.capabilities = capabilities;
+            this.wire = wire;
         }
 
         public String modelName() {
@@ -91,6 +99,10 @@ public interface Claude {
 
         public boolean supports(Capability capability) {
             return this.capabilities.contains(capability);
+        }
+
+        public Wire wire() {
+            return this.wire;
         }
 
         public int maxTokens() {
