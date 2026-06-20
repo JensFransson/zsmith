@@ -73,6 +73,10 @@ public interface OpenAI {
     }
 
     static JSONObject translateRequest(String system, JSONArray messages, JSONArray tools, float temperature) {
+        return translateRequest(system, messages, tools, temperature, model(), maxTokens());
+    }
+
+    static JSONObject translateRequest(String system, JSONArray messages, JSONArray tools, float temperature, String model, int maxTokens) {
         var openaiMessages = new JSONArray();
         if (system != null && !system.isBlank()) {
             openaiMessages.put(new JSONObject().put("role", "system").put("content", system));
@@ -82,10 +86,10 @@ public interface OpenAI {
         }
 
         var payload = new JSONObject()
-                .put("model", model())
+                .put("model", model)
                 .put("messages", openaiMessages)
                 .put("temperature", temperature)
-                .put("max_tokens", maxTokens());
+                .put("max_tokens", maxTokens);
 
         if (tools != null && !tools.isEmpty()) {
             payload.put("tools", translateTools(tools));

@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.claude.entity.ClaudeAPICallEvent;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.openai.control.OpenAI;
 
 
 
@@ -137,8 +138,9 @@ public interface Claude {
 
     static URI endpoint() {
         if (bedrock()) {
-            return URI.create("https://bedrock-mantle.%s.api.aws/anthropic/v1/messages"
-                    .formatted(bedrockRegion().trim()));
+            var path = currentModel.wire() == Wire.OPENAI ? "openai/v1/chat/completions" : "anthropic/v1/messages";
+            return URI.create("https://bedrock-mantle.%s.api.aws/%s"
+                    .formatted(bedrockRegion().trim(), path));
         }
         var scheme = ZCfg.string("claude.scheme", "https");
         var host = ZCfg.string("claude.host", "api.anthropic.com");
@@ -157,6 +159,9 @@ public interface Claude {
     }
 
     static JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
+        if (currentModel.wire() == Wire.OPENAI) {
+            return invokeOpenAICompatible(system, messages, tools, temperature);
+        }
         var payloadJSON = claudeMessage(messages, temperature, system);
         payloadJSON.put("model", modelName());
         if (tools != null && !tools.isEmpty()) {
@@ -169,6 +174,23 @@ public interface Claude {
         Log.response(answer);
         Log.llm("<< " + answer);
         return new JSONObject(answer);
+    }
+
+    /// Routes models that speak [Wire#OPENAI] (e.g. NVIDIA Nemotron on Bedrock Mantle's
+    /// OpenAI-compatible Chat Completions surface) through the [OpenAI] translators so the rest
+    /// of the agent stays Anthropic-native: the request is translated to OpenAI shape, sent over
+    /// the same Bedrock transport as the native path, and the response is translated back to the
+    /// Anthropic Messages shape callers expect.
+    static JSONObject invokeOpenAICompatible(String system, JSONArray messages, JSONArray tools, float temperature) {
+        var payload = OpenAI.translateRequest(system, messages, tools, temperature, modelName(), currentModel.maxTokens()).toString();
+        Log.request(payload);
+        Log.llm(">> " + payload);
+        var answer = invoke(payload);
+        var anthropicResponse = OpenAI.translateResponse(new JSONObject(answer));
+        var responseString = anthropicResponse.toString();
+        Log.response(responseString);
+        Log.llm("<< " + responseString);
+        return anthropicResponse;
     }
 
     public static JSONObject invoke(String system, String user, float temperature) {
@@ -294,7 +316,10 @@ public interface Claude {
                 event.model = servedModel;
             }
             var usage = json.optJSONObject("usage");
-            if (usage != null) {
+            if (usage != null && currentModel.wire() == Wire.OPENAI) {
+                event.inputTokens = usage.optInt("prompt_tokens");
+                event.outputTokens = usage.optInt("completion_tokens");
+            } else if (usage != null) {
                 event.inputTokens = usage.optInt("input_tokens");
                 event.outputTokens = usage.optInt("output_tokens");
                 event.cacheReadTokens = usage.optInt("cache_read_input_tokens");
@@ -311,12 +336,16 @@ public interface Claude {
     static HttpResponse<String> send(String message) {
         var uri = endpoint();
         Log.agent("claude endpoint: " + uri);
-        var authHeader = ZCfg.string("anthropic.auth.header", "x-api-key");
         var builder = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))
-                .header(authHeader, apiKey())
-                .header("content-type", "application/json")
-                .header("anthropic-version", apiVersion());
+                .header("content-type", "application/json");
+        if (currentModel.wire() == Wire.OPENAI) {
+            builder.header("Authorization", "Bearer " + apiKey());
+        } else {
+            var authHeader = ZCfg.string("anthropic.auth.header", "x-api-key");
+            builder.header(authHeader, apiKey())
+                    .header("anthropic-version", apiVersion());
+        }
         var workspaceId = ZCfg.string("anthropic.workspace.id", null);
         if (workspaceId != null && !workspaceId.isBlank()) {
             builder.header("anthropic-workspace-id", workspaceId);
