@@ -265,6 +265,25 @@ The same bare `claude.model` therefore works under both providers — used as-is
 
 > **Pick a model your account can use.** Bedrock returns `403 … is not available for this account` for models you have not been granted. List/enable models in the Bedrock console; your account's available Anthropic models determine valid `claude.model` values. See the [Bedrock Mantle docs](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html) for regions and the [endpoints reference](https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html).
 
+##### OpenAI-compatible models (NVIDIA Nemotron)
+
+Bedrock Mantle also serves **non-Anthropic** models — such as [NVIDIA Nemotron Super 3 120B](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-nvidia-nemotron-super-3-120b.html) — over its **OpenAI-compatible Chat Completions** route (`/v1/chat/completions`) rather than the Anthropic Messages route. zsmith detects this from the model id and switches wire format automatically — still under `llm.provider=bedrock`, no extra provider:
+
+```properties
+llm.provider=bedrock
+bedrock.region=eu-west-1                       # pick a region that offers the model (see model card)
+bedrock.api.key=bedrock-api-...
+claude.model=nvidia.nemotron-super-3-120b      # id carries a '.', used verbatim — no anthropic. prefix
+```
+
+For such models zsmith derives:
+
+- **endpoint** → `https://bedrock-mantle.<region>.api.aws/v1/chat/completions` (not `/anthropic/v1/messages`)
+- **auth** → `Authorization: Bearer <bedrock.api.key>`
+- **request/response** → translated to and from the OpenAI Chat Completions shape, so the Agent loop still sees Anthropic-shaped content blocks and `tool_use`
+
+> **Region matters.** This model is offered only in specific regions, and the set changes over time — a region that works today may not be the one in your existing Bedrock config. If you get a "model isn't supported"/availability error, check the current regions on the [model card](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-nvidia-nemotron-super-3-120b.html) and set `bedrock.region` accordingly.
+
 #### OpenAI endpoint
 
 By default, requests go to `https://api.openai.com/v1/chat/completions`. Configurable knobs:
