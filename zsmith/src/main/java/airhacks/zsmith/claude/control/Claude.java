@@ -134,11 +134,22 @@ public interface Claude {
     }
 
     HttpClient client = HttpClient.newHttpClient();
-    Models currentModel = Models.fromSystemProperty();
+    Models currentModel = selectedModel();
+
+    /// Resolves the active model from the `claude.model` configuration first, then the `-Dmodel`
+    /// system property, then the default. The configured name has to win because it drives more
+    /// than the request's `model` field — it selects the wire protocol, token budget, and
+    /// capabilities; deriving those from a stale default while sending a different model id is
+    /// what produces "model does not support this API" errors on Bedrock Mantle.
+    static Models selectedModel() {
+        var configured = ZCfg.string("claude.model", null);
+        return Models.fromPartialMatch(configured)
+                .orElseGet(Models::fromSystemProperty);
+    }
 
     static URI endpoint() {
         if (bedrock()) {
-            var path = currentModel.wire() == Wire.OPENAI ? "openai/v1/chat/completions" : "anthropic/v1/messages";
+            var path = currentModel.wire() == Wire.OPENAI ? "v1/chat/completions" : "anthropic/v1/messages";
             return URI.create("https://bedrock-mantle.%s.api.aws/%s"
                     .formatted(bedrockRegion().trim(), path));
         }
