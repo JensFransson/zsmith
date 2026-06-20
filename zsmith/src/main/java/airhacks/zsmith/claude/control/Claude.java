@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import airhacks.zsmith.claude.entity.ClaudeAPICallEvent;
 import airhacks.zsmith.configuration.control.ZCfg;
 import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.openai.control.OpenAI;
 
 
 
@@ -25,31 +26,68 @@ public interface Claude {
     String fallbackModelName = "claude-sonnet-4-7";
 
     static String apiKey() {
+        if (bedrock()) {
+            var bedrockKey = ZCfg.string("bedrock.api.key", null);
+            if (bedrockKey != null && !bedrockKey.isBlank()) {
+                return bedrockKey;
+            }
+        }
         return ZCfg.requiredString("anthropic.api.key");
     }
 
+    String bedrockVersion = "2023-06-01";
+
     static String apiVersion() {
+        if (bedrock()) {
+            return ZCfg.string("anthropic.version", bedrockVersion);
+        }
         return ZCfg.requiredString("anthropic.version");
+    }
+
+    /// Amazon Bedrock Mantle's `bedrock-mantle` endpoint is almost entirely conventional:
+    /// the only variable parts are the region, the model, and the API key. Selecting
+    /// `llm.provider=bedrock` switches on convention-over-configuration — the scheme,
+    /// host pattern, path, anthropic-version, and the `anthropic.` model prefix are all
+    /// derived, so the same properties file can hold both the native Anthropic and the Bedrock
+    /// configuration and flip between them with a single key.
+    ///
+    /// @see [Amazon Bedrock endpoints](https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html)
+    static boolean bedrock() {
+        return "bedrock".equalsIgnoreCase(ZCfg.string("llm.provider", "claude"));
+    }
+
+    static String bedrockRegion() {
+        return ZCfg.requiredString("bedrock.region");
     }
 
     enum Capability { TEMPERATURE, EFFORT, ADAPTIVE_THINKING }
 
+    /// The HTTP wire format a model speaks. `ANTHROPIC` is the native Messages API
+    /// (`/anthropic/v1/messages`); `OPENAI` is the OpenAI-compatible Chat Completions API
+    /// (`/openai/v1/chat/completions`) that Bedrock Mantle exposes for non-Anthropic models
+    /// such as NVIDIA Nemotron. The protocol is a property of the model, not of the provider:
+    /// on the same Bedrock Mantle host an Opus model is `ANTHROPIC` while Nemotron is `OPENAI`.
+    enum Wire { ANTHROPIC, OPENAI }
+
     enum Models {
-        CLAUDE_48_OPUS("claude-opus-4-8", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
-        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
-        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING)),
-        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, 64_000, EnumSet.allOf(Capability.class));
+        NVIDIA_NEMOTRON_SUPER_3_120B("nvidia.nemotron-super-3-120b", "nvidia.nemotron-super-3-120b", 32_000, EnumSet.of(Capability.TEMPERATURE), Wire.OPENAI),
+        CLAUDE_48_OPUS("claude-opus-4-8", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING), Wire.ANTHROPIC),
+        CLAUDE_47_OPUS("claude-opus-4-7", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING), Wire.ANTHROPIC),
+        CLAUDE_46_OPUS("claude-opus-4-6", Claude.fallbackModelName, 32_000, EnumSet.of(Capability.EFFORT, Capability.ADAPTIVE_THINKING), Wire.ANTHROPIC),
+        CLAUDE_46_SONNET(Claude.fallbackModelName, Claude.fallbackModelName, 64_000, EnumSet.allOf(Capability.class), Wire.ANTHROPIC);
 
         private String modelName;
         private String fallbackModelName;
         private int maxTokens;
         private EnumSet<Capability> capabilities;
+        private Wire wire;
 
-        Models(String modelName, String fallbackModelName, int maxTokens, EnumSet<Capability> capabilities) {
+        Models(String modelName, String fallbackModelName, int maxTokens, EnumSet<Capability> capabilities, Wire wire) {
             this.modelName = modelName;
             this.fallbackModelName = fallbackModelName;
             this.maxTokens = maxTokens;
             this.capabilities = capabilities;
+            this.wire = wire;
         }
 
         public String modelName() {
@@ -62,6 +100,10 @@ public interface Claude {
 
         public boolean supports(Capability capability) {
             return this.capabilities.contains(capability);
+        }
+
+        public Wire wire() {
+            return this.wire;
         }
 
         public int maxTokens() {
@@ -92,20 +134,47 @@ public interface Claude {
     }
 
     HttpClient client = HttpClient.newHttpClient();
-    URI uri = endpoint();
-    Models currentModel = Models.fromSystemProperty();
+    Models currentModel = selectedModel();
+
+    /// Resolves the active model from the `claude.model` configuration first, then the `-Dmodel`
+    /// system property, then the default. The configured name has to win because it drives more
+    /// than the request's `model` field — it selects the wire protocol, token budget, and
+    /// capabilities; deriving those from a stale default while sending a different model id is
+    /// what produces "model does not support this API" errors on Bedrock Mantle.
+    static Models selectedModel() {
+        var configured = ZCfg.string("claude.model", null);
+        return Models.fromPartialMatch(configured)
+                .orElseGet(Models::fromSystemProperty);
+    }
 
     static URI endpoint() {
+        if (bedrock()) {
+            var path = currentModel.wire() == Wire.OPENAI ? "v1/chat/completions" : "anthropic/v1/messages";
+            return URI.create("https://bedrock-mantle.%s.api.aws/%s"
+                    .formatted(bedrockRegion().trim(), path));
+        }
         var scheme = ZCfg.string("claude.scheme", "https");
         var host = ZCfg.string("claude.host", "api.anthropic.com");
         var port = ZCfg.integer("claude.port", -1);
+        var path = ZCfg.string("claude.path", "/v1/messages");
         var authority = port > 0 ? host + ":" + port : host;
-        return URI.create("%s://%s/v1/messages".formatted(scheme, authority));
+        return URI.create("%s://%s%s".formatted(scheme, authority, path));
+    }
+
+    static String modelName() {
+        var model = ZCfg.string("claude.model", currentModel.modelName());
+        if (bedrock() && !model.contains(".")) {
+            return "anthropic." + model;
+        }
+        return model;
     }
 
     static JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
+        if (currentModel.wire() == Wire.OPENAI) {
+            return invokeOpenAICompatible(system, messages, tools, temperature);
+        }
         var payloadJSON = claudeMessage(messages, temperature, system);
-        payloadJSON.put("model", currentModel.modelName());
+        payloadJSON.put("model", modelName());
         if (tools != null && !tools.isEmpty()) {
             payloadJSON.put("tools", tools);
         }
@@ -118,11 +187,28 @@ public interface Claude {
         return new JSONObject(answer);
     }
 
+    /// Routes models that speak [Wire#OPENAI] (e.g. NVIDIA Nemotron on Bedrock Mantle's
+    /// OpenAI-compatible Chat Completions surface) through the [OpenAI] translators so the rest
+    /// of the agent stays Anthropic-native: the request is translated to OpenAI shape, sent over
+    /// the same Bedrock transport as the native path, and the response is translated back to the
+    /// Anthropic Messages shape callers expect.
+    static JSONObject invokeOpenAICompatible(String system, JSONArray messages, JSONArray tools, float temperature) {
+        var payload = OpenAI.translateRequest(system, messages, tools, temperature, modelName(), currentModel.maxTokens()).toString();
+        Log.request(payload);
+        Log.llm(">> " + payload);
+        var answer = invoke(payload);
+        var anthropicResponse = OpenAI.translateResponse(new JSONObject(answer));
+        var responseString = anthropicResponse.toString();
+        Log.response(responseString);
+        Log.llm("<< " + responseString);
+        return anthropicResponse;
+    }
+
     public static JSONObject invoke(String system, String user, float temperature) {
         var enclosedPrompt = messagePrompt(user);
         Log.request(enclosedPrompt.toString());
         var payloadJSON = Claude.claudeMessage(enclosedPrompt, temperature, system);
-        payloadJSON.put("model", currentModel.modelName());
+        payloadJSON.put("model", modelName());
         var payload = payloadJSON.toString();
         Log.request(payload);
         Log.llm(">> " + payload);
@@ -195,7 +281,7 @@ public interface Claude {
             body = sendInstrumented(fallbackMessage, currentModel.fallbackModelName(), true);
         }
         if (body.statusCode() != 200) {
-            throw new IllegalStateException("claude API error %d: %s".formatted(body.statusCode(), body.body()));
+            throw new IllegalStateException("claude API error %d at %s: %s".formatted(body.statusCode(), endpoint(), body.body()));
         }
         return body.body();
     }
@@ -241,7 +327,10 @@ public interface Claude {
                 event.model = servedModel;
             }
             var usage = json.optJSONObject("usage");
-            if (usage != null) {
+            if (usage != null && currentModel.wire() == Wire.OPENAI) {
+                event.inputTokens = usage.optInt("prompt_tokens");
+                event.outputTokens = usage.optInt("completion_tokens");
+            } else if (usage != null) {
                 event.inputTokens = usage.optInt("input_tokens");
                 event.outputTokens = usage.optInt("output_tokens");
                 event.cacheReadTokens = usage.optInt("cache_read_input_tokens");
@@ -256,12 +345,23 @@ public interface Claude {
     }
 
     static HttpResponse<String> send(String message) {
-        var request = HttpRequest.newBuilder(uri)
+        var uri = endpoint();
+        Log.agent("claude endpoint: " + uri);
+        var builder = HttpRequest.newBuilder(uri)
                 .POST(BodyPublishers.ofString(message))
-                .header("x-api-key", apiKey())
-                .header("content-type", "application/json")
-                .header("anthropic-version", apiVersion())
-                .build();
+                .header("content-type", "application/json");
+        if (currentModel.wire() == Wire.OPENAI) {
+            builder.header("Authorization", "Bearer " + apiKey());
+        } else {
+            var authHeader = ZCfg.string("anthropic.auth.header", "x-api-key");
+            builder.header(authHeader, apiKey())
+                    .header("anthropic-version", apiVersion());
+        }
+        var workspaceId = ZCfg.string("anthropic.workspace.id", null);
+        if (workspaceId != null && !workspaceId.isBlank()) {
+            builder.header("anthropic-workspace-id", workspaceId);
+        }
+        var request = builder.build();
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (IOException | InterruptedException e) {

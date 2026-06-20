@@ -18,6 +18,12 @@ public interface LLM {
                 return Claude.invoke(system, messages, tools, temperature);
             }
         },
+        BEDROCK {
+            @Override
+            public JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {
+                return Claude.invoke(system, messages, tools, temperature);
+            }
+        },
         OPENAI {
             @Override
             public JSONObject invoke(String system, JSONArray messages, JSONArray tools, float temperature) {

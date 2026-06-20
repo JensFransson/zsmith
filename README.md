@@ -1,6 +1,6 @@
 # zsmith
 
-Zero-dependency AI agent framework for Claude with tool execution, SKILL.md and agentic loop support. No external libraries — only the Java standard library and a bundled JSON parser (`org.json`). Optionally integrates with [LightMetal](#lightmetal-embedded-local-inference) for fully on-device GGUF inference on Apple Silicon — drop `lightmetal.jar` on the classpath and it is auto-selected, no code or config change required.
+Zero-dependency AI agent framework with tool execution, SKILL.md and agentic loop support. The entire framework is a single **192 KB** jar — no external libraries, only the Java standard library. Optionally integrates with [LightMetal](#lightmetal-embedded-local-inference) for fully on-device GGUF inference on Apple Silicon — drop `lightmetal.jar` on the classpath and it is auto-selected, no code or config change required.
 
 ![zsmith](zsmith.png)
 
@@ -23,6 +23,58 @@ chmod +x zsinstall
 `zsinstall` is a single-file Java 25 script that downloads the latest release asset from GitHub into `./zbo/zsmith.jar` — matching the `-cp zbo/zsmith.jar` shebang used by the example agents. Re-run any time to upgrade.
 
 Based on the [`java-cli-script`](https://airails.dev) skill from [airails.dev](https://airails.dev) — single-file, zero-dependency, shebang-launched Java 25 utilities. Optional local inference via [LightMetal](https://github.com/AdamBien/lightmetal) — a Java 25 GGUF runner for Apple Silicon's Metal via the Foreign Function & Memory API.
+
+## Quick Start
+
+Install the jar, add your API key, and run your first agent in under a minute.
+
+**1. Install the jar** (see [Installation](#installation)) — it lands in `./zbo/zsmith.jar`.
+
+**2. Add your Anthropic API key** to `~/.zsmith/app.properties`:
+
+```properties
+anthropic.api.key=sk-ant-...
+```
+
+**3. Save this as `calculator`** (no file extension) in the same directory as `zbo/`:
+
+```java
+#!/usr/bin/java --class-path=zbo/zsmith.jar --source 25
+
+import airhacks.zsmith.agent.boundary.Agent;
+import airhacks.zsmith.tools.boundary.Tools;
+
+void main() {
+    var calculator = new Agent("calculator", """
+            You are a calculator assistant.
+            1. Use the user_question tool to ask the user for a math expression.
+            2. Use the calculator tool to evaluate it.
+            3. Show the result to the user.
+            4. Loop until the user types 'quit'.
+            """)
+            .withTools(Tools.USER_QUESTION, Tools.USER_MESSAGE, Tools.CALCULATOR);
+    calculator.act();
+}
+```
+
+**4. Make it executable and run it:**
+
+```bash
+chmod +x calculator
+./calculator
+```
+
+The agent asks for a math expression, evaluates it with the `calculator` tool, prints the result, and loops until you type `quit`. No build step — Java 25 runs the script directly against the prebuilt jar.
+
+**No API key? Run fully on-device.** On Apple Silicon you can skip step 2 entirely: drop [`lightmetal.jar`](#lightmetal-embedded-local-inference) on the classpath and zsmith auto-selects local GGUF inference — no key, no network. Adjust the shebang in step 3:
+
+```java
+#!/usr/bin/java --class-path=zbo/zsmith.jar:lightmetal.jar --enable-native-access=ALL-UNNAMED --source 25
+```
+
+The agent code is unchanged — see [LightMetal](#lightmetal-embedded-local-inference) for model configuration.
+
+Once this works, read on for the library API, tool profiles, and configuration.
 
 ## Usage
 
@@ -89,12 +141,67 @@ anthropic.api.key=sk-ant-...
 anthropic.version=2023-06-01
 ```
 
-### LLM Provider
+### Model
+
+The default Claude model is `claude-opus-4-8`. Override via system property:
+
+```bash
+java -Dmodel=sonnet -cp zbo/zsmith.jar MyAgent.java
+```
+
+Partial matching works — `sonnet` resolves to `claude-sonnet-4-7`, `4-7` to `claude-opus-4-7`, etc.
+
+### Properties Loading Order
+
+Loaded in order (each layer overrides the previous):
+
+1. `~/.zsmith/app.properties` — global defaults
+2. `./app.properties` — local project defaults
+3. `~/.zsmith/[agentName]/app.properties` — global agent-specific
+4. `./[agentName]/app.properties` — local agent-specific
+5. System properties — highest priority
+
+Only keys present in later files override earlier values; other keys are preserved.
+
+### Tool Permissions
+
+Control which tools require user confirmation before execution. Three permission levels: `allow` (execute silently), `deny` (reject), `confirm` (ask user first). Default is `confirm`.
+
+```properties
+tools.permissions.default=confirm
+tools.permissions.calculator=allow
+tools.permissions.current_time=allow
+tools.permissions.execute_script=confirm
+tools.permissions.read_any_file=confirm
+```
+
+Agent-specific permissions in `~/.zsmith/[agentName]/app.properties` override global defaults:
+
+```properties
+# A trusted automation agent
+tools.permissions.default=allow
+tools.permissions.execute_script=confirm
+```
+
+### System Prompt
+
+Loaded from `system.prompt` files in order (each layer overrides the previous):
+
+1. `~/.zsmith/[agentName]/system.prompt` — global agent-specific
+2. `./[agentName]/system.prompt` — local agent-specific
+3. `./system.prompt` — highest priority
+
+If no file is found, the constructor parameter is used as fallback.
+
+### Alternative LLM Providers
+
+> First-time users can skip this section — the default `claude` provider works out of the box. Come back when you want Amazon Bedrock, OpenAI, or local inference.
 
 zsmith ships with three clients, selected at runtime via `llm.provider`:
 
 ```properties
 llm.provider=claude         # default — Anthropic Messages API
+# llm.provider=bedrock      # Amazon Bedrock Mantle (Anthropic-compatible, reuses the Claude client)
 # llm.provider=openai       # OpenAI Chat Completions API
 # llm.provider=lightmetal   # local GGUF inference via lightmetal.jar (in-process)
 ```
@@ -111,7 +218,71 @@ claude.host=localhost
 claude.port=8080
 ```
 
-`claude.port` is optional — omit it to use the scheme default. `claude.scheme` defaults to `https`, `claude.host` to `api.anthropic.com`. The path `/v1/messages` is fixed.
+`claude.port` is optional — omit it to use the scheme default. `claude.scheme` defaults to `https`, `claude.host` to `api.anthropic.com`.
+
+Any Anthropic-compatible gateway can be reached by overriding these optional knobs — all default to the native Anthropic values, so leaving them unset preserves current behavior:
+
+```properties
+claude.path=/v1/messages              # request path (default)
+claude.model=claude-opus-4-8          # payload model id; default derived from -Dmodel / enum
+anthropic.auth.header=x-api-key       # name of the auth header carrying anthropic.api.key
+anthropic.workspace.id=               # adds anthropic-workspace-id header only when set
+```
+
+For a `Bearer`-token gateway, set `anthropic.auth.header=Authorization` and put the prefix in the key: `anthropic.api.key=Bearer <token>`.
+
+#### Amazon Bedrock Mantle
+
+[Amazon Bedrock Mantle](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html) exposes an Anthropic-compatible Messages API at its `bedrock-mantle` endpoint. It is selected with `llm.provider=bedrock` and reuses the Claude client — only the **region**, **model**, and **API key** vary; everything else is convention-derived.
+
+Because the native Anthropic and Bedrock settings never collide, **both can live in the same properties file** and you switch between them by flipping a single line:
+
+```properties
+# --- switch provider here ---
+llm.provider=claude        # native Anthropic API
+#llm.provider=bedrock      # Amazon Bedrock Mantle
+
+# --- native Anthropic ---
+anthropic.api.key=sk-ant-...
+anthropic.version=2023-06-01
+
+# --- Amazon Bedrock Mantle ---
+bedrock.region=eu-north-1
+bedrock.api.key=bedrock-api-...
+
+# --- shared ---
+claude.model=claude-haiku-4-5  # bare name works for both; pick one your Bedrock account can use
+```
+
+When `llm.provider=bedrock`, zsmith derives:
+
+- **endpoint** → `https://bedrock-mantle.<region>.api.aws/anthropic/v1/messages`
+- **anthropic-version** → `2023-06-01` (override with `anthropic.version` if needed)
+- **API key** → `bedrock.api.key`, falling back to `anthropic.api.key` when unset
+- **model prefix** → a **bare** `claude.model` gets the `anthropic.` prefix, so `claude.model=claude-haiku-4-5` resolves to `anthropic.claude-haiku-4-5`
+
+The same bare `claude.model` therefore works under both providers — used as-is for native Anthropic, `anthropic.`-prefixed under Bedrock. An id that already contains a `.` (e.g. `anthropic.claude-haiku-4-5`) is used verbatim. The 529→fallback retry is Anthropic-specific and does not apply to Bedrock model ids.
+
+> **Pick a model your account can use.** Bedrock returns `403 … is not available for this account` for models you have not been granted. List/enable models in the Bedrock console; your account's available Anthropic models determine valid `claude.model` values. See the [Bedrock Mantle docs](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-mantle.html) for regions and the [endpoints reference](https://docs.aws.amazon.com/bedrock/latest/userguide/endpoints.html).
+
+##### OpenAI-compatible models (NVIDIA Nemotron)
+
+Bedrock Mantle also serves **non-Anthropic** models — such as [NVIDIA Nemotron Super 3 120B](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-nvidia-nemotron-super-3-120b.html) — over its **OpenAI-compatible Chat Completions** route (`/v1/chat/completions`) rather than the Anthropic Messages route. zsmith detects this from the model id and switches wire format automatically — still under `llm.provider=bedrock`, no extra provider:
+
+```properties
+llm.provider=bedrock
+bedrock.region=eu-west-1                       # pick a region that offers the model (see model card)
+bedrock.api.key=bedrock-api-...
+claude.model=nvidia.nemotron-super-3-120b      # id carries a '.', used verbatim — no anthropic. prefix
+```
+
+For such models zsmith derives:
+
+- **endpoint** → `https://bedrock-mantle.<region>.api.aws/v1/chat/completions` (not `/anthropic/v1/messages`)
+- **auth** → `Authorization: Bearer <bedrock.api.key>`
+- **request/response** → translated to and from the OpenAI Chat Completions shape, so the Agent loop still sees Anthropic-shaped content blocks and `tool_use`
+
+> **Region matters.** This model is offered only in specific regions, and the set changes over time — a region that works today may not be the one in your existing Bedrock config. If you get a "model isn't supported"/availability error, check the current regions on the [model card](https://docs.aws.amazon.com/bedrock/latest/userguide/model-card-nvidia-nemotron-super-3-120b.html) and set `bedrock.region` accordingly.
 
 #### OpenAI endpoint
 
@@ -165,58 +336,6 @@ claude.scheme=http
 claude.host=localhost
 claude.port=8080
 ```
-
-### Model
-
-The default Claude model is `claude-opus-4-6`. Override via system property:
-
-```bash
-java -Dmodel=sonnet -cp zbo/zsmith.jar MyAgent.java
-```
-
-Partial matching works — `sonnet` resolves to `claude-sonnet-4-6`, `4-5` to `claude-opus-4-5-20251101`, etc.
-
-### Properties Loading Order
-
-Loaded in order (each layer overrides the previous):
-
-1. `~/.zsmith/app.properties` — global defaults
-2. `./app.properties` — local project defaults
-3. `~/.zsmith/[agentName]/app.properties` — global agent-specific
-4. `./[agentName]/app.properties` — local agent-specific
-5. System properties — highest priority
-
-Only keys present in later files override earlier values; other keys are preserved.
-
-### Tool Permissions
-
-Control which tools require user confirmation before execution. Three permission levels: `allow` (execute silently), `deny` (reject), `confirm` (ask user first). Default is `confirm`.
-
-```properties
-tools.permissions.default=confirm
-tools.permissions.calculator=allow
-tools.permissions.current_time=allow
-tools.permissions.execute_script=confirm
-tools.permissions.read_any_file=confirm
-```
-
-Agent-specific permissions in `~/.zsmith/[agentName]/app.properties` override global defaults:
-
-```properties
-# A trusted automation agent
-tools.permissions.default=allow
-tools.permissions.execute_script=confirm
-```
-
-### System Prompt
-
-Loaded from `system.prompt` files in order (each layer overrides the previous):
-
-1. `~/.zsmith/[agentName]/system.prompt` — global agent-specific
-2. `./[agentName]/system.prompt` — local agent-specific
-3. `./system.prompt` — highest priority
-
-If no file is found, the constructor parameter is used as fallback.
 
 ## Running the Examples
 
