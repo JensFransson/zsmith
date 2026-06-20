@@ -1,16 +1,16 @@
 package airhacks.zsmith.tui.control;
 
-import airhacks.zsmith.tui.entity.Config;
-import airhacks.zsmith.tui.entity.Response;
-
-import java.io.IOException;
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import airhacks.zsmith.logging.control.Log;
+import airhacks.zsmith.tui.entity.Config;
+import airhacks.zsmith.tui.entity.Response;
 
 public class ChatClient {
 
@@ -33,22 +33,6 @@ public class ChatClient {
     }
 
     Response send(String sessionId, String path, String body) {
-        var request = request(sessionId, path, body);
-        try (var _ = new Spinner()) {
-            var response = this.client.send(request, BodyHandlers.ofString());
-            var session = response.headers().firstValue(SESSION_HEADER).orElse(sessionId);
-            return new Response(response.statusCode(), response.body(), session);
-        }
-        catch (ConnectException _) {
-            return new Response(-1, "Connection refused — is the server running on "
-                                    + this.config.host() + ":" + this.config.port() + "?", sessionId);
-        }
-        catch (IOException | InterruptedException problem) {
-            return new Response(-1, message(problem), sessionId);
-        }
-    }
-
-    HttpRequest request(String sessionId, String path, String body) {
         var uri = URI.create("http://" + this.config.host() + ":" + this.config.port() + path);
         var builder = HttpRequest.newBuilder(uri)
                 .timeout(Duration.ofSeconds(this.config.timeout()))
@@ -57,10 +41,35 @@ public class ChatClient {
         if (sessionId != null) {
             builder.header(SESSION_HEADER, sessionId);
         }
-        return builder.build();
-    }
 
-    static String message(Exception problem) {
-        return problem.getMessage() != null ? problem.getMessage() : problem.getClass().getSimpleName();
+        var waiting = new AtomicBoolean(true);
+        var spinner = Thread.startVirtualThread(() -> {
+            try {
+                while (waiting.get()) {
+                    System.out.print(".");
+                    System.out.flush();
+                    Thread.sleep(500);
+                }
+            } catch (InterruptedException _) {}
+        });
+
+        try {
+            var response = this.client.send(builder.build(), BodyHandlers.ofString());
+            waiting.set(false);
+            spinner.join();
+            System.out.println();
+            var returnedSession = response.headers().firstValue(SESSION_HEADER).orElse(sessionId);
+            return new Response(response.statusCode(), response.body(), returnedSession);
+        } catch (java.net.ConnectException e) {
+            waiting.set(false);
+            try { spinner.join(); } catch (InterruptedException _) {}
+            System.out.println();
+            return new Response(-1, "Connection refused — is the server running on " + this.config.host() + ":" + this.config.port() + "?", sessionId);
+        } catch (Exception e) {
+            waiting.set(false);
+            try { spinner.join(); } catch (InterruptedException _) {}
+            System.out.println();
+            return new Response(-1, e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName(), sessionId);
+        }
     }
 }

@@ -1,33 +1,31 @@
 package airhacks.zsmith.logging.control;
 
-import airhacks.zsmith.configuration.control.ZCfg;
-
 import java.io.PrintStream;
 
-@SuppressWarnings("unused")
+import airhacks.zsmith.configuration.control.ZCfg;
+
 public enum Log {
 
     ERROR("❌", Color.RED, System.err),
     WARNING("⚠️", Color.YELLOW, System.out),
     INFO("ℹ️", Color.GREEN, System.out),
-    DEBUG("🔍", Color.BASE01, System.out),
+    DEBUG("🔍", Color.VIOLET, System.out),
     AGENT("🤖", Color.BLUE, System.out),
-    PROMPT("💬", Color.VIOLET, System.out),
-    ANSWER("💡", Color.CYAN, System.out),
+    PROMPT("💬", Color.CYAN, System.out),
+    ANSWER("💡", Color.ORANGE, System.out),
     TOOL("🔧", Color.MAGENTA, System.out),
-    SKILL("⚡", Color.ORANGE, System.out),
-    USER("👤", Color.BASE1, System.out),
-    SUBAGENT("🔀", Color.BASE1, System.out),
-    MEMORY("🧠", Color.BASE0, System.out),
-    REQUEST("📤", Color.BASE00, System.out, "log.request"),
-    RESPONSE("📥", Color.BASE00, System.out, "log.response"),
-    LLM("🧩", Color.BASE01, System.out, "log.llm"),
-    TOKENS("🪙", Color.BASE0, System.out);
+    SKILL("⚡", Color.CYAN, System.out),
+    USER("👤", Color.GREEN, System.out),
+    SUBAGENT("🔀", Color.VIOLET, System.out),
+    MEMORY("🧠", Color.YELLOW, System.out),
+    REQUEST("📤", Color.GREEN, System.out, "log.request"),
+    RESPONSE("📥", Color.VIOLET, System.out, "log.response"),
+    LLM("🧩", Color.CYAN, System.out, "log.llm"),
+    TOKENS("🪙", Color.YELLOW, System.out);
 
-    private final PrintStream out;
+    private PrintStream out;
 
     enum Color {
-        // Accents
         YELLOW("\033[38;2;181;137;0m"),       // Solarized Yellow #b58900
         ORANGE("\033[38;2;203;75;22m"),       // Solarized Orange #cb4b16
         RED("\033[38;2;220;50;47m"),          // Solarized Red #dc322f
@@ -35,14 +33,9 @@ public enum Log {
         VIOLET("\033[38;2;108;113;196m"),     // Solarized Violet #6c71c4
         BLUE("\033[38;2;38;139;210m"),        // Solarized Blue #268bd2
         CYAN("\033[38;2;42;161;152m"),        // Solarized Cyan #2aa198
-        GREEN("\033[38;2;133;153;0m"),        // Solarized Green #859900
-        // Content greys — the foreground-safe Solarized base tones
-        BASE01("\033[38;2;88;110;117m"),      // Solarized Base01 #586e75
-        BASE00("\033[38;2;101;123;131m"),     // Solarized Base00 #657b83
-        BASE0("\033[38;2;131;148;150m"),      // Solarized Base0 #839496
-        BASE1("\033[38;2;147;161;161m");      // Solarized Base1 #93a1a1
+        GREEN("\033[38;2;133;153;0m");        // Solarized Green #859900
 
-        final String code;
+        String code;
 
         Color(String code) {
             this.code = code;
@@ -54,11 +47,11 @@ public enum Log {
     private final String configKey;
     private final static String RESET = "\u001B[0m";
 
-    Log(String emoji, Color color, PrintStream out) {
+    private Log(String emoji, Color color, PrintStream out) {
         this(emoji, color, out, null);
     }
 
-    Log(String emoji, Color color, PrintStream out, String configKey) {
+    private Log(String emoji, Color color, PrintStream out, String configKey) {
         this.emoji = emoji;
         this.value = (color.code + "%s" + RESET);
         this.out = out;

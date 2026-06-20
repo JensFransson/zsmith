@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3a102a84-02ee-4ae1-b226-7ab729c35ba7" name="Changes" comment="Add IntelliJ IDEA files">
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/checkstyle-idea.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/checkstyle-idea.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/project.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/assistant" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/calculator" beforeDir="false" afterPath="$PROJECT_DIR$/examples/calculator" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/currentDate" beforeDir="false" afterPath="$PROJECT_DIR$/examples/currentDate" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/fileCalculator" beforeDir="false" afterPath="$PROJECT_DIR$/examples/fileCalculator" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/transcriber" beforeDir="false" afterPath="$PROJECT_DIR$/examples/transcriber" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/examples/zschat" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/.zb" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/.zb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/http/boundary/AgentHttpServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/http/boundary/AgentHttpServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/logging/control/Log.java" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/logging/control/Log.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/boundary/Chat.java" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/boundary/Chat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/control/ChatClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/control/ChatClient.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/control/CommandLine.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/control/Spinner.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/entity/Config.java" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/src/main/java/airhacks/zsmith/tui/entity/Config.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/main/main.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/test/java/AgentHttpServerIT.java" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/src/test/java/AgentHttpServerIT.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/src/test/test.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/zsmith/version.txt" beforeDir="false" afterPath="$PROJECT_DIR$/zsmith/version.txt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeInsightWorkspaceSettings">
+    <option name="optimizeImportsOnTheFly" value="true" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="feature/AddMainClassZSmith--main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;JensFransson&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/JensFransson/zsmith.git&quot;,
+    &quot;accountId&quot;: &quot;0c9a76ef-a4a7-4077-ba66-f7c5db8c19a6&quot;
+  }
+}</component>
+  <component name="GradleLocalSettings">
+    <option name="modificationStamps">
+      <map>
+        <entry key="$USER_HOME$/studio-projects/Keywarden" value="4400531669758" />
+        <entry key="$USER_HOME$/studio-projects/untitled" value="4397895196972" />
+        <entry key="$PROJECT_DIR$/../../../MyPoints" value="2929627655756" />
+        <entry key="$PROJECT_DIR$/../../../MyPoints/.gradle" value="2929969216731" />
+        <entry key="$PROJECT_DIR$/../../../cuba-platform/cuba" value="4401034434080" />
+        <entry key="$PROJECT_DIR$/../../../cuba/keywarden" value="4404279167250" />
+        <entry key="$PROJECT_DIR$/../../../cuba/keywarden2" value="4403737919911" />
+        <entry key="$PROJECT_DIR$/../../../demo/spring-demo2" value="1465026260041" />
+        <entry key="$PROJECT_DIR$/../../../keywarden2" value="2933005343106" />
+        <entry key="$PROJECT_DIR$/../../../trading" value="1442701611385" />
+        <entry key="$PROJECT_DIR$/../../../trading_nogit" value="1442701611385" />
+      </map>
+    </option>
+    <option name="projectSyncType">
+      <map>
+        <entry key="$PROJECT_DIR$/../../../bb/trading" value="PREVIEW" />
+        <entry key="$PROJECT_DIR$/../../../cuba/keywarden-6.10" value="PREVIEW" />
+        <entry key="$PROJECT_DIR$/../../../jhipster/keywarden" value="PREVIEW" />
+        <entry key="$PROJECT_DIR$/../../../trading" value="PREVIEW" />
+      </map>
+    </option>
+  </component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="alwaysUpdateSnapshots" value="true" />
+        <option name="customMavenHome" value="C:\Progs\Develop\Idea2018.3\plugins\maven\lib\maven3" />
+        <option name="mavenHomeTypeForPersistence" value="CUSTOM" />
+        <option name="threads" value="6" />
+      </MavenGeneralSettings>
+    </option>
+    <option name="importingSettings">
+      <MavenImportingSettings>
+        <option name="downloadDocsAutomatically" value="true" />
+        <option name="jdkForImporter" value="15" />
+        <option name="vmOptionsForImporter" value="-Dfile.encoding=UTF8 -Xms4G -Xmx8G -Xss64M" />
+      </MavenImportingSettings>
+    </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3FEox5bHmS9cFikhDNFQQhaTLHw" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="autoscrollToSource" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Reverting in feature/AddMainClassZSmith--main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/git/adam-bien/fork/zsmith&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.2&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
+      <Host>localhost</Host>
+      <Port>5050</Port>
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="zsmith" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="zsmith" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-37e91769500f-intellij.indexing.shared.core-IU-261.25134.95" />
+        <option value="bundled-js-predefined-d6986cc7102b-31caf2ab9e3c-JavaScript-IU-261.25134.95" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="3a102a84-02ee-4ae1-b226-7ab729c35ba7" name="Changes" comment="" />
+      <created>1781649832849</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1781649832849</updated>
+      <workItem from="1781649833982" duration="16843000" />
+      <workItem from="1781943716506" duration="1627000" />
+      <workItem from="1781952213263" duration="155000" />
+      <workItem from="1781952387137" duration="42000" />
+    </task>
+    <task id="LOCAL-00001" summary="Import changes from original repository. Upgrade to 2026.06.18.01.">
+      <option name="closed" value="true" />
+      <created>1781818379504</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1781818379504</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Add IntelliJ IDEA files">
+      <option name="closed" value="true" />
+      <created>1781952156166</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1781952156166</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_CLEANUP_BEFORE_PROJECT_COMMIT" value="true" />
+    <MESSAGE value="Import changes from original repository. Upgrade to 2026.06.18.01." />
+    <MESSAGE value="Add IntelliJ IDEA files" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add IntelliJ IDEA files" />
+    <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
+  </component>
+</project>
